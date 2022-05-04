@@ -1,0 +1,12 @@
+version: "3.9"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: discord-sports-notification:latest
+    container_name: discord-sports-notification
+    volumes:
+      - type: bind
+        source: ./src
+        target: /discord/src
