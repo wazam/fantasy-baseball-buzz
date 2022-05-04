@@ -1,5 +1,6 @@
+templates/*
 .dockerignore
-.env.example
+*.example
 .gitignore
 *.yml
 Dockerfile

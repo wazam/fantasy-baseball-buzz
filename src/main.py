@@ -1,7 +1,7 @@
 from flask import Flask
-from yahoo import yahoo_trends
-from espn import espn_trends
-from cbs import cbs_trends
+from src.yahoo import yahoo_trends
+from src.espn import espn_trends
+from src.cbs import cbs_trends
 
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
