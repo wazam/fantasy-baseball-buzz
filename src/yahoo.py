@@ -124,7 +124,7 @@ def yahoo_trends(number_of_days, fetch_full_names):
     # Return sorted dictionary of Players' names and adds/drops for the function
     return sorted_trends_dictionary
 
-# Used for "pipenv run python yahoo.py"
+# Used for "pipenv run python src/yahoo.py"
 if __name__ == "__main__":
     # Set development value for number of prior days to scape adds/drops for
     number_of_days = 2

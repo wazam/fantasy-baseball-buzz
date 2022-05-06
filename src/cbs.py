@@ -59,7 +59,7 @@ def cbs_trends():
     #Return sorted dictionary for function
     return sorted_trends_dictionary
 
-#Used for "pipenv run python cbs.py"
+#Used for "pipenv run python src/cbs.py"
 if __name__ == "__main__":
     data = cbs_trends()
     #Print Player trends

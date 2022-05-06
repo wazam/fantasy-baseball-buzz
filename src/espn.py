@@ -68,7 +68,7 @@ def espn_trends():
     #Return sorted dictionary for function
     return sorted_trends_dictionary
 
-#Used for "pipenv run python espn.py"
+#Used for "pipenv run python src/espn.py"
 if __name__ == "__main__":
     data = espn_trends()
     #Print Player trends

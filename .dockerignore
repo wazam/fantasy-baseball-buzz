@@ -1,6 +1,8 @@
+.github
 .dockerignore
 env.example
 .gitignore
+*.lnk
 *.yml
 Dockerfile
 *.md
