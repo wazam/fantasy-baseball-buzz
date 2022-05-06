@@ -49,19 +49,22 @@ def cbs_trends():
                 if player_name not in trends_dictionary:
                     trends_dictionary[player_name] = player_change
 
-    #Sort player ditionary
+    # Create new dictionary to sort the Players' by their net change across the requested day(s)
     sorted_trends_dictionary = {}
+    # Create a function to decide the custom sorting order
     def by_value(item):
+        # Return the Player's net change
         return item[1]
-    for k, v in sorted(trends_dictionary.items(), key=by_value, reverse=True):
-        sorted_trends_dictionary[k] = v
-
-    #Return sorted dictionary for function
+    # Loop through all the Players' net change values in the weekly trends dictionary for custom sorting in descending order
+    for key, value in sorted(trends_dictionary.items(), key=by_value, reverse=True):
+        # Add Player to sorted weekly trends dictionary with their net change
+        sorted_trends_dictionary[key] = value
+    #Return sorted dictionary for the function
     return sorted_trends_dictionary
 
-#Used for "pipenv run python src/cbs.py"
+# Used for testing with `python src/cbs.py`
 if __name__ == "__main__":
+    # Get Player's trends dictionary from function above
     data = cbs_trends()
-    #Print Player trends
-    print('\x1b[6;30;42m' + "Past 7 day(s) of CBS trends" + '\x1b[0m')
+    # Print Player trends data
     print(data)

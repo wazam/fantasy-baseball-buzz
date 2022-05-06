@@ -15,7 +15,7 @@ def yahoo_trends(number_of_days, fetch_full_names):
     trends_dictionary = {}
     # Site-specific url
     url_base = "http://baseball.fantasysports.yahoo.com"
-    # Loop through all days to scape all daily pages for positional URLs
+    # Loop through all days to scape all daily pages for position URLs
     for each_day in range(0, int(number_of_days)):
         # Calculate scape date by continually removing 1 day from current day
         date_scrape = date.today() - timedelta(days = each_day)
@@ -31,11 +31,11 @@ def yahoo_trends(number_of_days, fetch_full_names):
         html_soup = BeautifulSoup(html_doc, "html.parser")
         # Find intended main content on web page
         results_page = html_soup.find(id="yspmaincontent")
-        # Find positional pages navigational web page targets in main content, save HREF for URL later, start on the 5th element because the first 4 navitems aren't relavant
+        # Find position pages navigational web page targets in main content, save HREF for URL later, start on the 5th element because the first 4 navitems aren't relavant
         elements_positions = results_page.find_all("a", class_="Navtarget", href=True)[5::]
         # Create new dictionary to save Players' adds/drops for the day across all positions without double counting Players eligible in mutliple positions
         daily_dictionary = {}
-        # Loop through all positional pages to scrape table data of Players for the day
+        # Loop through all position pages to scrape table data of Players for the day
         for position in elements_positions:
             # Get href URL for each positions' page for scraping
             url_tab = str(position['href'])
@@ -115,24 +115,22 @@ def yahoo_trends(number_of_days, fetch_full_names):
     sorted_trends_dictionary = {}
     # Create a function to decide the custom sorting order
     def by_value(item):
-        # Return the Player's adds/drops net change
+        # Return the Player's net change
         return item[1]
     # Loop through all the Players' net change values in the weekly trends dictionary for custom sorting in descending order
     for key, value in sorted(trends_dictionary.items(), key=by_value, reverse=True):
-        # Add Player to sorted weekly trends dictionary with their adds/drop
+        # Add Player to sorted weekly trends dictionary with their net change
         sorted_trends_dictionary[key] = value
-    # Return sorted dictionary of Players' names and adds/drops for the function
+    #Return sorted dictionary for the function
     return sorted_trends_dictionary
 
-# Used for "pipenv run python src/yahoo.py"
+# Used for testing with `python src/yahoo.py`
 if __name__ == "__main__":
     # Set development value for number of prior days to scape adds/drops for
-    number_of_days = 2
+    number_of_days = 1
     # Set development value for scraping Players' full names at the cost of an additional page request per each Player
     fetch_full_names = False
     # Get Player's trends dictionary from function above
     data = yahoo_trends(number_of_days,fetch_full_names)
-    # Print command line interface heading for data
-    print('\x1b[6;30;42m' + "Past " + str(number_of_days) + " day(s) of Yahoo trends" + '\x1b[0m')
     # Print Player trends data
     print(data)
