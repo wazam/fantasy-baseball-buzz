@@ -1,6 +1,7 @@
-.github
+.github/
+.vscode/
 .dockerignore
-env.example
+.env.example
 .gitignore
 *.lnk
 *.yml
