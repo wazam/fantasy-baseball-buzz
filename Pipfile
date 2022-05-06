@@ -6,16 +6,10 @@ name = "pypi"
 [packages]
 beautifulsoup4 = "*"
 requests = "*"
-pandas = "*"
-lxml = "*"
-html5lib = "*"
 selenium = "*"
-webdriver-manager = "*"
 flask = "*"
-matplotlib = "*"
 unidecode = "*"
-colorama = "*"
-numpy = "*"
+python-dotenv = "*"
 
 [dev-packages]
 
