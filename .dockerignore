@@ -4,6 +4,7 @@ __pycache__/
 .dockerignore
 .env.example
 .gitignore
+.python-version
 *.yml
 Dockerfile
 *.log

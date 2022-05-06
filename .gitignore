@@ -1,5 +1,6 @@
 .vscode/
 __pycache__/
 .env
+.python-version
 *.override.yml
 *.log

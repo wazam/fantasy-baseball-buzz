@@ -1,11 +1,11 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "94e18eec92054ebe1cc9481e107d95a47ae0eb1ee7901a13d29805108364a9bb"
+            "sha256": "e7676b0eeb649d5ab49861e525ba54615c9f6feb8b363e39b703c1f1f4d011f3"
         },
         "pipfile-spec": 6,
         "requires": {
-            "python_version": "3.7.5"
+            "python_version": "3.10.4"
         },
         "sources": [
             {
@@ -178,14 +178,6 @@
             "markers": "python_version >= '3'",
             "version": "==3.3"
         },
-        "importlib-metadata": {
-            "hashes": [
-                "sha256:1208431ca90a8cca1a6b8af391bb53c1a2db74e5d1cef6ddced95d4b2062edc6",
-                "sha256:ea4c597ebf37142f827b8f39299579e31685c31d3a438b59f469406afd0f2539"
-            ],
-            "markers": "python_version < '3.10'",
-            "version": "==4.11.3"
-        },
         "itsdangerous": {
             "hashes": [
                 "sha256:2c2349112351b88699d8d4b6b075022c0808887cb7ad10069318a8b0bc88db44",
@@ -340,14 +332,6 @@
             "markers": "python_version >= '3.5'",
             "version": "==0.9.2"
         },
-        "typing-extensions": {
-            "hashes": [
-                "sha256:6657594ee297170d19f67d55c05852a874e7eb634f4f753dbd667855e07c1708",
-                "sha256:f1c24655a0da0d1b67f07e17a5e6b2a105894e6824b92096378bb3668ef02376"
-            ],
-            "markers": "python_version < '3.8'",
-            "version": "==4.2.0"
-        },
         "unidecode": {
             "hashes": [
                 "sha256:8e4352fb93d5a735c788110d2e7ac8e8031eb06ccbfe8d324ab71735015f9342",
@@ -357,10 +341,7 @@
             "version": "==1.3.4"
         },
         "urllib3": {
-            "extras": [
-                "secure",
-                "socks"
-            ],
+            "extras": [],
             "hashes": [
                 "sha256:44ece4d53fb1706f667c9bd1c648f5469a2ec925fcf3a776667042d645472c14",
                 "sha256:aabaf16477806a5e1dd19aa41f8c2b7950dd3c746362d7e3223dbe6de6ac448e"
@@ -383,14 +364,6 @@
             ],
             "markers": "python_version >= '3.7'",
             "version": "==1.1.0"
-        },
-        "zipp": {
-            "hashes": [
-                "sha256:56bf8aadb83c24db6c4b577e13de374ccfb67da2078beba1d037c17980bf43ad",
-                "sha256:c4f6e5bbf48e74f7a38e7cc5b0480ff42b0ae5178957d564d18932525d5cf099"
-            ],
-            "markers": "python_version >= '3.7'",
-            "version": "==3.8.0"
         }
     },
     "develop": {}
