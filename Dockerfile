@@ -1,7 +1,11 @@
-FROM python:3.10-slim
+# syntax=docker/dockerfile:1
+
+FROM python:3.7.5-slim
 
 WORKDIR /app
 
+ENV FLASK_APP=src/main.py
+ENV FLASK_RUN_HOST=0.0.0.0
 ENV TZ=America/New_York
 
 COPY Pipfile .
@@ -9,6 +13,8 @@ COPY Pipfile.lock .
 
 RUN pip install pipenv
 RUN pipenv install --deploy --ignore-pipfile
+
+EXPOSE 5000
 
 COPY . .
 

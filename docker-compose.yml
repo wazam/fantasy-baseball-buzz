@@ -1,12 +1,8 @@
 version: "3.9"
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+  web:
+    build: .
     image: fantasy-baseball-buzz:latest
     container_name: fantasy-baseball-buzz
-    volumes:
-      - type: bind
-        source: ./src
-        target: /app/src
+    ports:
+      - "8000:5000"
