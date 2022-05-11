@@ -2,7 +2,7 @@ version: "3.9"
 services:
   web:
     build: .
-    image: fantasy-baseball-buzz:latest
+    image: ghcr.io/wazam/fantasy-baseball-buzz:latest
     container_name: fantasy-baseball-buzz
     ports:
       - "8000:5000"

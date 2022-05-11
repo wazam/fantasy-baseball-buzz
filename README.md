@@ -1,6 +1,6 @@
-# [wazam / Fantasy Baseball Buzz](https://github.com/wazam/fantasy-baseball-buzz)
+# [Based Buzz](https://github.com/wazam/fantasy-baseball-buzz)
 
-Fantasy Baseball Buzz analyzes MLB players' trends across multiple fantasy sources and makes them comparable.
+Based Buzz analyzes MLB players' trends across multiple fantasy sources and makes them comparable, written in Python.
 
 ## Supported Sites
 
