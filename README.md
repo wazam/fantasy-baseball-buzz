@@ -25,6 +25,9 @@ Based Buzz analyzes MLB players' trends across multiple fantasy sources and make
 | RotoGrinders | ❌ | [Past 7 Days FanDuel Most Points](https://rotogrinders.com/game-stats/mlb-hitter?site=fanduel&range=1week) |
 | Pitcher List | ❌ | [Next 24 Hours Sit/Start Pitchers](https://www.pitcherlist.com/category/fantasy/sp-streamers/) |
 | Pitcher List | ❌ | [Next 7 Days Sit/Start Pitchers](https://www.pitcherlist.com/category/fantasy/sit-or-start/) |
-| Pitcher List | ❌ | [ROS Pitcher Rankings](https://www.pitcherlist.com/category/fantasy/the-list/) |
+| Pitcher List | ⚠ | [ROS Pitcher Rankings](https://www.pitcherlist.com/category/fantasy/the-list/) |
 | SP Streamer | ❌ | [Next 3 Days Pitcher Streamers](https://spstreamer.com/streamer-central/) |
 | FantasyPros | ❌ | [ROS Rankings](https://www.fantasypros.com/mlb/myplaybook/available-players.php) |
+| ESPN | ❌ | [Rater](https://fantasy.espn.com/baseball/playerrater) |
+| ESPN | ❌ | [Daily Leaders](https://fantasy.espn.com/baseball/leaders?statSplit=currSeason&scoringPeriodId=0) |
+| ESPN | ❌ | [ROS Rankings](https://www.espn.com/fantasy/baseball/story/_/id/33199412/fantasy-baseball-pre-season-rankings-points-leagues-2022) |
