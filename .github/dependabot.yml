@@ -25,4 +25,5 @@ updates:
       - dependency-name: "docker/build-push-action"
         versions: [">2.10.0"]
       - dependency-name: "sigstore/cosign-installer"
-        versions: ["2.2.0"]
+        versions: [">2.2.0"]
+      - dependency-name: "docker/setup-buildx-action"
