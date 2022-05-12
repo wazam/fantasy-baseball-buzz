@@ -2,6 +2,7 @@
 
 version: 2
 updates:
+
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
@@ -16,3 +17,12 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    ignore:
+      - dependency-name: "docker/login-action"
+        versions: [">1.9.0"]
+      - dependency-name: "docker/metadata-action"
+        versions: [">3.3.0"]
+      - dependency-name: "docker/build-push-action"
+        versions: [">2.10.0"]
+      - dependency-name: "sigstore/cosign-installer"
+        versions: ["2.2.0"]

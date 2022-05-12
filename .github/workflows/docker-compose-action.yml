@@ -1,0 +1,26 @@
+# https://github.com/peter-evans/docker-compose-actions-workflow
+
+name: Docker Compose
+
+on:
+  schedule:
+    - cron: '30 20 * * *'
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Build the stack
+      run: docker-compose up -d
+
+    - name: Test the compose file
+      run: docker run --network container:fantasy-baseball-buzz appropriate/curl -s --retry 10 --retry-connrefused http://localhost:5000/
