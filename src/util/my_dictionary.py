@@ -2,6 +2,7 @@
 def by_value(item):
     return item[1]
 
+
 # Returns new dictionary sorted from highest to lowest (true)
 def sort(dict, high_to_low):
     dict_sort = {}

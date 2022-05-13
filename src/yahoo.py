@@ -1,20 +1,20 @@
-# Used to load web pages
 import requests
-# Used to scrape web pages
 from bs4 import BeautifulSoup
-# Used to get current date
 from datetime import date
-# Used to calculate prior dates
 from datetime import timedelta
-# Used to remove accent marks from Player's names
 import unidecode
+
+import util.my_dictionary as MyD
+
+url_base = "http://baseball.fantasysports.yahoo.com"
+headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36'}
+
 
 # Returns a numerically ordered dictionary of Players' names with their add/drop roster trends
 def yahoo_trends(number_of_days, fetch_full_names):
     # Create new dictionary to save all the Players' adds/drops for all the day(s)
     trends_dictionary = {}
     # Site-specific url
-    url_base = "http://baseball.fantasysports.yahoo.com"
     # Loop through all days to scape all daily pages for position URLs
     for each_day in range(0, int(number_of_days)):
         # Calculate scape date by continually removing 1 day from current day
@@ -24,7 +24,7 @@ def yahoo_trends(number_of_days, fetch_full_names):
         # Create scrapable URL to load position pages from
         url_scrape = url_base + url_tab + str(date_scrape)
         # Load daily page
-        html_page = requests.get(url_scrape)
+        html_page = requests.get(url_scrape, headers= headers)
         # Create HTML document for BeautifulSoup
         html_doc = html_page.content
         # Create searchable HTML with BeautifulSoup parsing
@@ -42,7 +42,7 @@ def yahoo_trends(number_of_days, fetch_full_names):
             # Create scrapable URL to load table data from
             url_scrape = url_base + url_tab
             # Load position page
-            html_page = requests.get(url_scrape)
+            html_page = requests.get(url_scrape, headers= headers)
             # Create HTML document for BeautifulSoup
             html_doc = html_page.content
             # Create searchable HTML with BeautifulSoup parsing
@@ -68,7 +68,7 @@ def yahoo_trends(number_of_days, fetch_full_names):
                     # Get href URL for each Players' individual page for scraping
                     url_scrape = str(elements_players[index]['href'])
                     # Load individual Player page
-                    html_page = requests.get(url_scrape)
+                    html_page = requests.get(url_scrape, headers= headers)
                     # Create HTML document for BeautifulSoup
                     html_doc = html_page.content
                     # Create searchable HTML with BeautifulSoup parsing
@@ -101,6 +101,7 @@ def yahoo_trends(number_of_days, fetch_full_names):
                 if player_name not in daily_dictionary:
                     # Add Player to daily dictionary with net change
                     daily_dictionary[player_name] = player_change
+                print(index, player_name, player_change)
         # Loop through all the Players in the daily dictionary after scraping all the position pages for the day
         for key in daily_dictionary.keys():
             # Check if Player is already in the weekly trends dictionary
@@ -112,25 +113,13 @@ def yahoo_trends(number_of_days, fetch_full_names):
                 # Update Player in weekly trends dictionary while keeping their add/drops from prior day(s)
                 trends_dictionary[key] = trends_dictionary[key] + daily_dictionary[key]
     # Create new dictionary to sort the Players' by their net change across the requested day(s)
-    sorted_trends_dictionary = {}
-    # Create a function to decide the custom sorting order
-    def by_value(item):
-        # Return the Player's net change
-        return item[1]
-    # Loop through all the Players' net change values in the weekly trends dictionary for custom sorting in descending order
-    for key, value in sorted(trends_dictionary.items(), key=by_value, reverse=True):
-        # Add Player to sorted weekly trends dictionary with their net change
-        sorted_trends_dictionary[key] = value
-    #Return sorted dictionary for the function
+    sorted_trends_dictionary = MyD.sort(trends_dictionary, True)
     return sorted_trends_dictionary
 
-# Used for testing with `python src/yahoo.py`
+
+# ```python src/yahoo.py```
 if __name__ == "__main__":
-    # Set development value for number of prior days to scape adds/drops for
     number_of_days = 1
-    # Set development value for scraping Players' full names at the cost of an additional page request per each Player
-    fetch_full_names = False
-    # Get Player's trends dictionary from function above
+    fetch_full_names = True
     data = yahoo_trends(number_of_days,fetch_full_names)
-    # Print Player trends data
     print(data)

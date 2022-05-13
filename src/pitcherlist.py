@@ -1,13 +1,14 @@
 import unidecode
 
-import functions.my_beautifulsoup as MyBS
-import functions.my_dictionary as MyD
+import util.my_beautifulsoup as MyBS
+import util.my_dictionary as MyD
 
 
 url_base = 'http://www.pitcherlist.com'
 headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36'}
 player_dict = {}
 sorted_dict = {}
+
 
 def startup(url_tab, all, name, attrib, href):
     player_dict.clear()
@@ -17,6 +18,33 @@ def startup(url_tab, all, name, attrib, href):
     url_weekly_page = MyBS.find_class(start_page, '', 'a', 'link', True)['href']    
     weekly_page_rows = MyBS.scrape_class(url_weekly_page, headers, all, name, attrib, href)
     return weekly_page_rows
+
+
+def get_ranks(rows):
+    for i, r in enumerate(rows):
+        player_name_diacritics = rows[i].a.text
+        player_name = unidecode.unidecode(player_name_diacritics)
+        player_rank = int(rows[i].td.text)
+        if player_name not in player_dict:
+            player_dict[player_name] = player_rank
+    return player_dict
+
+
+def get_trends(rows):
+    for i, r in enumerate(rows):
+        player_name_diacritics = rows[i].a.text
+        player_name = unidecode.unidecode(player_name_diacritics)
+        player_trend_text = rows[i].find_all('td')[3].text
+        if player_trend_text == '-':
+            player_trend = 0
+        elif player_trend_text == '+UR':
+            player_rank = int(rows[i].td.text)
+            player_trend = 101 - player_rank
+        else:
+            player_trend = int(player_trend_text)
+        if player_name not in player_dict:
+            player_dict[player_name] = player_trend
+    return player_dict
 
 
 def get_pitcher_trends():
@@ -60,33 +88,6 @@ def get_batter_ranks():
     player_dict = get_ranks(weekly_rows)
     sorted_dict = MyD.sort(player_dict, False)
     return sorted_dict
-
-
-def get_ranks(rows):
-    for i, r in enumerate(rows):
-        player_name_diacritics = rows[i].a.text
-        player_name = unidecode.unidecode(player_name_diacritics)
-        player_rank = int(rows[i].td.text)
-        if player_name not in player_dict:
-            player_dict[player_name] = player_rank
-    return player_dict
-
-
-def get_trends(rows):
-    for i, r in enumerate(rows):
-        player_name_diacritics = rows[i].a.text
-        player_name = unidecode.unidecode(player_name_diacritics)
-        player_trend_text = rows[i].find_all('td')[3].text
-        if player_trend_text == '-':
-            player_trend = 0
-        elif player_trend_text == '+UR':
-            player_rank = int(rows[i].td.text)
-            player_trend = 101 - player_rank
-        else:
-            player_trend = int(player_trend_text)
-        if player_name not in player_dict:
-            player_dict[player_name] = player_trend
-    return player_dict
 
 
 # ```python src/pitcherlist.py```
