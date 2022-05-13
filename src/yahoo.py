@@ -3,8 +3,10 @@ from bs4 import BeautifulSoup
 from datetime import date
 from datetime import timedelta
 import unidecode
+import json
 
 import util.my_dictionary as MyD
+import util.my_json as MyJ
 
 url_base = "http://baseball.fantasysports.yahoo.com"
 headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36'}
@@ -63,56 +65,49 @@ def yahoo_trends(number_of_days, fetch_full_names):
                 elements_columns = [each_column.text.strip() for each_column in elements_columns]
                 # Remove empty column cell values
                 data_rows.append([each_column for each_column in elements_columns if each_column])
-                # Find Player's full name with new full page request (no other option as data is not on main content page otherwise in any form) for cross-site comparison because the same abbreviated name is sometimes shared by different Players
-                if fetch_full_names:
-                    # Get href URL for each Players' individual page for scraping
-                    url_scrape = str(elements_players[index]['href'])
-                    # Load individual Player page
-                    html_page = requests.get(url_scrape, headers= headers)
-                    # Create HTML document for BeautifulSoup
-                    html_doc = html_page.content
-                    # Create searchable HTML with BeautifulSoup parsing
-                    html_soup = BeautifulSoup(html_doc, "html.parser")
-                    # Find intended main content on web page
-                    results_page = html_soup.find(id="Main")
-                    # Find Player's full name (with applicable diacritics) in main content
-                    element_full_name = results_page.find("span", class_="ys-name")
-                    # Set current Player's name and remove diacritics for cross-site comparison
-                    player_name = unidecode.unidecode(str(element_full_name.text))
-                # Find Player's shortened name without a new page request from the current data
-                else:
-                    # List of Yahoo! formatted MLB team names
-                    player_teams = ["Ari","Atl","Bal","Bos","CWS","ChC","Cin","Cle","Col","Det","Hou","KC","LAA","LAD","Mia","Mil","Min","NYY","NYM","Oak","Phi","Pit","SD","SF","Sea","StL","TB","Tex","Tor","Was"]
-                    # Loop through all the teams
-                    for team in player_teams:
-                        # Try removing team names until the string is successfully shortened
-                        if len(str(str(data_rows[index][0].split('\n')[1].strip()).rsplit(str(team + ' - '), 2)[0].strip())) < len(str(data_rows[index][0].split('\n')[1].strip())):
-                            # Set current Player's name and remove diacritics for cross-site comparison
-                            player_name = unidecode.unidecode(str(str(data_rows[index][0].split('\n')[1].strip()).rsplit(team, 2)[0].strip()))
-                            # Stop checking team names
-                            break
-                # Set current Player's adds for the day by looking at the column cell value for the current row
+
+                # List of Yahoo! formatted MLB team names
+                player_teams = ["Ari","Atl","Bal","Bos","CWS","ChC","Cin","Cle","Col","Det","Hou","KC","LAA","LAD","Mia","Mil","Min","NYY","NYM","Oak","Phi","Pit","SD","SF","Sea","StL","TB","Tex","Tor","Was"]
+                # Loop through all the teams
+                for team in player_teams:
+                    # Try removing team names until the string is successfully shortened
+                    if len(str(str(data_rows[index][0].split('\n')[1].strip()).rsplit(str(team + ' - '), 2)[0].strip())) < len(str(data_rows[index][0].split('\n')[1].strip())):
+                        player_name_short = unidecode.unidecode(str(str(data_rows[index][0].split('\n')[1].strip()).rsplit(team, 2)[0].strip()))
+                        break
+
+                players_json = json.load(open('./data/yahoo-players.json'))
+                print("player is " + player_name_short)
+                for key, _ in enumerate(players_json['players']):
+                    if player_name_short == players_json['players'][key]['short_name']:
+                        player_name_full = players_json['players'][key]['full_name']
+                        print("found old player")
+                        break
+                    elif key == len(players_json['players']) - 1:
+                        url_scrape = str(elements_players[index]['href'])
+                        html_page = requests.get(url_scrape, headers= headers)
+                        html_soup = BeautifulSoup(html_page.content, "html.parser")
+                        results_page = html_soup.find(id="Main")
+                        player_name_full = unidecode.unidecode(str(results_page.find("span", class_="ys-name").text))
+                        new_player = {"short_name": player_name_short, "full_name": player_name_full}
+                        MyJ.write_json(new_player, filename= './data/yahoo-players.json')
+                        print("added new player")
+                        break
+                    else:
+                        print("no player found yet")
+
+                player_name = player_name_full
                 player_add = int(data_rows[index][4])
-                # Set current Player's drops for the day by looking at thr column cell value for the current row
                 player_drop = int(data_rows[index][3])
-                # Set Player's net change to remove drops from adds (unlike Yahoo which combines drops to adds)
                 player_change = player_add - player_drop
-                # Check if Player is already in daily dictionary to avoid duplicating Player's adds/drops for Players eligible on multiple position pages for the current day
+
                 if player_name not in daily_dictionary:
-                    # Add Player to daily dictionary with net change
                     daily_dictionary[player_name] = player_change
-                print(index, player_name, player_change)
-        # Loop through all the Players in the daily dictionary after scraping all the position pages for the day
+
         for key in daily_dictionary.keys():
-            # Check if Player is already in the weekly trends dictionary
             if key not in trends_dictionary:
-                # Add Player to weekly trends dictionary with their adds/drop
                 trends_dictionary[key] = daily_dictionary[key]
-            # For Players with existing key/values
             else:
-                # Update Player in weekly trends dictionary while keeping their add/drops from prior day(s)
                 trends_dictionary[key] = trends_dictionary[key] + daily_dictionary[key]
-    # Create new dictionary to sort the Players' by their net change across the requested day(s)
     sorted_trends_dictionary = MyD.sort(trends_dictionary, True)
     return sorted_trends_dictionary
 
