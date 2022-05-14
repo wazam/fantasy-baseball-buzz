@@ -26,6 +26,6 @@ def write_json(new_data, filename):
 # ```python src/util/my_json.py```
 if __name__ == "__main__":
     filename = 'yahoo-players'
-    new_data = {"short_name": "", "full_name": ""}
-    write_json(new_data, filename)
+    # new_data = {"short_name": "A. Test", "full_name": "Always Test"}
+    # write_json(new_data, filename)
     print(get_json(filename))
