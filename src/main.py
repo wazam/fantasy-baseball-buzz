@@ -7,7 +7,6 @@ from espn import espn_trends
 from cbs import cbs_trends
 import pitcherlist
 
-
 load_dotenv(find_dotenv())
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
@@ -78,6 +77,14 @@ def page_pl_5():
 
 
 @app.route("/yahoo")
+def yahoo_page():
+    if eval(environ.get('ENABLE_YAHOO', True)) == True:
+        data = yahoo_trends(7)
+        return data
+    else:
+        return Response(status = 503)
+
+@app.route("/yahoo/1")
 def yahoo_page():
     if eval(environ.get('ENABLE_YAHOO', True)) == True:
         data = yahoo_trends(1)

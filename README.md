@@ -8,8 +8,8 @@ Based Buzz analyzes MLB players' trends across multiple fantasy sources and make
 | :----: | :----: | ---- |
 | ESPN | ✅ | [Past 7 days of most added players](https://fantasy.espn.com/baseball/addeddropped) |
 | ESPN | ❌ | [Past 1 day of most added players](https://fantasy.espn.com/baseball/addeddropped) |
+| Yahoo! | ✅ | [Past 7 days of most added players](https://baseball.fantasysports.yahoo.com/b1/buzzindex) |
 | Yahoo! | ✅ | [Past 1 day of most added players](https://baseball.fantasysports.yahoo.com/b1/buzzindex) |
-| Yahoo! | ❌ | [Past 7 days of most added players](https://baseball.fantasysports.yahoo.com/b1/buzzindex) |
 | CBS | ✅ | [Past 7 days of most added players](https://www.cbssports.com/fantasy/baseball/trends/added/all/) |
 | CBS | ❌ | [Past 1 day of most added players](https://www.cbssports.com/fantasy/baseball/trends/added/all/) |
 | Fantrax | ❌ | [Past 7 days of most added players](https://www.fantrax.com/login) |
