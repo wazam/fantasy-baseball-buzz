@@ -36,7 +36,7 @@ def espn_page():
 
 
 @app.route("/pitcherlist/pitcher-trends")
-def page_pl_1():
+def pitcherlist_page_1():
     if eval(environ.get('ENABLE_PITCHERLIST', True)) == True:
         data = pitcherlist.get_pitcher_trends()
         return data
@@ -44,7 +44,7 @@ def page_pl_1():
         return Response(status = 503)
 
 @app.route("/pitcherlist/pitcher-ranks")
-def page_pl_2():
+def pitcherlist_page_2():
     if eval(environ.get('ENABLE_PITCHERLIST', True)) == True:
         data = pitcherlist.get_pitcher_ranks()
         return data
@@ -52,7 +52,7 @@ def page_pl_2():
         return Response(status = 503)
 
 @app.route("/pitcherlist/pitcher-streamers")
-def page_pl_3():
+def pitcherlist_page_3():
     if eval(environ.get('ENABLE_PITCHERLIST', True)) == True:
         data = pitcherlist.get_pitcher_streamers()
         return data
@@ -60,7 +60,7 @@ def page_pl_3():
         return Response(status = 503)
 
 @app.route("/pitcherlist/batter-trends")
-def page_pl_4():
+def pitcherlist_page_4():
     if eval(environ.get('ENABLE_PITCHERLIST', True)) == True:
         data = pitcherlist.get_batter_trends()
         return data
@@ -68,7 +68,7 @@ def page_pl_4():
         return Response(status = 503)
 
 @app.route("/pitcherlist/batter-ranks")
-def page_pl_5():
+def pitcherlist_page_5():
     if eval(environ.get('ENABLE_PITCHERLIST', True)) == True:
         data = pitcherlist.get_batter_ranks()
         return data
@@ -77,7 +77,7 @@ def page_pl_5():
 
 
 @app.route("/yahoo")
-def yahoo_page():
+def yahoo_page_1():
     if eval(environ.get('ENABLE_YAHOO', True)) == True:
         data = yahoo_trends(7)
         return data
@@ -85,7 +85,7 @@ def yahoo_page():
         return Response(status = 503)
 
 @app.route("/yahoo/1")
-def yahoo_page():
+def yahoo_page_2():
     if eval(environ.get('ENABLE_YAHOO', True)) == True:
         data = yahoo_trends(1)
         return data
