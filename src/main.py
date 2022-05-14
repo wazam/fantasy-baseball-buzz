@@ -80,7 +80,7 @@ def page_pl_5():
 @app.route("/yahoo")
 def yahoo_page():
     if eval(environ.get('ENABLE_YAHOO', True)) == True:
-        data = yahoo_trends(1, True)
+        data = yahoo_trends(1)
         return data
     else:
         return Response(status = 503)

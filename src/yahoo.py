@@ -1,19 +1,19 @@
-import requests
 from bs4 import BeautifulSoup
 from datetime import date
 from datetime import timedelta
 import unidecode
-import json
 
 import util.my_dictionary as MyD
 import util.my_json as MyJ
+import util.my_ratelimit as MyR
+
 
 url_base = "http://baseball.fantasysports.yahoo.com"
 headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36'}
 
 
 # Returns a numerically ordered dictionary of Players' names with their add/drop roster trends
-def yahoo_trends(number_of_days, fetch_full_names):
+def yahoo_trends(number_of_days):
     # Create new dictionary to save all the Players' adds/drops for all the day(s)
     trends_dictionary = {}
     # Site-specific url
@@ -26,7 +26,7 @@ def yahoo_trends(number_of_days, fetch_full_names):
         # Create scrapable URL to load position pages from
         url_scrape = url_base + url_tab + str(date_scrape)
         # Load daily page
-        html_page = requests.get(url_scrape, headers= headers)
+        html_page = MyR.make_ratelimited_request(url_scrape, headers)
         # Create HTML document for BeautifulSoup
         html_doc = html_page.content
         # Create searchable HTML with BeautifulSoup parsing
@@ -44,7 +44,7 @@ def yahoo_trends(number_of_days, fetch_full_names):
             # Create scrapable URL to load table data from
             url_scrape = url_base + url_tab
             # Load position page
-            html_page = requests.get(url_scrape, headers= headers)
+            html_page = MyR.make_ratelimited_request(url_scrape, headers)
             # Create HTML document for BeautifulSoup
             html_doc = html_page.content
             # Create searchable HTML with BeautifulSoup parsing
@@ -67,33 +67,28 @@ def yahoo_trends(number_of_days, fetch_full_names):
                 data_rows.append([each_column for each_column in elements_columns if each_column])
 
                 # List of Yahoo! formatted MLB team names
-                player_teams = ["Ari","Atl","Bal","Bos","CWS","ChC","Cin","Cle","Col","Det","Hou","KC","LAA","LAD","Mia","Mil","Min","NYY","NYM","Oak","Phi","Pit","SD","SF","Sea","StL","TB","Tex","Tor","Was"]
+                mlb_teams = ["Ari","Atl","Bal","Bos","CWS","ChC","Cin","Cle","Col","Det","Hou","KC","LAA","LAD","Mia","Mil","Min","NYY","NYM","Oak","Phi","Pit","SD","SF","Sea","StL","TB","Tex","Tor","Was"]
                 # Loop through all the teams
-                for team in player_teams:
+                for team in mlb_teams:
                     # Try removing team names until the string is successfully shortened
                     if len(str(str(data_rows[index][0].split('\n')[1].strip()).rsplit(str(team + ' - '), 2)[0].strip())) < len(str(data_rows[index][0].split('\n')[1].strip())):
                         player_name_short = unidecode.unidecode(str(str(data_rows[index][0].split('\n')[1].strip()).rsplit(team, 2)[0].strip()))
                         break
-
-                players_json = json.load(open('./data/yahoo-players.json'))
-                print("player is " + player_name_short)
+                
+                players_json = MyJ.get_json('yahoo-players')
                 for key, _ in enumerate(players_json['players']):
                     if player_name_short == players_json['players'][key]['short_name']:
                         player_name_full = players_json['players'][key]['full_name']
-                        print("found old player")
                         break
                     elif key == len(players_json['players']) - 1:
                         url_scrape = str(elements_players[index]['href'])
-                        html_page = requests.get(url_scrape, headers= headers)
+                        html_page = MyR.make_ratelimited_request(url_scrape, headers)
                         html_soup = BeautifulSoup(html_page.content, "html.parser")
                         results_page = html_soup.find(id="Main")
                         player_name_full = unidecode.unidecode(str(results_page.find("span", class_="ys-name").text))
                         new_player = {"short_name": player_name_short, "full_name": player_name_full}
-                        MyJ.write_json(new_player, filename= './data/yahoo-players.json')
-                        print("added new player")
+                        MyJ.write_json(new_player, 'yahoo-players')
                         break
-                    else:
-                        print("no player found yet")
 
                 player_name = player_name_full
                 player_add = int(data_rows[index][4])
@@ -114,7 +109,6 @@ def yahoo_trends(number_of_days, fetch_full_names):
 
 # ```python src/yahoo.py```
 if __name__ == "__main__":
-    number_of_days = 1
-    fetch_full_names = True
-    data = yahoo_trends(number_of_days,fetch_full_names)
+    number_of_days = 14
+    data = yahoo_trends(number_of_days)
     print(data)

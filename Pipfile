@@ -10,6 +10,7 @@ selenium = "*"
 flask = "*"
 unidecode = "*"
 python-dotenv = "*"
+ratelimit = "*"
 
 [dev-packages]
 
