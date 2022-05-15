@@ -1,3 +1,4 @@
+import enum
 import util.my_beautifulsoup as MyBS
 import util.my_dictionary as MyD
 import util.my_unidecode as MyU
@@ -13,8 +14,8 @@ def startup(url_tab, all, name, attrib, href):
     url_start_page = url_base + url_tab
     start_page = MyBS.scrape_class(url_start_page, headers, '', 'div', 'hold-me', False)
     url_weekly_page = MyBS.find_class(start_page, '', 'a', 'link', True)['href']    
-    weekly_page_rows = MyBS.scrape_class(url_weekly_page, headers, all, name, attrib, href)
-    return weekly_page_rows
+    weekly_page_data = MyBS.scrape_class(url_weekly_page, headers, all, name, attrib, href)
+    return weekly_page_data
 
 
 # Return Players' name and rank
@@ -103,10 +104,20 @@ def get_pitcher_matchups():
     return sorted_dict
 
 
+def get_pitcher_two_starts():
+    tables = startup('/category/fantasy/two-start-pitchers/', 'all', 'table', 'dataTableLaunch bold centered rounded stats dataTable no-footer', False)
+    for i, _ in enumerate(tables):
+        for j in range(0, len(tables[i].find_all('a'))):
+            player_name = tables[i].find_all('a')[j].text
+            player_projection = 2 - i
+            player_dict[player_name] = player_projection
+    return player_dict
+
+
 # Return sorted Batters' name and change in rank
 def get_batter_trends():
     weekly_rows = startup('/category/fantasy/hitter-list', 'all', 'tr', 'new-tier', False)
-    player_dict =  get_trends(weekly_rows)
+    player_dict = get_trends(weekly_rows)
     sorted_dict = MyD.sort(player_dict)
     return sorted_dict
 
@@ -124,6 +135,7 @@ if __name__ == '__main__':
     # print(get_pitcher_trends())
     # print(get_pitcher_ranks())
     # print(get_pitcher_streamers())
+    #print(get_pitcher_matchups())
+    print(get_pitcher_two_starts())
     # print(get_batter_trends())
     # print(get_batter_ranks())
-    print(get_pitcher_matchups())
