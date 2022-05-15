@@ -41,7 +41,7 @@ def pitcherlist_page_2():
 
 @app.route("/pitcherlist/3")
 def pitcherlist_page_3():
-    data = pitcherlist.get_streaming_pitcher_ranks()
+    data = pitcherlist.get_streaming_starting_pitcher_ranks()
     return data
 
 @app.route("/pitcherlist/4")

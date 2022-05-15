@@ -65,7 +65,7 @@ def get_starting_pitcher_ranks():
 
 
 # Return name and rank, sorted low to high
-def get_streaming_pitcher_ranks():
+def get_streaming_starting_pitcher_ranks():
     streamers_page = startup('/category/fantasy/sp-streamers/', '', 'div', 'row article-wrap', False)
     row_streamers = MyBS.find(streamers_page, 'all', 'tr', False)
     for i, _ in enumerate(row_streamers):
@@ -152,7 +152,7 @@ def get_closing_pitcher_ranks():
 if __name__ == '__main__':
     print(get_starting_pitcher_rank_trends())
     print(get_starting_pitcher_ranks())
-    print(get_streaming_pitcher_ranks())
+    print(get_streaming_starting_pitcher_ranks())
     print(get_starting_pitcher_matchup_tiers())
     print(get_two_start_starting_pitcher_matchup_tiers())
     print(get_batter_rank_trends())
