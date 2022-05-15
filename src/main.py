@@ -19,94 +19,71 @@ def home_page():
 
 @app.route("/cbs")
 def cbs_page():
-    if eval(environ.get('ENABLE_CBS', True)) == True:
-        data = cbs_trends()
-        return data
-    else:
-        return Response(status = 503)
+    data = cbs_trends()
+    return data
 
 
 @app.route("/espn")
 def espn_page():
-    if eval(environ.get('ENABLE_ESPN', True)) == True:
-        data = espn_trends()
-        return data
-    else:
-        return Response(status = 503)
+    data = espn_trends()
+    return data
 
 
-@app.route("/pitcherlist/pitcher-trends")
+@app.route("/pitcherlist/1")
 def pitcherlist_page_1():
-    if eval(environ.get('ENABLE_PITCHERLIST', True)) == True:
-        data = pitcherlist.get_pitcher_trends()
-        return data
-    else:
-        return Response(status = 503)
+    data = pitcherlist.get_starting_pitcher_rank_trends()
+    return data
 
-@app.route("/pitcherlist/pitcher-ranks")
+@app.route("/pitcherlist/2")
 def pitcherlist_page_2():
-    if eval(environ.get('ENABLE_PITCHERLIST', True)) == True:
-        data = pitcherlist.get_pitcher_ranks()
-        return data
-    else:
-        return Response(status = 503)
+    data = pitcherlist.get_starting_pitcher_ranks()
+    return data
 
-@app.route("/pitcherlist/pitcher-streamers")
+@app.route("/pitcherlist/3")
 def pitcherlist_page_3():
-    if eval(environ.get('ENABLE_PITCHERLIST', True)) == True:
-        data = pitcherlist.get_pitcher_streamers()
-        return data
-    else:
-        return Response(status = 503)
+    data = pitcherlist.get_streaming_pitcher_ranks()
+    return data
 
-@app.route("/pitcherlist/pitcher-matchups")
+@app.route("/pitcherlist/4")
 def pitcherlist_page_4():
-    if eval(environ.get('ENABLE_PITCHERLIST', True)) == True:
-        data = pitcherlist.get_pitcher_matchups()
-        return data
-    else:
-        return Response(status = 503)
+    data = pitcherlist.get_starting_pitcher_matchup_tiers()
+    return data
 
-@app.route("/pitcherlist/pitcher-two-starts")
+@app.route("/pitcherlist/5")
 def pitcherlist_page_5():
-    if eval(environ.get('ENABLE_PITCHERLIST', True)) == True:
-        data = pitcherlist.get_pitcher_two_starts()
-        return data
-    else:
-        return Response(status = 503)
+    data = pitcherlist.get_two_start_starting_pitcher_matchup_tiers()
+    return data
 
-@app.route("/pitcherlist/batter-trends")
+@app.route("/pitcherlist/6")
 def pitcherlist_page_6():
-    if eval(environ.get('ENABLE_PITCHERLIST', True)) == True:
-        data = pitcherlist.get_batter_trends()
-        return data
-    else:
-        return Response(status = 503)
+    data = pitcherlist.get_batter_rank_trends()
+    return data
 
-@app.route("/pitcherlist/batter-ranks")
+@app.route("/pitcherlist/7")
 def pitcherlist_page_7():
-    if eval(environ.get('ENABLE_PITCHERLIST', True)) == True:
-        data = pitcherlist.get_batter_ranks()
-        return data
-    else:
-        return Response(status = 503)
+    data = pitcherlist.get_batter_ranks()
+    return data
+
+@app.route("/pitcherlist/8")
+def pitcherlist_page_8():
+    data = pitcherlist.get_closing_pitcher_rank_trends()
+    return data
+
+@app.route("/pitcherlist/9")
+def pitcherlist_page_9():
+    data = pitcherlist.get_closing_pitcher_ranks()
+    return data
 
 
-@app.route("/yahoo/7-day")
+@app.route("/yahoo/1")
 def yahoo_page_1():
-    if eval(environ.get('ENABLE_YAHOO', True)) == True:
-        data = yahoo_trends(7)
-        return data
-    else:
-        return Response(status = 503)
+    data = yahoo_trends(7)
+    return data
 
-@app.route("/yahoo/1-day")
+@app.route("/yahoo/2")
 def yahoo_page_2():
-    if eval(environ.get('ENABLE_YAHOO', True)) == True:
-        data = yahoo_trends(1)
-        return data
-    else:
-        return Response(status = 503)
+    data = yahoo_trends(1)
+    return data
 
 
 if __name__ == "__main__":
