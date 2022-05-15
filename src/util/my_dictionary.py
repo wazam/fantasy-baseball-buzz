@@ -3,9 +3,17 @@ def by_value(item):
     return item[1]
 
 
-# Returns new dictionary sorted from highest to lowest (true)
-def sort(dict, high_to_low):
-    dict_sort = {}
-    for k, v in sorted(dict.items(), key= by_value, reverse= high_to_low):
-        dict_sort[k] = v
-    return dict_sort
+# Returns new dictionary sorted from highest to lowest
+def sort(dictionary_unsorted):
+    dictionary_sorted = {}
+    for k, v in sorted(dictionary_unsorted.items(), key = by_value, reverse = True):
+        dictionary_sorted[k] = v
+    return dictionary_sorted
+
+
+# Returns dictionary sorted by values from lowest to highest
+def sort_desc(dictionary_unsorted):
+    dictionary_sorted = {}
+    for k, v in sorted(dictionary_unsorted.items(), key = by_value):
+        dictionary_sorted[k] = v
+    return dictionary_sorted

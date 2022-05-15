@@ -73,7 +73,7 @@ def yahoo_trends(number_of_days_to_scrape):
                 weekly_dict[key] = weekly_dict[key] + daily_dict[key]
 
     # Sort the weekly dictionary from High to Low
-    sorted_weekly_dict = MyD.sort(weekly_dict, True)
+    sorted_weekly_dict = MyD.sort(weekly_dict)
     return sorted_weekly_dict
 
 
