@@ -8,14 +8,14 @@ headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/
 player_dict = {}
 
 
-# Return Player data rows from current week's article
+# Return data from search in current week's article
 def startup(url_tab, all, name, attrib, href):
     player_dict.clear()
     url_start_page = url_base + url_tab
     start_page = MyBS.scrape_class(url_start_page, headers, '', 'div', 'hold-me', False)
-    url_weekly_page = MyBS.find_class(start_page, '', 'a', 'link', True)['href']    
-    weekly_page_data = MyBS.scrape_class(url_weekly_page, headers, all, name, attrib, href)
-    return weekly_page_data
+    url_weekly_page = MyBS.find_class(start_page, '', 'a', 'link', True)['href']
+    weekly_page = MyBS.scrape_class(url_weekly_page, headers, all, name, attrib, href)
+    return weekly_page
 
 
 # Return Players' name and rank
@@ -34,7 +34,8 @@ def get_trends(rows):
     for i, _ in enumerate(rows):
         player_name_diacritics = rows[i].a.text
         player_name = MyU.fix_str(player_name_diacritics)
-        player_trend_text = rows[i].find_all('td')[3].text
+        player_trend_column = len(rows[i].find_all('td')) - 1
+        player_trend_text = rows[i].find_all('td')[player_trend_column].text
         if player_trend_text == '-':
             player_trend = 0
         elif player_trend_text == '+UR':
@@ -47,24 +48,24 @@ def get_trends(rows):
     return player_dict
 
 
-# Return sorted Pitchers' name and change in rank
-def get_pitcher_trends():
+# Return name and change in rank, sorted high to low
+def get_starting_pitcher_rank_trends():
     weekly_rows = startup('/category/fantasy/the-list', 'all', 'tr', 'new-tier', False)
     player_dict = get_trends(weekly_rows)
     sorted_dict = MyD.sort(player_dict)
     return sorted_dict
 
 
-# Return sorted Pitchers' name and rank
-def get_pitcher_ranks():
+# Return name and rank, sorted low to high
+def get_starting_pitcher_ranks():
     weekly_rows = startup('/category/fantasy/the-list', 'all', 'tr', 'new-tier', False)
     player_dict = get_ranks(weekly_rows)
     sorted_dict = MyD.sort_desc(player_dict)
     return sorted_dict
 
 
-# Return sorted Pitchers' name and rank
-def get_pitcher_streamers():
+# Return name and rank, sorted low to high
+def get_streaming_pitcher_ranks():
     streamers_page = startup('/category/fantasy/sp-streamers/', '', 'div', 'row article-wrap', False)
     row_streamers = MyBS.find(streamers_page, 'all', 'tr', False)
     for i, _ in enumerate(row_streamers):
@@ -78,8 +79,8 @@ def get_pitcher_streamers():
     return sorted_dict
 
 
-# Return sorted Pitchers' name and projected week matchup(s) favor
-def get_pitcher_matchups():
+# Return name (short) and projected matchup(s) tier, combined for all weekly matchups, sorted high to low
+def get_starting_pitcher_matchup_tiers():
     matchups_page = startup('/category/fantasy/sit-or-start/', '', 'div', 'row article-wrap', False)
     matchups_row = MyBS.find(matchups_page, 'all', 'tr', False)
     for i, _ in enumerate(matchups_row):
@@ -104,7 +105,8 @@ def get_pitcher_matchups():
     return sorted_dict
 
 
-def get_pitcher_two_starts():
+# Return name and projected matchups tier
+def get_two_start_starting_pitcher_matchup_tiers():
     tables = startup('/category/fantasy/two-start-pitchers/', 'all', 'table', 'dataTableLaunch bold centered rounded stats dataTable no-footer', False)
     for i, _ in enumerate(tables):
         for j in range(0, len(tables[i].find_all('a'))):
@@ -114,15 +116,15 @@ def get_pitcher_two_starts():
     return player_dict
 
 
-# Return sorted Batters' name and change in rank
-def get_batter_trends():
+# Return name and change in rank, sorted high to low
+def get_batter_rank_trends():
     weekly_rows = startup('/category/fantasy/hitter-list', 'all', 'tr', 'new-tier', False)
     player_dict = get_trends(weekly_rows)
     sorted_dict = MyD.sort(player_dict)
     return sorted_dict
 
 
-# Return sorted Batters' name and rank
+# Return name and rank, sorted low to high
 def get_batter_ranks():
     weekly_rows = startup('/category/fantasy/hitter-list', 'all', 'tr', 'new-tier', False)
     player_dict = get_ranks(weekly_rows)
@@ -130,12 +132,30 @@ def get_batter_ranks():
     return sorted_dict
 
 
+# Return name and change in rank, sorted high to low
+def get_closing_pitcher_rank_trends():
+    weekly_rows = startup('/category/fantasy/closing-time/', 'all', 'tr', 'new-tier', False)
+    player_dict = get_trends(weekly_rows)
+    sorted_dict = MyD.sort(player_dict)
+    return sorted_dict
+
+
+# Return name and rank, sorted low to high
+def get_closing_pitcher_ranks():
+    weekly_rows = startup('/category/fantasy/closing-time/', 'all', 'tr', 'new-tier', False)
+    player_dict = get_ranks(weekly_rows)
+    sorted_dict = MyD.sort_desc(player_dict)
+    return sorted_dict
+
+
 # ```python src/pitcherlist.py```
 if __name__ == '__main__':
-    # print(get_pitcher_trends())
-    # print(get_pitcher_ranks())
-    # print(get_pitcher_streamers())
-    #print(get_pitcher_matchups())
-    print(get_pitcher_two_starts())
-    # print(get_batter_trends())
-    # print(get_batter_ranks())
+    print(get_starting_pitcher_rank_trends())
+    print(get_starting_pitcher_ranks())
+    print(get_streaming_pitcher_ranks())
+    print(get_starting_pitcher_matchup_tiers())
+    print(get_two_start_starting_pitcher_matchup_tiers())
+    print(get_batter_rank_trends())
+    print(get_batter_ranks())
+    print(get_closing_pitcher_rank_trends())
+    print(get_closing_pitcher_ranks())
