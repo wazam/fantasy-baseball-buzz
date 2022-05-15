@@ -40,7 +40,8 @@ def get_trends(rows):
             player_trend = 0
         elif player_trend_text == '+UR':
             player_rank = int(rows[i].td.text)
-            player_trend = 101 - player_rank
+            total_ranks = len(rows) + 1
+            player_trend = total_ranks - player_rank
         else:
             player_trend = int(player_trend_text)
         if player_name not in player_dict:
@@ -148,6 +149,22 @@ def get_closing_pitcher_ranks():
     return sorted_dict
 
 
+# Return name and change in rank, sorted high to low
+def get_relief_pitcher_rank_trends():
+    weekly_rows = startup('/category/fantasy/the-hold-up/', 'all', 'tr', 'new-tier', False)
+    player_dict = get_trends(weekly_rows)
+    sorted_dict = MyD.sort(player_dict)
+    return sorted_dict
+
+
+# Return name and rank, sorted low to high
+def get_relief_pitcher_ranks():
+    weekly_rows = startup('/category/fantasy/the-hold-up/', 'all', 'tr', 'new-tier', False)
+    player_dict = get_ranks(weekly_rows)
+    sorted_dict = MyD.sort_desc(player_dict)
+    return sorted_dict
+
+
 # ```python src/pitcherlist.py```
 if __name__ == '__main__':
     print(get_starting_pitcher_rank_trends())
@@ -159,3 +176,5 @@ if __name__ == '__main__':
     print(get_batter_ranks())
     print(get_closing_pitcher_rank_trends())
     print(get_closing_pitcher_ranks())
+    print(get_relief_pitcher_rank_trends())
+    print(get_relief_pitcher_ranks())

@@ -74,6 +74,16 @@ def pitcherlist_page_9():
     data = pitcherlist.get_closing_pitcher_ranks()
     return data
 
+@app.route("/pitcherlist/10")
+def pitcherlist_page_10():
+    data = pitcherlist.get_relief_pitcher_rank_trends()
+    return data
+
+@app.route("/pitcherlist/11")
+def pitcherlist_page_11():
+    data = pitcherlist.get_relief_pitcher_ranks()
+    return data
+
 
 @app.route("/yahoo/1")
 def yahoo_page_1():
