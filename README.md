@@ -22,8 +22,8 @@ Based Buzz analyzes MLB players' trends across multiple fantasy sources and make
 | Pitcher List | ✅ | [Next 2 days pitcher projections](https://www.pitcherlist.com/category/fantasy/sp-streamers/) |
 | Pitcher List | ✅ | [Next 7 days pitcher projections](https://www.pitcherlist.com/category/fantasy/sit-or-start/) |
 | Pitcher List | ✅ | [Next 7 days 2-start pitcher projections](https://www.pitcherlist.com/category/fantasy/two-start-pitchers/) |
+| Pitcher List | ✅ | [ROS closer pitcher projections](https://www.pitcherlist.com/category/fantasy/closing-time/) |
 | Pitcher List | ⚠ | [ROS relief pitcher projections](https://www.pitcherlist.com/category/fantasy/the-hold-up/) |
-| Pitcher List | ⚠ | [ROS closer pitcher projections](https://www.pitcherlist.com/category/fantasy/closing-time/) |
 | Pitcher List | ❌ | [Daily Player Projections](https://www.pitcherlist.com/category/dfs-betting/betting-picks/) |
 | Pitcher List | ❌ | [Daily Player Projections](https://www.pitcherlist.com/category/fantasy/dfs/) |
 | Pitcher List | ❌ | [Category Power Rankings](https://www.pitcherlist.com/category/fantasy/category-power-rankings/) |
