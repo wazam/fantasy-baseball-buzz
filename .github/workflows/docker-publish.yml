@@ -3,8 +3,6 @@
 name: Docker Publish
 
 on:
-  schedule:
-    - cron: '30 20 * * *'
   push:
     branches: [ main ]
   pull_request:
