@@ -1,19 +1,18 @@
-# Used to return an instance of a web browser
 from selenium import webdriver
-# Used to send launch paramaters to Chrome web browser on the local machine
+from selenium.webdriver.firefox.service import Service as FirefoxService
+from webdriver_manager.firefox import GeckoDriverManager
+
 from selenium.webdriver.chrome.options import Options as ChromeOptions
-# Used to send launch paramaters to Firefox web browser on the local machine
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
-# Used to send launch paramaters to Edge web browser on the local machine
-from selenium.webdriver.edge.options import Options as EdgeOptions
-# Used to scrape web pages in the browser for content
+
 from selenium.webdriver.common.by import By
-# Used to wait for the web pages to load/update
 from time import sleep
-# Used to set environment varaibles on the system
+
 from dotenv import load_dotenv, find_dotenv
-# Used to get environment varaibles from the system 
 from os import environ
+
+from selenium.webdriver.chrome.service import Service as ChromeService
+from webdriver_manager.chrome import ChromeDriverManager
 
 # Returns a numerically ordered dictionary of Players' names with their roster trends
 def espn_trends():
@@ -22,52 +21,42 @@ def espn_trends():
     # Set environment variables from local .env
     load_dotenv(find_dotenv())
     # Set browser from environment variable used for scraping
-    browser = environ.get('BROWSER', "CHROME")
+    browser = environ.get('BROWSER', 'FIREFOX')
     # Set enabled headless mode environment variable for web browser
-    enable_headless = eval(environ.get('ENABLE_HEADLESS', True))
+    # enable_headless = eval(environ.get('ENABLE_HEADLESS', True))
     # Check if Chrome web-driver support is enabled
-    if browser == "CHROME":
-        # Set options class to configure Chrome
-        options = ChromeOptions()
-        # Check for observing the web-driver's actions in the web browser
-        if enable_headless == False:
-            # Set web browser option to run with user-interface
-            options.headless = False # or pass
-        else:
-            # Set web browser option to run without user-interface
-            options.headless = True
-        # Ignore error messages `Failed to read descriptor from node connection: A device attached to the system is not functioning` from CLI
-        options.add_experimental_option('excludeSwitches', ['enable-logging'])
-        # Launch web browser with options
-        driver = webdriver.Chrome(options=options)
+    
+    from webdriver_manager.core.utils import read_version_from_cmd, PATTERN
+    version = read_version_from_cmd("/usr/bin/firefox-bin --version", PATTERN["firefox"])
+    driver_binary = GeckoDriverManager(version=version).install()
+    
+    if browser == 'CHROME':
+        # # Set options class to configure Chrome
+        # options = ChromeOptions()
+        # # Check for observing the web-driver's actions in the web browser
+        # if enable_headless == False:
+        #     # Set web browser option to run with user-interface
+        #     options.headless = False # or pass
+        # else:
+        #     # Set web browser option to run without user-interface
+        #     options.headless = True
+        # # Ignore error messages `Failed to read descriptor from node connection: A device attached to the system is not functioning` from CLI
+        # options.add_experimental_option('excludeSwitches', ['enable-logging'])
+        # # Launch web browser with options
+        driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))  #, options=options)
     # Check if Firefox web-driver support is enabled
-    elif browser == "FIREFOX":
-        # Set options class to configure Firefox
-        options = FirefoxOptions()
-        # Check for observing the web-driver's actions in the web browser
-        if enable_headless == False:
-            # Set web browser option to run with user-interface
-            options.headless = False # or pass
-        else:
-            # Set web browser option to run without user-interface
-            options.headless = True
-        # Launch web browser with options
-        driver = webdriver.Firefox(options=options)
-    # Check if Edge web-driver support is enabled
-    elif browser == "EDGE":
-        # Set options class to configure Edge
-        options = EdgeOptions()
-        # Check for observing the web-driver's actions in the web browser
-        if enable_headless == False:
-            # Set web browser option to run with user-interface
-            pass
-        else:
-            # Set web browser option to run without user-interface
-            options.add_argument("headless")
-        # Ignore error messages `Failed to read descriptor from node connection: A device attached to the system is not functioning` from CLI
-        options.add_experimental_option('excludeSwitches', ['enable-logging'])
-        # Launch web browser with options
-        driver = webdriver.Edge(options=options)
+    elif browser == 'FIREFOX':
+        # # Set options class to configure Firefox
+        # options = FirefoxOptions()  # DeprecationWarning: headless property is deprecated, instead use add_argument('-headless') options.headless = False # or pass
+        # # Check for observing the web-driver's actions in the web browser
+        # if enable_headless == False:
+        #     # Set web browser option to run with user-interface
+        #     options.headless = False # or pass
+        # else:
+        #     # Set web browser option to run without user-interface
+        #     options.headless = True
+        # # Launch web browser with options
+        driver = webdriver.Firefox(service=FirefoxService(GeckoDriverManager().install()))  #, options=options)
     # Send the URL to the web browser
     driver.get(url)
     # Wait for the web page to load all it's content
