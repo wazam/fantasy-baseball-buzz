@@ -3,10 +3,15 @@
 name: Docker Publish
 
 on:
+  schedule:
+    - cron: '22 22 * * 3'
   push:
-    branches: [ main ]
+    branches:
+      - 'main'
   pull_request:
-    branches: [ main ]
+    branches:
+      - 'main'
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
@@ -14,6 +19,7 @@ env:
 
 jobs:
   build:
+
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -25,11 +31,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install cosign
+      - name: Install cosign tool
         if: github.event_name != 'pull_request'
-        uses: sigstore/cosign-installer@d6a3abf1bdea83574e28d40543793018b6035605
+        uses: sigstore/cosign-installer@f3c664df7af409cb4873aa5068053ba9d61a57b6 #v2.6.0
         with:
-          cosign-release: 'v1.7.1'
+          cosign-release: 'v1.13.1'
 
       - name: Setup Docker buildx
         uses: docker/setup-buildx-action@79abd3f86f79a9d68a23c75a09a9a85889262adf
@@ -56,9 +62,11 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Sign the published Docker image
         if: ${{ github.event_name != 'pull_request' }}
         env:
           COSIGN_EXPERIMENTAL: "true"
-        run: cosign sign ${{ steps.meta.outputs.tags }}@${{ steps.build-and-push.outputs.digest }}
+        run: echo "${{ steps.meta.outputs.tags }}" | xargs -I {} cosign sign {}@${{ steps.build-and-push.outputs.digest }}
