@@ -2,6 +2,35 @@
 
 Jamball aggregates MLB player trends, statistics, and projections from multiple baseball and fantasy sources to provide you a more in-depth picture of player true values across all parts of the internet. Written in Python. #FreeMaxScherzer
 
+## Installation
+
+### Build From Source
+1. Install [git](https://git-scm.com/downloads) and [docker-compose](https://docs.docker.com/compose/install/).
+2. Clone the repo.
+```sh
+git clone https://github.com/wazam/fantasy-baseball-buzz.git
+```
+3. Change to the current working directory.
+```sh
+cd ./fantasy-baseball-buzz
+```
+4. Run the `docker-compose.yml` file to build and run the app.
+```sh
+docker-compose up -d
+```
+
+
+### Docker-Compose
+```sh
+---
+version: "3"
+services:
+  app:
+    image: ghcr.io/wazam/fantasy-baseball-buzz:main
+    container_name: fantasy-baseball-buzz
+```
+
+
 ## Supported Sites
 
 ### ESPN
