@@ -8,6 +8,7 @@ from espn import espn_trends
 from cbs import cbs_trends
 import pitcherlist
 
+
 load_dotenv(find_dotenv())
 app = Flask(__name__, template_folder='../templates', static_url_path='/static', static_folder='../static')
 app.config['JSON_SORT_KEYS'] = False
@@ -20,7 +21,6 @@ def start_page():
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
-
 
 @app.route('/about')
 def web_about():
