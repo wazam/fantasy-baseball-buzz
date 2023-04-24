@@ -7,16 +7,20 @@ on:
     branches:
       - 'main'
     paths:
-      - '**.py'
       - 'Pipfile'
       - 'Pipfile.lock'
+      - 'src/**'
+      - 'static/**'
+      - 'templates/**'
   pull_request:
     branches:
       - 'main'
     paths:
-      - '**.py'
       - 'Pipfile'
       - 'Pipfile.lock'
+      - 'src/**'
+      - 'static/**'
+      - 'templates/**'
   workflow_dispatch:
 
 permissions:

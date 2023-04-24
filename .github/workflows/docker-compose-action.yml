@@ -4,14 +4,18 @@ name: Docker Compose
 
 on:
   schedule:
-    - cron: '30 20 * * *'
+    - cron: '22 22 * * 3'
   push:
-    branches: [ main ]
+    branches:
+      - 'main'
   pull_request:
-    branches: [ main ]
+    branches:
+      - 'main'
+  workflow_dispatch:
 
 jobs:
   build:
+
     runs-on: ubuntu-latest
 
     steps:

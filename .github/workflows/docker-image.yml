@@ -9,20 +9,24 @@ on:
     paths:
       - 'Dockerfile'
       - 'docker-compose.yml'
-      - '**.py'
+      - '.dockerignore'
       - 'Pipfile'
       - 'Pipfile.lock'
-      - '**.html'
+      - 'src/**'
+      - 'static/**'
+      - 'templates/**'
   pull_request:
     branches:
       - 'main'
     paths:
       - 'Dockerfile'
       - 'docker-compose.yml'
-      - '**.py'
+      - '.dockerignore'
       - 'Pipfile'
       - 'Pipfile.lock'
-      - '**.html'
+      - 'src/**'
+      - 'static/**'
+      - 'templates/**'
   workflow_dispatch:
 
 jobs:
