@@ -11,6 +11,7 @@ flask = "*"
 unidecode = "*"
 python-dotenv = "*"
 ratelimit = "*"
+webdriver-manager = "*"
 
 [dev-packages]
 
