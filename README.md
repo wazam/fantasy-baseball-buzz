@@ -1,6 +1,6 @@
 # [Jamball](https://github.com/wazam/fantasy-baseball-buzz)
 
-Jamball tracks MLB player trends, statistics, and projections across multiple baseball fantasy sources to help you make understand the data. Written in Python.
+Jamball aggregates MLB player trends, statistics, and projections from multiple baseball and fantasy sources to provide you a more in-depth picture of player true values across all parts of the internet. Written in Python. #FreeMaxScherzer
 
 ## Supported Sites
 
@@ -194,3 +194,10 @@ Jamball tracks MLB player trends, statistics, and projections across multiple ba
 - [❌ Baseball America Rankings](https://www.baseballamerica.com/rankings/)
 
 </details>
+
+
+## Disclaimers
+- [MLB Terms of Use](https://www.mlb.com/official-information/terms-of-use)
+- [MLB Copyright](https://gdx.mlb.com/components/copyright.txt)
+- [ESPN Terms of Use](https://web.archive.org/web/20220409030827/http://www.espn.com/apis/devcenter/terms.html)
+- [Disney Terms of Use](https://disneytermsofuse.com/english/)
