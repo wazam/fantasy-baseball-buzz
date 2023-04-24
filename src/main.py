@@ -1,6 +1,6 @@
 from dotenv import load_dotenv, find_dotenv
 from os import environ
-from flask import Flask, Response, redirect
+from flask import Flask, Response, redirect, render_template
 
 from yahoo import yahoo_trends
 from espn import espn_trends
@@ -8,13 +8,14 @@ from cbs import cbs_trends
 import pitcherlist
 
 load_dotenv(find_dotenv())
-app = Flask(__name__)
+app = Flask(__name__, template_folder='../templates')
 app.config['JSON_SORT_KEYS'] = False
 
 
 @app.route('/')
-def home_page():
-    return redirect("https://github.com/wazam/fantasy-baseball-buzz")
+def start_page():
+    #return redirect("https://github.com/wazam/fantasy-baseball-buzz")
+    return render_template('index.html')
 
 
 @app.route("/cbs")
