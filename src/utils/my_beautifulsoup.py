@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 
-import util.my_ratelimit as MyR
+import src.utils.my_ratelimit as MyR
 
 
 # Return class tag(s) from web page

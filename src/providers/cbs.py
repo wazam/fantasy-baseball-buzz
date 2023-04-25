@@ -1,7 +1,6 @@
-#Used to load web pages
 import requests
-#Used to scrape web pages
 from bs4 import BeautifulSoup
+
 
 #Function to return a numerically ordered dictionary of players' names and players' trends
 def cbs_trends():
@@ -62,9 +61,8 @@ def cbs_trends():
     #Return sorted dictionary for the function
     return sorted_trends_dictionary
 
-# Used for testing with `python src/cbs.py`
+
+# Used for testing with `pipenv run python src/providers/cbs.py` or `pipenv run python -m src.providers.cbs`
 if __name__ == "__main__":
-    # Get Player's trends dictionary from function above
     data = cbs_trends()
-    # Print Player trends data
     print(data)

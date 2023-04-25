@@ -1,8 +1,9 @@
-import util.my_beautifulsoup as MyBS
-import util.my_datetime as MyDT
-import util.my_dictionary as MyD
-import util.my_json as MyJ
-import util.my_unidecode as MyU
+import src.utils.my_beautifulsoup as MyBS
+import src.utils.my_datetime as MyDT
+import src.utils.my_dictionary as MyD
+import src.utils.my_json as MyJ
+import src.utils.my_unidecode as MyU
+
 
 url_base = "http://baseball.fantasysports.yahoo.com"
 headers_import = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36'}
@@ -38,12 +39,13 @@ def yahoo_trends(number_of_days_to_scrape):
                 data_rows.append([each_column for each_column in elements_columns if each_column])
 
                 # Get Player's short name by trying to removing team names until the string is successfully shortened
-                mlb_teams = ["Ari","Atl","Bal","Bos","CWS","ChC","Cin","Cle","Col","Det","Hou","KC","LAA","LAD","Mia","Mil","Min","NYY","NYM","Oak","Phi","Pit","SD","SF","Sea","StL","TB","Tex","Tor","Was"]
+                mlb_teams = ["ARI","ATL","BAL","BOS","CWS","CHC","CIN","CLE","COL","DET","HOU","KC","LAA","LAD","MIA","MIL","MIN","NYY","NYM","OAK","PHI","PIT","SD","SF","SEA","STL","TB","TEX","TOR","WAS"]
                 for team in mlb_teams:
                     if len(str(str(data_rows[index][0].split('\n')[1].strip()).rsplit(str(team + ' - '), 2)[0].strip())) < len(str(data_rows[index][0].split('\n')[1].strip())):
                         player_name_short = MyU.fix_str(str(str(data_rows[index][0].split('\n')[1].strip()).rsplit(team, 2)[0].strip()))
                         break
-
+                
+                # breakpoint()
                 # Get Player's full name from JSON file (web request and save to JSON if full name is not present)
                 players_json = MyJ.get_json('yahoo-players')
                 for key, _ in enumerate(players_json['players']):
@@ -77,8 +79,8 @@ def yahoo_trends(number_of_days_to_scrape):
     return sorted_weekly_dict
 
 
-# ```python src/yahoo.py```
+# Used for testing with `pipenv run python -m src.providers.yahoo`
 if __name__ == "__main__":
-    days = 2
+    days = 14
     data = yahoo_trends(days)
     print(data)

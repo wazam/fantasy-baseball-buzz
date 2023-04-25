@@ -1,12 +1,12 @@
-from dotenv import load_dotenv, find_dotenv
 import os
-from os import environ
-from flask import Flask, Response, redirect, render_template, send_from_directory
+from dotenv import load_dotenv, find_dotenv
+from flask import Flask, render_template, send_from_directory, redirect
 
-from yahoo import yahoo_trends
-from espn import espn_trends
-from cbs import cbs_trends
-import pitcherlist
+import src.providers.pitcherlist as pitcherlist
+
+from src.providers.yahoo import yahoo_trends
+from src.providers.espn import espn_trends
+from src.providers.cbs import cbs_trends
 
 
 load_dotenv(find_dotenv())
