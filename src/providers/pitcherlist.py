@@ -1,7 +1,7 @@
-import enum
-import util.my_beautifulsoup as MyBS
-import util.my_dictionary as MyD
-import util.my_unidecode as MyU
+import src.utils.my_beautifulsoup as MyBS
+import src.utils.my_dictionary as MyD
+import src.utils.my_unidecode as MyU
+
 
 url_base = 'http://www.pitcherlist.com'
 headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36'}
@@ -165,16 +165,48 @@ def get_relief_pitcher_ranks():
     return sorted_dict
 
 
-# ```python src/pitcherlist.py```
+# Used for testing with `pipenv run python -m src.providers.pitcherlist`
 if __name__ == '__main__':
-    print(get_starting_pitcher_rank_trends())
-    print(get_starting_pitcher_ranks())
-    print(get_streaming_starting_pitcher_ranks())
-    print(get_starting_pitcher_matchup_tiers())
-    print(get_two_start_starting_pitcher_matchup_tiers())
-    print(get_batter_rank_trends())
-    print(get_batter_ranks())
-    print(get_closing_pitcher_rank_trends())
-    print(get_closing_pitcher_ranks())
-    print(get_relief_pitcher_rank_trends())
-    print(get_relief_pitcher_ranks())
+    data = get_starting_pitcher_rank_trends()
+    print('\n' + 'get_starting_pitcher_rank_trends')
+    print(data)
+
+    data = get_starting_pitcher_ranks()
+    print('\n' + 'get_starting_pitcher_ranks')
+    print(data)
+    
+    data = get_streaming_starting_pitcher_ranks()
+    print('\n' + 'get_streaming_starting_pitcher_ranks')
+    print(data)
+    
+    data = get_starting_pitcher_matchup_tiers()
+    print('\n' + 'get_starting_pitcher_matchup_tiers')
+    print(data)
+    
+    data = get_two_start_starting_pitcher_matchup_tiers()
+    print('\n' + 'get_two_start_starting_pitcher_matchup_tiers')
+    print(data)
+    
+    data = get_batter_rank_trends()
+    print('\n' + 'get_batter_rank_trends')
+    print(data)
+    
+    data = get_batter_ranks()
+    print('\n' + 'get_batter_ranks')
+    print(data)
+    
+    data = get_closing_pitcher_rank_trends()
+    print('\n' + 'get_closing_pitcher_rank_trends')
+    print(data)
+    
+    data = get_closing_pitcher_ranks()
+    print('\n' + 'get_closing_pitcher_ranks')
+    print(data)
+    
+    data = get_relief_pitcher_rank_trends()
+    print('\n' + 'get_relief_pitcher_rank_trends')
+    print(data)
+    
+    data = get_relief_pitcher_ranks()
+    print('\n' + 'get_relief_pitcher_ranks')
+    print(data)

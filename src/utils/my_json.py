@@ -1,6 +1,7 @@
 import os
 import json
 
+
 filepath = './data'
 ext = '.json'
 
