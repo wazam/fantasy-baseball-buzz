@@ -7,10 +7,11 @@ def cbs_trends():
 
     #Create dictionary for storing Player's names and X Day +/-
     trends_dictionary = {}
+    headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/112.0'}
     url_base = "http://www.cbssports.com"
     url_tab = "/fantasy/baseball/trends/added/all/"
     url_scrape = url_base + url_tab
-    html_page = requests.get(url_scrape)
+    html_page = requests.get(url_scrape, headers=headers)
     html_doc = html_page.content
     html_soup = BeautifulSoup(html_doc, "html.parser")
     results_page = html_soup.find("div", class_="Page-shell")
@@ -20,7 +21,7 @@ def cbs_trends():
     for tab in elements_tabs:
         url_tab = str(tab['href'])
         url_scrape = url_base + url_tab
-        html_page = requests.get(url_scrape)
+        html_page = requests.get(url_scrape, headers=headers)
         html_doc = html_page.content
         html_soup = BeautifulSoup(html_doc, "html.parser")
         results_page = html_soup.find("div", class_="Page-shell")
@@ -30,7 +31,7 @@ def cbs_trends():
         for position in elements_positions:
             url_tab = str(position['href'])
             url_scrape = url_base + url_tab
-            html_page = requests.get(url_scrape)
+            html_page = requests.get(url_scrape, headers=headers)
             html_doc = html_page.content
             html_soup = BeautifulSoup(html_doc, "html.parser")
             results_table = html_soup.find(id="TableBase")
@@ -62,7 +63,7 @@ def cbs_trends():
     return sorted_trends_dictionary
 
 
-# Used for testing with `pipenv run python src/providers/cbs.py` or `pipenv run python -m src.providers.cbs`
+# Used for testing with `pipenv run python src/provider_cbs.py`
 if __name__ == "__main__":
     data = cbs_trends()
     print(data)

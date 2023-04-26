@@ -1,12 +1,12 @@
-import src.utils.my_beautifulsoup as MyBS
-import src.utils.my_datetime as MyDT
-import src.utils.my_dictionary as MyD
-import src.utils.my_json as MyJ
-import src.utils.my_unidecode as MyU
+import utils.my_beautifulsoup as MyBS
+import utils.my_datetime as MyDT
+import utils.my_dictionary as MyD
+import utils.my_json as MyJ
+import utils.my_unidecode as MyU
 
 
 url_base = "http://baseball.fantasysports.yahoo.com"
-headers_import = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36'}
+headers_import = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/112.0'}
 weekly_dict = {}
 daily_dict = {}
 
@@ -79,8 +79,8 @@ def yahoo_trends(number_of_days_to_scrape):
     return sorted_weekly_dict
 
 
-# Used for testing with `pipenv run python -m src.providers.yahoo`
+# Used for testing with `pipenv run python src/provider_yahoo.py`
 if __name__ == "__main__":
-    days = 14
+    days = 1
     data = yahoo_trends(days)
     print(data)
