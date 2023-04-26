@@ -26,7 +26,7 @@ RUN groupadd --gid $USER_GID $USERNAME \
 
 # RUN mkdir /home/fbb/fantasy-baseball-buzz && chown fbb /home/fbb/fantasy-baseball-buzz
 WORKDIR /home/fbb/fantasy-baseball-buzz
-COPY Pipfile* .
+COPY Pipfile* ./
 RUN pip install pipenv && pipenv install --system --deploy --ignore-pipfile --verbose
 COPY . .
 
