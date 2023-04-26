@@ -6,7 +6,6 @@ from webdriver_manager.firefox import GeckoDriverManager
 from webdriver_manager.core.utils import read_version_from_cmd, PATTERN
 
 from os import environ
-# from dotenv import load_dotenv, find_dotenv
 from time import sleep
 
 
@@ -14,18 +13,23 @@ from time import sleep
 def espn_trends():
     url = "http://fantasy.espn.com/baseball/addeddropped"
 
-    # Set environment variables from local .env
-    # load_dotenv(find_dotenv())
-
     headless = environ.get('HEADLESS', True)
-    options = FirefoxOptions()
+    firefox_options = FirefoxOptions()
     if headless == True:
-        options.add_argument("--headless")
+        firefox_options.add_argument("--headless")
+    # firefox_options.add_argument("--no-sandbox")
     
-    version = read_version_from_cmd("/usr/bin/firefox-bin --version", PATTERN["firefox"])
-    driver_binary = GeckoDriverManager(version=version).install()
+    #version = read_version_from_cmd("/usr/bin/firefox --version", PATTERN["firefox"])  # "/usr/bin/firefox-bin"
+    #print(version)
+    driver_binary = GeckoDriverManager().install()  # ".install(version=version)"
+    firefox_service = FirefoxService(driver_binary)
+    driver = webdriver.Firefox(service=firefox_service, options=firefox_options)
 
-    driver = webdriver.Firefox(service=FirefoxService(driver_binary), options=options)
+    # # Returns the current user-agent from browser (used during testing)
+    # user_agent = driver.execute_script("return navigator.userAgent;")
+    # headers = {'User-Agent': user_agent}
+    # print(headers)
+    # breakpoint()
 
     # Send the URL to the web browser
     driver.get(url)
@@ -85,7 +89,7 @@ def espn_trends():
     return sorted_trends_dictionary
 
 
-# Used for testing with `pipenv run python src/providers/espn.py` or `pipenv run python -m src.providers.espn`
+# Used for testing with `pipenv run python src/provider_espn.py`
 if __name__ == "__main__":
     data = espn_trends()
     print(data)
