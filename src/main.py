@@ -40,8 +40,8 @@ def cbs_page_3():
     return data
 
 
-@app.route("/espn")
-def espn_page():
+@app.route("/espn/1")
+def espn_page_1():
     data = espn.get_added_dropped_trends()
     return data
 
@@ -116,6 +116,7 @@ def yahoo_page_2():
 def yahoo_page_3():
     data = yahoo.get_added_dropped_trends(14)
     return data
+
 
 # Used for testing with `pipenv run python src/main.py` or `pipenv run flask run`
 if __name__ == "__main__":
