@@ -27,4 +27,4 @@ jobs:
       run: docker-compose up -d
 
     - name: Test the compose file
-      run: docker run --network container:fantasy-baseball-buzz appropriate/curl -s --retry 10 --retry-connrefused http://localhost:5000/about
+      run: docker run --network container:fantasy-baseball-buzz appropriate/curl --verbose --retry 10 --retry-connrefused http://localhost:5000
