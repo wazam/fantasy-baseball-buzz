@@ -1,10 +1,10 @@
 # [Jamball](https://github.com/wazam/fantasy-baseball-buzz)
 
-Jamball aggregates MLB player trends, statistics, and projections from multiple baseball and fantasy sources to provide you a more in-depth picture of player true values across all parts of the internet. Written in Python. #FreeMaxScherzer
+Jamball aggregates MLB player trends, statistics, and projections from multiple baseball and fantasy sources to provide you a more in-depth picture of player true values across all parts of the internet. Written in Python.
 
 ## Installation
 
-### Build From Source
+<details><summary><i>Build From Source</i></summary>
 
 1. Install [git](https://git-scm.com/downloads) and [docker-compose](https://docs.docker.com/compose/install/).
 2. Clone the repo.
@@ -25,7 +25,7 @@ Jamball aggregates MLB player trends, statistics, and projections from multiple 
     docker-compose up -d
     ```
 
-### Docker-compose
+</details><details><summary><i>Docker-compose</i></summary>
 
 ```sh
 ---
@@ -40,11 +40,11 @@ services:
       - "5000:5000"
 ```
 
+</details>
+
 ## Supported Sites
 
-### ESPN
-
-<details><summary><i>Click to expand...</i></summary>
+<details><summary><i>ESPN</i></summary>
 
 - [❌ % Rostered](https://fantasy.espn.com/baseball/playerrater)
   - [❌ 1 Day Change in % Rostered](https://fantasy.espn.com/baseball/addeddropped)
@@ -63,11 +63,7 @@ services:
 - [❌ ROS Category/Rotisserie Rankings](https://www.espn.com/fantasy/baseball/story/_/id/33208450)
 - [❌ Daily Matchup Rankings](https://www.google.com/search?q=intitle:%22Fantasy+baseball+pitcher+rankings,+lineup+advice+for%22+intitle:%22Fantasy+baseball+pitcher+rankings,+lineup+advice+for%22+site:www.espn.com&tbs=sbd:1,qdr:m&tbm=nws&filter=0)
 
-</details>
-
-### Yahoo! Sports
-
-<details><summary><i>Click to expand...</i></summary>
+</details><details><summary><i>Yahoo! Sports</i></summary>
 
 - [❌ % Rostered](https://baseball.fantasysports.yahoo.com/b1/148799/players)
   - [❌ 1 Day Change in % Rostered](https://baseball.fantasysports.yahoo.com/b1/buzzindex)
@@ -84,11 +80,7 @@ services:
   - [❌ 30 Day Rankings](https://baseball.fantasysports.yahoo.com/b1/148799/players?&sort=AR&sdir=1&status=ALL&pos=B&stat1=S_L30&jsenabled=1)
   - [❌ Pre-Season Rankings](https://baseball.fantasysports.yahoo.com/b1/148799/players?status=A&pos=B&cut_type=33&stat1=S_S_2022&myteam=0&sort=OR&sdir=1&pspid=782201687&activity=players_sort_click)
 
-</details>
-
-### CBS Sports
-
-<details><summary><i>Click to expand...</i></summary>
+</details><details><summary><i>CBS Sports</i></summary>
 
 - [❌ % Rostered](https://www.cbssports.com/search/baseball/players/)
   - [❌ 1 Day Change in % Rostered](https://www.cbssports.com/fantasy/baseball/trends/added/all/)
@@ -105,11 +97,25 @@ services:
 - [❌ H2H ADP](https://www.cbssports.com/fantasy/baseball/draft/averages/)
 - [❌ Roto ADP](https://www.cbssports.com/fantasy/baseball/draft/averages/both/roto/all/)
 
-</details>
+</details><details><summary><i>Pitcher List</i></summary>
 
-### Fantrax
+- [✅ ROS Starting Pitcher Rankings](https://www.pitcherlist.com/category/fantasy/the-list/)
+  - [✅ 7 Day Change in Rank](https://www.pitcherlist.com/category/fantasy/the-list/)
+- [✅ ROS Batter Rankings](https://www.pitcherlist.com/category/fantasy/hitter-list/)
+  - [✅ 7 Day Change in Rank](https://www.pitcherlist.com/category/fantasy/hitter-list/)
+- [✅ ROS Closing Pitcher Rankings](https://www.pitcherlist.com/category/fantasy/closing-time/)
+  - [✅ 7 Day Change in Rank](https://www.pitcherlist.com/category/fantasy/closing-time/)
+- [✅ ROS Relief Pitcher Rankings](https://www.pitcherlist.com/category/fantasy/the-hold-up/)
+  - [✅ 7 Day Change in Rank](https://www.pitcherlist.com/category/fantasy/the-hold-up/)
+- [✅ 7 Day Starting Pitcher Matchup Rankings](https://www.pitcherlist.com/category/fantasy/sit-or-start/)
+- [✅ 7 Day 2-Start Pitcher Matchup Rankings](https://www.pitcherlist.com/category/fantasy/two-start-pitchers/)
+- [✅ 2 Day Streaming Pitcher Matchup Rankings](https://www.pitcherlist.com/category/fantasy/sp-streamers/)
+- [❌ Daily Player Projections](https://www.pitcherlist.com/category/dfs-betting/betting-picks/)
+- [❌ Daily Player Projections](https://www.pitcherlist.com/category/fantasy/dfs/)
+- [❌ Category Power Rankings](https://www.pitcherlist.com/category/fantasy/category-power-rankings/)
+- [❌ Add/Drop Recommendations](https://www.pitcherlist.com/category/fantasy/buy-sell/)
 
-<details><summary><i>Click to expand...</i></summary>
+</details><details><summary><i>Fantrax</i></summary>
 
 - [❌ % Rostered](https://www.fantrax.com/login)
   - ❌ 1 Day Change in % Rostered
@@ -129,11 +135,28 @@ services:
   - ❌ 30 Day Rankings
   - ❌ 60 Day Rankings
 
-</details>
+</details><details><summary><i>RotoBaller</i></summary>
 
-### NFBC
+- [❌ 7 Day Starting Pitcher Matchup Rankings](https://www.rotoballer.com/tag/mlb-start-sit-series-for-fantasy-baseball)
+- [❌ 7 Day 2-Start Pitcher Matchup Rankings](https://www.rotoballer.com/?s=%22Two-Start%20Pitcher%20Streamers%20for%20Fantasy%20Baseball%20-%20Week%22)
+- [❌ 7 Day Streaming Hitter Recommendations](https://www.rotoballer.com/?s=%22Top%20Hitter%20Streamers%20and%20Starts%20for%20Fantasy%20Baseball%20-%20Week%22)
+- [❌ Waiver Wire Rankings](https://www.rotoballer.com/fantasy-baseball-rankings/440514?pa=left#!/waiver-wire?league=Overall&page=1&perPage=100)
+- [❌ Starting Pitcher Pickups](https://www.rotoballer.com/?s=%22Starting%20Pitcher%20Waiver%20Wire%20Pickups%20for%20Fantasy%20Baseball%20Week%22)
+- [❌ Points Pitcher Pickups](https://www.rotoballer.com/?s=%22Points%20League%20Pitchers:%20Waiver%20Wire%20Pickups%20-%20Week%22)
+- [❌ Points Hitter Pickups](https://www.rotoballer.com/?s=%22Points%20League%20Hitters:%20Waiver%20Wire%20Pickups%20-%20Week%22)
 
-<details><summary><i>Click to expand...</i></summary>
+</details><details><summary><i>FantasyPros</i></summary>
+
+- [❌ ROS Rankings](https://www.fantasypros.com/mlb/rankings/ros-overall.php)
+- [❌ Current Rankings](https://www.fantasypros.com/mlb/rankings/overall.php)
+- [❌ ADP Rankings](https://www.fantasypros.com/mlb/adp/overall.php)
+- [❌ Streaming Pitcher Matchup Rankings](https://www.fantasypros.com/mlb/streaming-pitchers.php)
+- [❌ Two Start Pitcher Matchup Rankings](https://www.fantasypros.com/mlb/two-start-pitchers.php)
+- [❌ Stats](https://www.fantasypros.com/mlb/stats/hitters.php)
+- [❌ Projections](https://www.fantasypros.com/mlb/projections/ros-hitters.php)
+- [❌ Zeile Consensus Projections](https://www.fantasypros.com/mlb/projections/hitters.php)
+
+</details><details><summary><i>NFBC</i></summary>
 
 - [❌ % Rostered](https://nfc.shgn.com/players/baseball)
   - [❌ 1 Day Change in % Rostered](https://nfc.shgn.com/players/baseball)
@@ -147,71 +170,12 @@ services:
   - [❌ 30 Day Rankings](https://nfc.shgn.com/players/baseball)
 - [❌ ADP](https://nfc.shgn.com/adp/baseball)
 
-</details>
-
-### RT Sports
-
-<details><summary><i>Click to expand...</i></summary>
+</details><details><summary><i>RT Sports</i></summary>
 
 - [❌ Points ADP](https://rtsports.com/baseball/baseball-rankings.php?RULES=11&)
 - [❌ Roto ADP](https://rtsports.com/baseball/baseball-rankings.php?RULES=11&)
 
-</details>
-
-### Pitcher List
-
-<details><summary><i>Click to expand...</i></summary>
-
-- [✅ ROS Starting Pitcher Rankings](https://www.pitcherlist.com/category/fantasy/the-list/)
-    - [✅ 7 Day Change in Rank](https://www.pitcherlist.com/category/fantasy/the-list/)
-- [✅ ROS Batter Rankings](https://www.pitcherlist.com/category/fantasy/hitter-list/)
-    - [✅ 7 Day Change in Rank](https://www.pitcherlist.com/category/fantasy/hitter-list/)
-- [✅ ROS Closing Pitcher Rankings](https://www.pitcherlist.com/category/fantasy/closing-time/)
-    - [✅ 7 Day Change in Rank](https://www.pitcherlist.com/category/fantasy/closing-time/)
-- [✅ ROS Relief Pitcher Rankings](https://www.pitcherlist.com/category/fantasy/the-hold-up/)
-    - [✅ 7 Day Change in Rank](https://www.pitcherlist.com/category/fantasy/the-hold-up/)
-- [✅ 7 Day Starting Pitcher Matchup Rankings](https://www.pitcherlist.com/category/fantasy/sit-or-start/)
-- [✅ 7 Day 2-Start Pitcher Matchup Rankings](https://www.pitcherlist.com/category/fantasy/two-start-pitchers/)
-- [✅ 2 Day Streaming Pitcher Matchup Rankings](https://www.pitcherlist.com/category/fantasy/sp-streamers/)
-- [❌ Daily Player Projections](https://www.pitcherlist.com/category/dfs-betting/betting-picks/)
-- [❌ Daily Player Projections](https://www.pitcherlist.com/category/fantasy/dfs/)
-- [❌ Category Power Rankings](https://www.pitcherlist.com/category/fantasy/category-power-rankings/)
-- [❌ Add/Drop Recommendations](https://www.pitcherlist.com/category/fantasy/buy-sell/)
-
-</details>
-
-### RotoBaller
-
-<details><summary><i>Click to expand...</i></summary>
-
-- [❌ 7 Day Starting Pitcher Matchup Rankings](https://www.rotoballer.com/tag/mlb-start-sit-series-for-fantasy-baseball)
-- [❌ 7 Day 2-Start Pitcher Matchup Rankings](https://www.rotoballer.com/?s=%22Two-Start%20Pitcher%20Streamers%20for%20Fantasy%20Baseball%20-%20Week%22)
-- [❌ 7 Day Streaming Hitter Recommendations](https://www.rotoballer.com/?s=%22Top%20Hitter%20Streamers%20and%20Starts%20for%20Fantasy%20Baseball%20-%20Week%22)
-- [❌ Waiver Wire Rankings](https://www.rotoballer.com/fantasy-baseball-rankings/440514?pa=left#!/waiver-wire?league=Overall&page=1&perPage=100)
-- [❌ Starting Pitcher Pickups](https://www.rotoballer.com/?s=%22Starting%20Pitcher%20Waiver%20Wire%20Pickups%20for%20Fantasy%20Baseball%20Week%22)
-- [❌ Points Pitcher Pickups](https://www.rotoballer.com/?s=%22Points%20League%20Pitchers:%20Waiver%20Wire%20Pickups%20-%20Week%22)
-- [❌ Points Hitter Pickups](https://www.rotoballer.com/?s=%22Points%20League%20Hitters:%20Waiver%20Wire%20Pickups%20-%20Week%22)
-
-</details>
-
-### FantasyPros
-
-<details><summary><i>Click to expand...</i></summary>
-
-- [❌ ROS Rankings](https://www.fantasypros.com/mlb/rankings/ros-overall.php)
-- [❌ Current Rankings](https://www.fantasypros.com/mlb/rankings/overall.php)
-- [❌ ADP Rankings](https://www.fantasypros.com/mlb/adp/overall.php)
-- [❌ Streaming Pitcher Matchup Rankings](https://www.fantasypros.com/mlb/streaming-pitchers.php)
-- [❌ Two Start Pitcher Matchup Rankings](https://www.fantasypros.com/mlb/two-start-pitchers.php)
-- [❌ Stats](https://www.fantasypros.com/mlb/stats/hitters.php)
-- [❌ Projections](https://www.fantasypros.com/mlb/projections/ros-hitters.php)
-- [❌ Zeile Consensus Projections](https://www.fantasypros.com/mlb/projections/hitters.php)
-
-</details>
-
-### Other
-
-<details><summary><i>Click to expand...</i></summary>
+</details><details><summary><i>Other</i></summary>
 
 - [❌ Swish Analytics Next 24 Hours DraftKings Most Points](https://swishanalytics.com/optimus/mlb/fanduel-draftkings-live-scoring)
 - [❌ FantasyData ROS Rankings](https://fantasydata.com/mlb/fantasy-baseball-rankings)
@@ -233,10 +197,14 @@ services:
 
 </details>
 
-## Disclaimers
+##
+
+<details><summary><i>Disclaimers</i></summary>
 
 - [MLB Terms of Use](https://www.mlb.com/official-information/terms-of-use)
 - [Disney (ESPN) Terms of Use](https://disneytermsofuse.com/english/)
 - [Yahoo Terms of Service](https://legal.yahoo.com/us/en/yahoo/terms/otos/index.html)
 - [Paramount (CBS) Terms of Use](https://www.viacomcbs.legal/us/en/cbsi/terms-of-use)
 - [Pitcher List Terms of Service](https://www.pitcherlist.com/terms-of-service/)
+
+</details>
