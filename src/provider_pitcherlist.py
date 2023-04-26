@@ -1,10 +1,10 @@
-import src.utils.my_beautifulsoup as MyBS
-import src.utils.my_dictionary as MyD
-import src.utils.my_unidecode as MyU
+import utils.my_beautifulsoup as MyBS
+import utils.my_dictionary as MyD
+import utils.my_unidecode as MyU
 
 
 url_base = 'http://www.pitcherlist.com'
-headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36'}
+headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/112.0'}
 player_dict = {}
 
 
@@ -165,7 +165,7 @@ def get_relief_pitcher_ranks():
     return sorted_dict
 
 
-# Used for testing with `pipenv run python -m src.providers.pitcherlist`
+# Used for testing with `pipenv run python src/provider_pitcherlist.py`
 if __name__ == '__main__':
     data = get_starting_pitcher_rank_trends()
     print('\n' + 'get_starting_pitcher_rank_trends')
