@@ -1,15 +1,12 @@
 import os
-from dotenv import load_dotenv, find_dotenv
 from flask import Flask, render_template, send_from_directory, redirect
 
-import src.providers.pitcherlist as pitcherlist
+import provider_pitcherlist as pitcherlist
+from provider_yahoo import yahoo_trends
+from provider_espn import espn_trends
+from provider_cbs import cbs_trends
 
-from src.providers.yahoo import yahoo_trends
-from src.providers.espn import espn_trends
-from src.providers.cbs import cbs_trends
 
-
-load_dotenv(find_dotenv())
 app = Flask(__name__, template_folder='../templates', static_url_path='/static', static_folder='../static')
 app.config['JSON_SORT_KEYS'] = False
 
