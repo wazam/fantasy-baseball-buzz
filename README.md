@@ -2,25 +2,31 @@
 
 Jamball aggregates MLB player trends, statistics, and projections from multiple baseball and fantasy sources to provide you a more in-depth picture of player true values across all parts of the internet. Written in Python. #FreeMaxScherzer
 
-
 ## Installation
 
 ### Build From Source
+
 1. Install [git](https://git-scm.com/downloads) and [docker-compose](https://docs.docker.com/compose/install/).
 2. Clone the repo.
-```sh
-git clone https://github.com/wazam/fantasy-baseball-buzz.git
-```
+
+    ```sh
+    git clone https://github.com/wazam/fantasy-baseball-buzz.git
+    ```
+
 3. Change to the current working directory.
-```sh
-cd ./fantasy-baseball-buzz
-```
+
+    ```sh
+    cd ./fantasy-baseball-buzz
+    ```
+
 4. Run the `docker-compose.yml` file to build and run the app.
-```sh
-docker-compose up -d
-```
+
+    ```sh
+    docker-compose up -d
+    ```
 
 ### Docker-compose
+
 ```sh
 ---
 version: "3"
@@ -34,7 +40,6 @@ services:
       - "5000:5000"
 ```
 
-
 ## Supported Sites
 
 ### ESPN
@@ -42,19 +47,19 @@ services:
 <details><summary><i>Click to expand...</i></summary>
 
 - [❌ % Rostered](https://fantasy.espn.com/baseball/playerrater)
-    - [❌ 1 Day Change in % Rostered](https://fantasy.espn.com/baseball/addeddropped)
-    - [✅ 7 Day Change in % Rostered](https://fantasy.espn.com/baseball/addeddropped)
+  - [❌ 1 Day Change in % Rostered](https://fantasy.espn.com/baseball/addeddropped)
+  - [✅ 7 Day Change in % Rostered](https://fantasy.espn.com/baseball/addeddropped)
 - [❌ ADP](https://fantasy.espn.com/baseball/livedraftresults)
-    - [❌ 1 Day Change in ADP](https://fantasy.espn.com/baseball/livedraftresults)
-    - [❌ 7 Day Change in ADP](https://fantasy.espn.com/baseball/livedraftresults)
+  - [❌ 1 Day Change in ADP](https://fantasy.espn.com/baseball/livedraftresults)
+  - [❌ 7 Day Change in ADP](https://fantasy.espn.com/baseball/livedraftresults)
 - [❌ Player Ratings](https://fantasy.espn.com/baseball/playerrater)
 - [❌ Point Leaders](https://fantasy.espn.com/baseball/leaders?statSplit=currSeason&scoringPeriodId=0)
-    - [❌ 7 Day Point Leaders](https://fantasy.espn.com/baseball/leaders?statSplit=currSeason&scoringPeriodId=0)
+  - [❌ 7 Day Point Leaders](https://fantasy.espn.com/baseball/leaders?statSplit=currSeason&scoringPeriodId=0)
 - [❌ Undroppables](https://fantasy.espn.com/baseball/players/undroppables)
 - [❌ Closer Chart](https://www.espn.com/fantasy/baseball/flb/story?page=REcloserorgchart)
 - [❌ ROS Points Rankings](https://www.espn.com/fantasy/baseball/story/_/id/33199412)
-    - [❌ 7 Day Change in Rank](https://www.espn.com/fantasy/baseball/story/_/id/33199412)
-    - [❌ ROS Points Position Rankings](https://www.espn.com/fantasy/baseball/story/_/id/33199412)
+  - [❌ 7 Day Change in Rank](https://www.espn.com/fantasy/baseball/story/_/id/33199412)
+  - [❌ ROS Points Position Rankings](https://www.espn.com/fantasy/baseball/story/_/id/33199412)
 - [❌ ROS Category/Rotisserie Rankings](https://www.espn.com/fantasy/baseball/story/_/id/33208450)
 - [❌ Daily Matchup Rankings](https://www.google.com/search?q=intitle:%22Fantasy+baseball+pitcher+rankings,+lineup+advice+for%22+intitle:%22Fantasy+baseball+pitcher+rankings,+lineup+advice+for%22+site:www.espn.com&tbs=sbd:1,qdr:m&tbm=nws&filter=0)
 
@@ -65,19 +70,19 @@ services:
 <details><summary><i>Click to expand...</i></summary>
 
 - [❌ % Rostered](https://baseball.fantasysports.yahoo.com/b1/148799/players)
-    - [❌ 1 Day Change in % Rostered](https://baseball.fantasysports.yahoo.com/b1/buzzindex)
-    - [❌ 7 Day Change in % Rostered](https://baseball.fantasysports.yahoo.com/b1/buzzindex)
+  - [❌ 1 Day Change in % Rostered](https://baseball.fantasysports.yahoo.com/b1/buzzindex)
+  - [❌ 7 Day Change in % Rostered](https://baseball.fantasysports.yahoo.com/b1/buzzindex)
 - [✅ 1 Day Change in Roster Adds/Drops](https://baseball.fantasysports.yahoo.com/b1/buzzindex)
-    - [✅ 7 Day Change in Roster Adds/Drops](https://baseball.fantasysports.yahoo.com/b1/buzzindex)
+  - [✅ 7 Day Change in Roster Adds/Drops](https://baseball.fantasysports.yahoo.com/b1/buzzindex)
 - [❌ Can't Cut](https://baseball.fantasysports.yahoo.com/b1/148799/cantcutlist)
 - [❌ Who's Hot](https://baseball.fantasysports.yahoo.com/b1/whoshot)
 - [❌ H2H MVPs](https://baseball.fantasysports.yahoo.com/b1/keystosuccess?st=head)
 - [❌ Roto MVPs](https://baseball.fantasysports.yahoo.com/b1/keystosuccess?st=roto)
 - [❌ Point Leader Rankings](https://baseball.fantasysports.yahoo.com/b1/148799/players)
-    - [❌ 7 Day Rankings](https://baseball.fantasysports.yahoo.com/b1/148799/players?&sort=AR&sdir=1&status=ALL&pos=B&stat1=S_L7&jsenabled=1)
-    - [❌ 14 Day Rankings](https://baseball.fantasysports.yahoo.com/b1/148799/players?&sort=AR&sdir=1&status=ALL&pos=B&stat1=S_L14&jsenabled=1)
-    - [❌ 30 Day Rankings](https://baseball.fantasysports.yahoo.com/b1/148799/players?&sort=AR&sdir=1&status=ALL&pos=B&stat1=S_L30&jsenabled=1)
-    - [❌ Pre-Season Rankings](https://baseball.fantasysports.yahoo.com/b1/148799/players?status=A&pos=B&cut_type=33&stat1=S_S_2022&myteam=0&sort=OR&sdir=1&pspid=782201687&activity=players_sort_click)
+  - [❌ 7 Day Rankings](https://baseball.fantasysports.yahoo.com/b1/148799/players?&sort=AR&sdir=1&status=ALL&pos=B&stat1=S_L7&jsenabled=1)
+  - [❌ 14 Day Rankings](https://baseball.fantasysports.yahoo.com/b1/148799/players?&sort=AR&sdir=1&status=ALL&pos=B&stat1=S_L14&jsenabled=1)
+  - [❌ 30 Day Rankings](https://baseball.fantasysports.yahoo.com/b1/148799/players?&sort=AR&sdir=1&status=ALL&pos=B&stat1=S_L30&jsenabled=1)
+  - [❌ Pre-Season Rankings](https://baseball.fantasysports.yahoo.com/b1/148799/players?status=A&pos=B&cut_type=33&stat1=S_S_2022&myteam=0&sort=OR&sdir=1&pspid=782201687&activity=players_sort_click)
 
 </details>
 
@@ -86,15 +91,15 @@ services:
 <details><summary><i>Click to expand...</i></summary>
 
 - [❌ % Rostered](https://www.cbssports.com/search/baseball/players/)
-    - [❌ 1 Day Change in % Rostered](https://www.cbssports.com/fantasy/baseball/trends/added/all/)
-    - [✅ 7 Day Change in % Rostered](https://www.cbssports.com/fantasy/baseball/trends/added/all/)
+  - [❌ 1 Day Change in % Rostered](https://www.cbssports.com/fantasy/baseball/trends/added/all/)
+  - [✅ 7 Day Change in % Rostered](https://www.cbssports.com/fantasy/baseball/trends/added/all/)
 - [❌ % Started](https://www.cbssports.com/search/baseball/players/)
 - [❌ Position Ranking](https://www.cbssports.com/search/baseball/players/)
 - [❌ Most Viewed](https://www.cbssports.com/fantasy/baseball/trends/viewed/all/)
 - [❌ Point Leader Rankings](https://www.cbssports.com/fantasy/baseball/stats/)
-    - [❌ 7 Day Rankings](https://www.cbssports.com/fantasy/baseball/stats/U/2022/7d/stats/)
-    - [❌ 14 Day Rankings](https://www.cbssports.com/fantasy/baseball/stats/U/2022/14d/stats/)
-    - [❌ 28 Day Rankings](https://www.cbssports.com/fantasy/baseball/stats/U/2022/28d/stats/)
+  - [❌ 7 Day Rankings](https://www.cbssports.com/fantasy/baseball/stats/U/2022/7d/stats/)
+  - [❌ 14 Day Rankings](https://www.cbssports.com/fantasy/baseball/stats/U/2022/14d/stats/)
+  - [❌ 28 Day Rankings](https://www.cbssports.com/fantasy/baseball/stats/U/2022/28d/stats/)
 - [❌ ROS H2H Rankings](https://www.cbssports.com/fantasy/baseball/rankings/h2h/C/)
 - [❌ ROS Roto Rankings](https://www.cbssports.com/fantasy/baseball/rankings/roto/C/)
 - [❌ H2H ADP](https://www.cbssports.com/fantasy/baseball/draft/averages/)
@@ -107,22 +112,22 @@ services:
 <details><summary><i>Click to expand...</i></summary>
 
 - [❌ % Rostered](https://www.fantrax.com/login)
-    - ❌ 1 Day Change in % Rostered
-    - ❌ 7 Day Change in % Rostered
+  - ❌ 1 Day Change in % Rostered
+  - ❌ 7 Day Change in % Rostered
 - ❌ % Started
-    - ❌ 1 Day Change in % Rostered
-    - ❌ 7 Day Change in % Rostered
+  - ❌ 1 Day Change in % Rostered
+  - ❌ 7 Day Change in % Rostered
 - ❌ ADP
 - ❌ Position Ranking
-    - ❌ 7 Day Rankings
-    - ❌ 14 Day Rankings
-    - ❌ 30 Day Rankings
-    - ❌ 60 Day Rankings
+  - ❌ 7 Day Rankings
+  - ❌ 14 Day Rankings
+  - ❌ 30 Day Rankings
+  - ❌ 60 Day Rankings
 - ❌ Point Leader Rankings
-    - ❌ 7 Day Rankings
-    - ❌ 14 Day Rankings
-    - ❌ 30 Day Rankings
-    - ❌ 60 Day Rankings
+  - ❌ 7 Day Rankings
+  - ❌ 14 Day Rankings
+  - ❌ 30 Day Rankings
+  - ❌ 60 Day Rankings
 
 </details>
 
@@ -131,15 +136,15 @@ services:
 <details><summary><i>Click to expand...</i></summary>
 
 - [❌ % Rostered](https://nfc.shgn.com/players/baseball)
-    - [❌ 1 Day Change in % Rostered](https://nfc.shgn.com/players/baseball)
-    - [❌ 7 Day Change in % Rostered](https://nfc.shgn.com/players/baseball)
+  - [❌ 1 Day Change in % Rostered](https://nfc.shgn.com/players/baseball)
+  - [❌ 7 Day Change in % Rostered](https://nfc.shgn.com/players/baseball)
 - [❌ % Started](https://nfc.shgn.com/players/baseball)
-    - [❌ 1 Day Change in % Rostered](https://nfc.shgn.com/players/baseball)
-    - [❌ 7 Day Change in % Rostered](https://nfc.shgn.com/players/baseball)
+  - [❌ 1 Day Change in % Rostered](https://nfc.shgn.com/players/baseball)
+  - [❌ 7 Day Change in % Rostered](https://nfc.shgn.com/players/baseball)
 - [❌ Point Leader Rankings](https://nfc.shgn.com/players/baseball)
-    - [❌ 7 Day Rankings](https://nfc.shgn.com/players/baseball)
-    - [❌ 14 Day Rankings](https://nfc.shgn.com/players/baseball)
-    - [❌ 30 Day Rankings](https://nfc.shgn.com/players/baseball)
+  - [❌ 7 Day Rankings](https://nfc.shgn.com/players/baseball)
+  - [❌ 14 Day Rankings](https://nfc.shgn.com/players/baseball)
+  - [❌ 30 Day Rankings](https://nfc.shgn.com/players/baseball)
 - [❌ ADP](https://nfc.shgn.com/adp/baseball)
 
 </details>
@@ -228,10 +233,10 @@ services:
 
 </details>
 
-
 ## Disclaimers
+
 - [MLB Terms of Use](https://www.mlb.com/official-information/terms-of-use)
 - [Disney (ESPN) Terms of Use](https://disneytermsofuse.com/english/)
 - [Yahoo Terms of Service](https://legal.yahoo.com/us/en/yahoo/terms/otos/index.html)
 - [Paramount (CBS) Terms of Use](https://www.viacomcbs.legal/us/en/cbsi/terms-of-use)
-- [Pitcher List Terms of Service ](https://www.pitcherlist.com/terms-of-service/)
+- [Pitcher List Terms of Service](https://www.pitcherlist.com/terms-of-service/)
