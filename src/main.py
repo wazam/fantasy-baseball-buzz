@@ -21,7 +21,7 @@ def favicon():
 
 @app.route('/about')
 def about_page():
-    return redirect("https://github.com/wazam/fantasy-baseball-buzz")
+    return redirect("http://github.com/wazam/fantasy-baseball-buzz")
 
 
 @app.route("/cbs/1")
