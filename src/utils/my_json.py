@@ -27,7 +27,7 @@ def write_json(new_data, filename):
     return
 
 
-# ```python src/util/my_json.py```
+# Used for testing with `pipenv run python src/utils/my_json.py` or `pipenv run python -m src.utils.my_json`
 if __name__ == "__main__":
     filename = 'yahoo-players'
     # new_data = {"short_name": "A. Test", "full_name": "Always Test"}

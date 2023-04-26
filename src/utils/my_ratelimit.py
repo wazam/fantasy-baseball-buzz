@@ -16,7 +16,8 @@ def make_ratelimited_request(url_import, headers_import):
 
 # Used for testing with `pipenv run python src/utils/my_ratelimit.py` or `pipenv run python -m src.utils.my_ratelimit`
 if __name__ == "__main__":
-    html_page = make_ratelimited_request("https://baseball.fantasysports.yahoo.com/b1/buzzindex", {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/112.0'})
+    headers = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0"}
+    html_page = make_ratelimited_request("https://baseball.fantasysports.yahoo.com/b1/buzzindex", headers)
     # html_text = html_page.text
     # html_doc = html_page.content
     if html_page.status_code == 200:

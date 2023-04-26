@@ -2,14 +2,14 @@ import os
 from flask import Flask, render_template, send_from_directory, redirect
 
 import provider_pitcherlist as pitcherlist
-from provider_yahoo import yahoo_trends
-from provider_espn import espn_trends
-from provider_cbs import cbs_trends
+import provider_yahoo as yahoo
+import provider_espn as espn
+import provider_cbs as cbs
 
 
 app = Flask(__name__, template_folder='../templates', static_url_path='/static', static_folder='../static')
-app.config['JSON_SORT_KEYS'] = False
-
+# app.config['JSON_SORT_KEYS'] = False
+app.json.sort_keys = False
 
 @app.route('/')
 def start_page():
@@ -20,19 +20,29 @@ def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 @app.route('/about')
-def web_about():
+def about_page():
     return redirect("https://github.com/wazam/fantasy-baseball-buzz")
 
 
-@app.route("/cbs")
-def cbs_page():
-    data = cbs_trends()
+@app.route("/cbs/1")
+def cbs_page_1():
+    data = cbs.get_added_dropped_trends()
+    return data
+
+@app.route("/cbs/2")
+def cbs_page_2():
+    data = cbs.get_viewed_trends()
+    return data
+
+@app.route("/cbs/3")
+def cbs_page_3():
+    data = cbs.get_traded_trends()
     return data
 
 
 @app.route("/espn")
 def espn_page():
-    data = espn_trends()
+    data = espn.get_added_dropped_trends()
     return data
 
 
@@ -94,14 +104,19 @@ def pitcherlist_page_11():
 
 @app.route("/yahoo/1")
 def yahoo_page_1():
-    data = yahoo_trends(7)
+    data = yahoo.get_added_dropped_trends(1)
     return data
 
 @app.route("/yahoo/2")
 def yahoo_page_2():
-    data = yahoo_trends(1)
+    data = yahoo.get_added_dropped_trends(7)
     return data
 
+@app.route("/yahoo/3")
+def yahoo_page_3():
+    data = yahoo.get_added_dropped_trends(14)
+    return data
 
+# Used for testing with `pipenv run python src/main.py` or `pipenv run flask run`
 if __name__ == "__main__":
     app.run()

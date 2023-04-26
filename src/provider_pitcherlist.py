@@ -3,8 +3,7 @@ import utils.my_dictionary as MyD
 import utils.my_unidecode as MyU
 
 
-url_base = 'http://www.pitcherlist.com'
-headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/112.0'}
+url_base = "http://www.pitcherlist.com"
 player_dict = {}
 
 
@@ -12,9 +11,9 @@ player_dict = {}
 def startup(url_tab, all, name, attrib, href):
     player_dict.clear()
     url_start_page = url_base + url_tab
-    start_page = MyBS.scrape_class(url_start_page, headers, '', 'div', 'hold-me', False)
+    start_page = MyBS.scrape_class(url_start_page, '', 'div', 'hold-me', False)
     url_weekly_page = MyBS.find_class(start_page, '', 'a', 'link', True)['href']
-    weekly_page = MyBS.scrape_class(url_weekly_page, headers, all, name, attrib, href)
+    weekly_page = MyBS.scrape_class(url_weekly_page, all, name, attrib, href)
     return weekly_page
 
 
@@ -167,46 +166,14 @@ def get_relief_pitcher_ranks():
 
 # Used for testing with `pipenv run python src/provider_pitcherlist.py`
 if __name__ == '__main__':
-    data = get_starting_pitcher_rank_trends()
-    print('\n' + 'get_starting_pitcher_rank_trends')
-    print(data)
-
-    data = get_starting_pitcher_ranks()
-    print('\n' + 'get_starting_pitcher_ranks')
-    print(data)
-    
-    data = get_streaming_starting_pitcher_ranks()
-    print('\n' + 'get_streaming_starting_pitcher_ranks')
-    print(data)
-    
-    data = get_starting_pitcher_matchup_tiers()
-    print('\n' + 'get_starting_pitcher_matchup_tiers')
-    print(data)
-    
-    data = get_two_start_starting_pitcher_matchup_tiers()
-    print('\n' + 'get_two_start_starting_pitcher_matchup_tiers')
-    print(data)
-    
-    data = get_batter_rank_trends()
-    print('\n' + 'get_batter_rank_trends')
-    print(data)
-    
-    data = get_batter_ranks()
-    print('\n' + 'get_batter_ranks')
-    print(data)
-    
-    data = get_closing_pitcher_rank_trends()
-    print('\n' + 'get_closing_pitcher_rank_trends')
-    print(data)
-    
-    data = get_closing_pitcher_ranks()
-    print('\n' + 'get_closing_pitcher_ranks')
-    print(data)
-    
-    data = get_relief_pitcher_rank_trends()
-    print('\n' + 'get_relief_pitcher_rank_trends')
-    print(data)
-    
-    data = get_relief_pitcher_ranks()
-    print('\n' + 'get_relief_pitcher_ranks')
-    print(data)
+    print('\n', 'get_starting_pitcher_rank_trends', '\n', get_starting_pitcher_rank_trends())
+    print('\n', 'get_starting_pitcher_ranks', '\n', get_starting_pitcher_ranks())
+    print('\n', 'get_streaming_starting_pitcher_ranks', '\n', get_streaming_starting_pitcher_ranks())
+    print('\n', 'get_starting_pitcher_matchup_tiers', '\n', get_starting_pitcher_matchup_tiers())
+    print('\n', 'get_two_start_starting_pitcher_matchup_tiers', '\n', get_two_start_starting_pitcher_matchup_tiers())
+    print('\n', 'get_batter_rank_trends', '\n', get_batter_rank_trends())
+    print('\n', 'get_batter_ranks', '\n', get_batter_ranks())
+    print('\n', 'get_closing_pitcher_rank_trends', '\n', get_closing_pitcher_rank_trends())
+    print('\n', 'get_closing_pitcher_ranks', '\n', get_closing_pitcher_ranks())
+    print('\n', 'get_relief_pitcher_rank_trends', '\n', get_relief_pitcher_rank_trends())
+    print('\n', 'get_relief_pitcher_ranks', '\n', get_relief_pitcher_ranks())
