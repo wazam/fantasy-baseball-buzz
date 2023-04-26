@@ -1,35 +1,44 @@
+from os import environ
+from time import sleep
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.service import Service as FirefoxService
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from webdriver_manager.firefox import GeckoDriverManager
-from webdriver_manager.core.utils import read_version_from_cmd, PATTERN
+# from webdriver_manager.core.utils import read_version_from_cmd, PATTERN  # (used during testing)
 
-from os import environ
-from time import sleep
+
+url_base = "http://fantasy.espn.com/baseball"
 
 
 # Returns a numerically ordered dictionary of Players' names with their roster trends
-def espn_trends():
-    url = "http://fantasy.espn.com/baseball/addeddropped"
+def get_added_dropped_trends():
+    url_tab = "/addeddropped"
+    url = url_base + url_tab
 
-    headless = environ.get('HEADLESS', True)
+    headless = int(environ.get('SELENIUM_HEADLESS', 1))
     firefox_options = FirefoxOptions()
-    if headless == True:
-        firefox_options.add_argument("--headless")
-    # firefox_options.add_argument("--no-sandbox")
+    if headless == 1:
+        firefox_options.add_argument("--headless")  # .add_argument("--no-sandbox")
     
-    #version = read_version_from_cmd("/usr/bin/firefox --version", PATTERN["firefox"])  # "/usr/bin/firefox-bin"
-    #print(version)
-    driver_binary = GeckoDriverManager().install()  # ".install(version=version)"
-    firefox_service = FirefoxService(driver_binary)
-    driver = webdriver.Firefox(service=firefox_service, options=firefox_options)
+    # # Returns current version of browser (used during testing)
+    # version = read_version_from_cmd("/usr/bin/firefox --version", PATTERN["firefox"])
+    # print(version)
+    # breakpoint()
+    
+    firefox_options.binary_location = r'/usr/bin/firefox'
+    driver_binary = GeckoDriverManager().install()  # .install(version=version)
+    
+    driver_service = FirefoxService(driver_binary)
+    driver = webdriver.Firefox(service=driver_service, options=firefox_options)
 
-    # # Returns the current user-agent from browser (used during testing)
+    # # Returns current user-agent from browser (used during testing)
     # user_agent = driver.execute_script("return navigator.userAgent;")
     # headers = {'User-Agent': user_agent}
     # print(headers)
     # breakpoint()
+    # return headers
 
     # Send the URL to the web browser
     driver.get(url)
@@ -91,5 +100,5 @@ def espn_trends():
 
 # Used for testing with `pipenv run python src/provider_espn.py`
 if __name__ == "__main__":
-    data = espn_trends()
+    data = get_added_dropped_trends()
     print(data)
