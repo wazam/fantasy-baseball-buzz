@@ -10,8 +10,8 @@ def days_before_today(days_back):
     return date_back
 
 
-# ```python src/util/my_datetime.py```
+# Used for testing with `pipenv run python src/utils/my_datetime.py` or `pipenv run python -m src.utils.my_datetime`
 if __name__ == "__main__":
-    days_ago = 10
+    days_ago = 7
     the_date = days_before_today(days_ago)
     print(the_date, 'was the date', days_ago, 'days ago.')

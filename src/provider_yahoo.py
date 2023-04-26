@@ -6,13 +6,12 @@ import utils.my_unidecode as MyU
 
 
 url_base = "http://baseball.fantasysports.yahoo.com"
-headers_import = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/112.0'}
 weekly_dict = {}
 daily_dict = {}
 
 
 # Returns a numerically ordered dictionary of Players' names with their add/drop roster trends
-def yahoo_trends(number_of_days_to_scrape):
+def get_added_dropped_trends(number_of_days_to_scrape):
     weekly_dict.clear()
 
     # Get position page URLs from daily page
@@ -21,13 +20,13 @@ def yahoo_trends(number_of_days_to_scrape):
         date_scrape = MyDT.days_before_today(day)
         url_tab = "/b1/buzzindex?sort=BI_S&src=combined&bimtab=ALL&trendtab=O&pos=ALL&date="
         url_scrape = url_base + url_tab + str(date_scrape)
-        elements_positions = MyBS.scrape_class(url_scrape, headers_import, 'all', 'a', 'Navtarget', True)[46::]
+        elements_positions = MyBS.scrape_class(url_scrape, 'all', 'a', 'Navtarget', True)[46::]
 
         # Get Players table data from position page
         for position in elements_positions:
             url_tab = str(position['href'])
             url_scrape = url_base + url_tab
-            results_table = MyBS.scrape_class(url_scrape, headers_import, 'all', 'table', 'Tst-table Table', False)[0]
+            results_table = MyBS.scrape_class(url_scrape, 'all', 'table', 'Tst-table Table', False)[0]
             elements_rows = MyBS.find(results_table, 'all', 'tr', False)[2::]
             elements_players = MyBS.find_class(results_table, 'all', 'a', 'Nowrap', True)
 
@@ -54,7 +53,7 @@ def yahoo_trends(number_of_days_to_scrape):
                         break
                     elif key == len(players_json['players']) - 1:
                         url_scrape = str(elements_players[index]['href'])
-                        element_player_name_full = MyBS.scrape_class(url_scrape, headers_import, '', 'span', 'ys-name', False)
+                        element_player_name_full = MyBS.scrape_class(url_scrape, '', 'span', 'ys-name', False)
                         player_name_full = MyU.fix_str(element_player_name_full.text)
                         new_player = {"short_name": player_name_short, "full_name": player_name_full}
                         MyJ.write_json(new_player, 'yahoo-players')
@@ -81,6 +80,5 @@ def yahoo_trends(number_of_days_to_scrape):
 
 # Used for testing with `pipenv run python src/provider_yahoo.py`
 if __name__ == "__main__":
-    days = 1
-    data = yahoo_trends(days)
-    print(data)
+    print('\n', 'get_added_dropped_trends-1day', '\n', get_added_dropped_trends(1))
+    print('\n', 'get_added_dropped_trends-7day', '\n', get_added_dropped_trends(3))

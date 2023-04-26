@@ -9,5 +9,5 @@ def fix_str(unicode_string):
 
 # Used for testing with `pipenv run python src/utils/my_unidecode.py` or `pipenv run python -m src.utils.my_unidecode`
 if __name__ == "__main__":
-    data = fix_str("Ronald Jose Acuña Jr")
+    data = fix_str("Ronald (Jose) Acuña, Jr.")
     print(data)
