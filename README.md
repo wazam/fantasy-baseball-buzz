@@ -2,6 +2,7 @@
 
 Jamball aggregates MLB player trends, statistics, and projections from multiple baseball and fantasy sources to provide you a more in-depth picture of player true values across all parts of the internet. Written in Python. #FreeMaxScherzer
 
+
 ## Installation
 
 ### Build From Source
@@ -19,8 +20,7 @@ cd ./fantasy-baseball-buzz
 docker-compose up -d
 ```
 
-
-### Docker-Compose
+### Docker-compose
 ```sh
 ---
 version: "3"
@@ -28,6 +28,10 @@ services:
   app:
     image: ghcr.io/wazam/fantasy-baseball-buzz:main
     container_name: fantasy-baseball-buzz
+    environment:
+      - TZ=America/New_York
+    ports:
+      - "5000:5000"
 ```
 
 
@@ -227,6 +231,7 @@ services:
 
 ## Disclaimers
 - [MLB Terms of Use](https://www.mlb.com/official-information/terms-of-use)
-- [MLB Copyright](https://gdx.mlb.com/components/copyright.txt)
-- [ESPN Terms of Use](https://web.archive.org/web/20220409030827/http://www.espn.com/apis/devcenter/terms.html)
-- [Disney Terms of Use](https://disneytermsofuse.com/english/)
+- [Disney (ESPN) Terms of Use](https://disneytermsofuse.com/english/)
+- [Yahoo Terms of Service](https://legal.yahoo.com/us/en/yahoo/terms/otos/index.html)
+- [Paramount (CBS) Terms of Use](https://www.viacomcbs.legal/us/en/cbsi/terms-of-use)
+- [Pitcher List Terms of Service ](https://www.pitcherlist.com/terms-of-service/)
