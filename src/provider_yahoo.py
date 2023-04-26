@@ -81,4 +81,4 @@ def get_added_dropped_trends(number_of_days_to_scrape):
 # Used for testing with `pipenv run python src/provider_yahoo.py`
 if __name__ == "__main__":
     print('\n', 'get_added_dropped_trends-1day', '\n', get_added_dropped_trends(1))
-    print('\n', 'get_added_dropped_trends-7day', '\n', get_added_dropped_trends(3))
+    print('\n', 'get_added_dropped_trends-7days', '\n', get_added_dropped_trends(7))
