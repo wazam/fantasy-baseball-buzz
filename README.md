@@ -1,6 +1,6 @@
 # [Jamball](https://github.com/wazam/fantasy-baseball-buzz)
 
-Jamball aggregates MLB player trends, statistics, and projections from multiple baseball and fantasy sources to provide you a more in-depth picture of player true values across all parts of the internet. Written in Python.
+Jamball aggregates MLB player trends, statistics, and projections from multiple baseball and fantasy sources to provide you a more in-depth picture of player values across all parts of the internet. Written in Python.
 
 ## Installation
 
