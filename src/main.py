@@ -26,13 +26,28 @@ def about_page():
     return redirect("http://github.com/wazam/fantasy-baseball-buzz")
 
 
+# Takes 2m 45s to fully run
 @app.route('/combined')
 def combined_page():
     return render_template('combined.html', \
-                            apiPlayers=MyC.get_names(), \
-                            apiTrends1=MyC.get_trend(espn.get_added_dropped_trends()), \
-                            apiTrends2=MyC.get_trend(cbs.get_added_dropped_trends()), \
-                            apiTrends3=MyC.get_trend(yahoo.get_added_dropped_trends(7)))
+        apiPlayers=MyC.get_names(), \
+        apiTrends01=MyC.get_trend(espn.get_added_dropped_trends()), \
+        apiTrends02=MyC.get_trend(cbs.get_added_dropped_trends()), \
+        apiTrends03=MyC.get_trend(yahoo.get_added_dropped_trends(7)), \
+        apiTrends04=MyC.get_trend(yahoo.get_added_dropped_trends(1)), \
+        apiTrends05=MyC.get_trend(cbs.get_viewed_trends()), \
+        apiTrends06=MyC.get_trend(cbs.get_traded_trends()), \
+        apiTrends07=MyC.get_trend(pitcherlist.get_starting_pitcher_rank_trends()), \
+        apiTrends08=MyC.get_trend(pitcherlist.get_starting_pitcher_ranks()), \
+        apiTrends09=MyC.get_trend(pitcherlist.get_streaming_starting_pitcher_ranks()), \
+        apiTrends10=MyC.get_trend(pitcherlist.get_starting_pitcher_matchup_tiers()), \
+        apiTrends11=MyC.get_trend(pitcherlist.get_two_start_starting_pitcher_matchup_tiers()), \
+        apiTrends12=MyC.get_trend(pitcherlist.get_batter_rank_trends()), \
+        apiTrends13=MyC.get_trend(pitcherlist.get_batter_ranks()), \
+        apiTrends14=MyC.get_trend(pitcherlist.get_closing_pitcher_rank_trends()), \
+        apiTrends15=MyC.get_trend(pitcherlist.get_closing_pitcher_ranks()), \
+        apiTrends16=MyC.get_trend(pitcherlist.get_relief_pitcher_rank_trends()), \
+        apiTrends17=MyC.get_trend(pitcherlist.get_relief_pitcher_ranks()))
 
 
 @app.route("/cbs/1")
