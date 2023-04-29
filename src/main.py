@@ -26,7 +26,7 @@ def about_page():
     return redirect("http://github.com/wazam/fantasy-baseball-buzz")
 
 
-# Takes 2m 45s to fully run
+# Takes 2m 50s to fully run
 @app.route('/combined')
 def combined_page():
     return render_template('combined.html', \

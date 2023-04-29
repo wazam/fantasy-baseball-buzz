@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 
 import utils.my_json as MyJ
 
+
 url_base = "http://www.cbssports.com"
 trends_dictionary = {}
 sorted_trends_dictionary = {}

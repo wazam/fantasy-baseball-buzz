@@ -1,5 +1,6 @@
 import utils.my_json as MyJ
 
+
 # Return list of Player's full names
 def get_names():
     return_player_names = []
@@ -13,6 +14,7 @@ def get_names():
     # print(return_player_names)
     # breakpoint()
     return return_player_names
+
 
 # Return dictionary of Player's trends from a provider
 def get_trend(player_trend_data):    
