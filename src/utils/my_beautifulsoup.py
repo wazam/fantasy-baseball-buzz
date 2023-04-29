@@ -2,7 +2,9 @@ from bs4 import BeautifulSoup
 
 import utils.my_ratelimit as MyR
 
+
 headers = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0"}
+
 
 # Return class tag(s) from web page
 def scrape_class(url_import, find_all, find_name, find_attrib, href_import):

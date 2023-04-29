@@ -66,6 +66,9 @@ def get_added_dropped_trends(number_of_days_to_scrape):
                 if player_name_full not in daily_dict:
                     daily_dict[player_name_full] = player_change
 
+                # Add Player's full name to combined file from all sources
+                MyJ.add_name_to(player_name_full, 'player-names')
+
         # Add Player's Name and Change to weekly dictionary, add Changes across all days
         for key in daily_dict.keys():
             if key not in weekly_dict:

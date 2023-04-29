@@ -6,10 +6,12 @@ import provider_yahoo as yahoo
 import provider_espn as espn
 import provider_cbs as cbs
 
+import combined as MyC
+
 
 app = Flask(__name__, template_folder='../templates', static_url_path='/static', static_folder='../static')
-# app.config['JSON_SORT_KEYS'] = False
-app.json.sort_keys = False
+app.json.sort_keys = False  # app.config['JSON_SORT_KEYS'] = False  # deprecated
+
 
 @app.route('/')
 def start_page():
@@ -22,6 +24,15 @@ def favicon():
 @app.route('/about')
 def about_page():
     return redirect("http://github.com/wazam/fantasy-baseball-buzz")
+
+
+@app.route('/combined')
+def combined_page():
+    return render_template('combined.html', \
+                            apiPlayers=MyC.get_names(), \
+                            apiTrends1=MyC.get_trend(espn.get_added_dropped_trends()), \
+                            apiTrends2=MyC.get_trend(cbs.get_added_dropped_trends()), \
+                            apiTrends3=MyC.get_trend(yahoo.get_added_dropped_trends(7)))
 
 
 @app.route("/cbs/1")
@@ -118,6 +129,6 @@ def yahoo_page_3():
     return data
 
 
-# Used for testing with `pipenv run python src/main.py` or `pipenv run flask run`
+# Used for testing with `pipenv run flask run`
 if __name__ == "__main__":
     app.run()
