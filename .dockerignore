@@ -1,10 +1,11 @@
+.git/
 .github/
 .vscode/
 __pycache__/
 .dockerignore
-.env.example
+.env
 .gitignore
-.python-version
+.tool-versions
 *.yml
 Dockerfile
 *.log

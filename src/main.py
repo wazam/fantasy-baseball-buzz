@@ -1,31 +1,74 @@
-from dotenv import load_dotenv, find_dotenv
-from os import environ
-from flask import Flask, Response, redirect
+import os
+from flask import Flask, render_template, send_from_directory, redirect
 
-from yahoo import yahoo_trends
-from espn import espn_trends
-from cbs import cbs_trends
-import pitcherlist
+import provider_pitcherlist as pitcherlist
+import provider_yahoo as yahoo
+import provider_espn as espn
+import provider_cbs as cbs
 
-load_dotenv(find_dotenv())
-app = Flask(__name__)
-app.config['JSON_SORT_KEYS'] = False
+import combined as MyC
+
+
+app = Flask(__name__, template_folder='../templates', static_url_path='/static', static_folder='../static')
+app.json.sort_keys = False  # app.config['JSON_SORT_KEYS'] = False  # deprecated
 
 
 @app.route('/')
-def home_page():
-    return redirect("https://github.com/wazam/fantasy-baseball-buzz")
+def start_page():
+    return render_template('index.html')
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
+@app.route('/about')
+def about_page():
+    return redirect("http://github.com/wazam/fantasy-baseball-buzz")
 
 
-@app.route("/cbs")
-def cbs_page():
-    data = cbs_trends()
+# Takes 2m 50s to fully run
+@app.route('/combined')
+def combined_page():
+    return render_template('combined.html', \
+        apiPlayers=MyC.get_names(), \
+        apiTrends01=MyC.get_trend(espn.get_added_dropped_trends()), \
+        apiTrends02=MyC.get_trend(cbs.get_added_dropped_trends()), \
+        apiTrends03=MyC.get_trend(yahoo.get_added_dropped_trends(7)), \
+        apiTrends04=MyC.get_trend(yahoo.get_added_dropped_trends(1)), \
+        apiTrends05=MyC.get_trend(cbs.get_viewed_trends()), \
+        apiTrends06=MyC.get_trend(cbs.get_traded_trends()), \
+        apiTrends07=MyC.get_trend(pitcherlist.get_starting_pitcher_rank_trends()), \
+        apiTrends08=MyC.get_trend(pitcherlist.get_starting_pitcher_ranks()), \
+        apiTrends09=MyC.get_trend(pitcherlist.get_streaming_starting_pitcher_ranks()), \
+        apiTrends10=MyC.get_trend(pitcherlist.get_starting_pitcher_matchup_tiers()), \
+        apiTrends11=MyC.get_trend(pitcherlist.get_two_start_starting_pitcher_matchup_tiers()), \
+        apiTrends12=MyC.get_trend(pitcherlist.get_batter_rank_trends()), \
+        apiTrends13=MyC.get_trend(pitcherlist.get_batter_ranks()), \
+        apiTrends14=MyC.get_trend(pitcherlist.get_closing_pitcher_rank_trends()), \
+        apiTrends15=MyC.get_trend(pitcherlist.get_closing_pitcher_ranks()), \
+        apiTrends16=MyC.get_trend(pitcherlist.get_relief_pitcher_rank_trends()), \
+        apiTrends17=MyC.get_trend(pitcherlist.get_relief_pitcher_ranks()))
+
+
+@app.route("/cbs/1")
+def cbs_page_1():
+    data = cbs.get_added_dropped_trends()
+    return data
+
+@app.route("/cbs/2")
+def cbs_page_2():
+    data = cbs.get_viewed_trends()
+    return data
+
+@app.route("/cbs/3")
+def cbs_page_3():
+    data = cbs.get_traded_trends()
     return data
 
 
-@app.route("/espn")
-def espn_page():
-    data = espn_trends()
+@app.route("/espn/1")
+def espn_page_1():
+    data = espn.get_added_dropped_trends()
     return data
 
 
@@ -87,14 +130,20 @@ def pitcherlist_page_11():
 
 @app.route("/yahoo/1")
 def yahoo_page_1():
-    data = yahoo_trends(7)
+    data = yahoo.get_added_dropped_trends(1)
     return data
 
 @app.route("/yahoo/2")
 def yahoo_page_2():
-    data = yahoo_trends(1)
+    data = yahoo.get_added_dropped_trends(7)
+    return data
+
+@app.route("/yahoo/3")
+def yahoo_page_3():
+    data = yahoo.get_added_dropped_trends(14)
     return data
 
 
+# Used for testing with `pipenv run flask run`
 if __name__ == "__main__":
     app.run()

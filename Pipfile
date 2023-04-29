@@ -9,10 +9,11 @@ requests = "*"
 selenium = "*"
 flask = "*"
 unidecode = "*"
-python-dotenv = "*"
 ratelimit = "*"
+webdriver-manager = "*"
+jinja2 = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.10.4"
+python_version = "3.11.3"

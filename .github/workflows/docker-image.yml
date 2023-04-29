@@ -3,15 +3,35 @@
 name: Docker Image
 
 on:
-  schedule:
-    - cron: '30 20 * * *'
   push:
-    branches: [ main ]
+    branches:
+      - 'main'
+    paths:
+      - 'Dockerfile'
+      - 'docker-compose.yml'
+      - '.dockerignore'
+      - 'Pipfile'
+      - 'Pipfile.lock'
+      - 'src/**'
+      - 'static/**'
+      - 'templates/**'
   pull_request:
-    branches: [ main ]
+    branches:
+      - 'main'
+    paths:
+      - 'Dockerfile'
+      - 'docker-compose.yml'
+      - '.dockerignore'
+      - 'Pipfile'
+      - 'Pipfile.lock'
+      - 'src/**'
+      - 'static/**'
+      - 'templates/**'
+  workflow_dispatch:
 
 jobs:
   build:
+
     runs-on: ubuntu-latest
 
     steps:

@@ -1,7 +1,6 @@
-version: "3.9"
+version: "3"
 services:
-  web:
-    image: fantasy-baseball-buzz:main 
+  app:
     build:
       context: .
       dockerfile: Dockerfile

@@ -1,10 +1,10 @@
-import enum
-import util.my_beautifulsoup as MyBS
-import util.my_dictionary as MyD
-import util.my_unidecode as MyU
+import utils.my_beautifulsoup as MyBS
+import utils.my_dictionary as MyD
+import utils.my_json as MyJ
+import utils.my_unidecode as MyU
 
-url_base = 'http://www.pitcherlist.com'
-headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36'}
+
+url_base = "http://www.pitcherlist.com"
 player_dict = {}
 
 
@@ -12,9 +12,9 @@ player_dict = {}
 def startup(url_tab, all, name, attrib, href):
     player_dict.clear()
     url_start_page = url_base + url_tab
-    start_page = MyBS.scrape_class(url_start_page, headers, '', 'div', 'hold-me', False)
+    start_page = MyBS.scrape_class(url_start_page, '', 'div', 'hold-me', False)
     url_weekly_page = MyBS.find_class(start_page, '', 'a', 'link', True)['href']
-    weekly_page = MyBS.scrape_class(url_weekly_page, headers, all, name, attrib, href)
+    weekly_page = MyBS.scrape_class(url_weekly_page, all, name, attrib, href)
     return weekly_page
 
 
@@ -26,6 +26,7 @@ def get_ranks(rows):
         player_rank = int(rows[i].td.text)
         if player_name not in player_dict:
             player_dict[player_name] = player_rank
+        MyJ.add_name_to(player_name, 'player-names')
     return player_dict
 
 
@@ -46,6 +47,7 @@ def get_trends(rows):
             player_trend = int(player_trend_text)
         if player_name not in player_dict:
             player_dict[player_name] = player_trend
+        MyJ.add_name_to(player_name, 'player-names')
     return player_dict
 
 
@@ -76,6 +78,7 @@ def get_streaming_starting_pitcher_ranks():
         player_rank = int(row_streamers[i].td.text)
         if player_name not in player_dict:
             player_dict[player_name] = player_rank
+        MyJ.add_name_to(player_name, 'player-names')
     sorted_dict = MyD.sort_desc(player_dict)
     return sorted_dict
 
@@ -102,6 +105,21 @@ def get_starting_pitcher_matchup_tiers():
                 player_dict.update({player2_name_short: player2_rating_updated})
         except IndexError:
             continue
+
+        # Get Player's full name from JSON file
+        players_json = MyJ.get_json('yahoo-players')
+        for key, _ in enumerate(players_json['players']):
+            if player1_name_short == players_json['players'][key]['short_name']:
+                player1_name_full = players_json['players'][key]['full_name']
+            if player2_name_short == players_json['players'][key]['short_name']:
+                player2_name_full = players_json['players'][key]['full_name']
+            elif key == len(players_json['players']) - 1:
+                # No full name found, try scraping more
+                break
+
+        MyJ.add_name_to(player1_name_full, 'player-names')
+        MyJ.add_name_to(player2_name_full, 'player-names')
+
     sorted_dict = MyD.sort(player_dict)
     return sorted_dict
 
@@ -165,16 +183,16 @@ def get_relief_pitcher_ranks():
     return sorted_dict
 
 
-# ```python src/pitcherlist.py```
+# Used for testing with `pipenv run python src/provider_pitcherlist.py`
 if __name__ == '__main__':
-    print(get_starting_pitcher_rank_trends())
-    print(get_starting_pitcher_ranks())
-    print(get_streaming_starting_pitcher_ranks())
-    print(get_starting_pitcher_matchup_tiers())
-    print(get_two_start_starting_pitcher_matchup_tiers())
-    print(get_batter_rank_trends())
-    print(get_batter_ranks())
-    print(get_closing_pitcher_rank_trends())
-    print(get_closing_pitcher_ranks())
-    print(get_relief_pitcher_rank_trends())
-    print(get_relief_pitcher_ranks())
+    print('\n', 'get_starting_pitcher_rank_trends', '\n', get_starting_pitcher_rank_trends())
+    print('\n', 'get_starting_pitcher_ranks', '\n', get_starting_pitcher_ranks())
+    print('\n', 'get_streaming_starting_pitcher_ranks', '\n', get_streaming_starting_pitcher_ranks())
+    print('\n', 'get_starting_pitcher_matchup_tiers', '\n', get_starting_pitcher_matchup_tiers())
+    print('\n', 'get_two_start_starting_pitcher_matchup_tiers', '\n', get_two_start_starting_pitcher_matchup_tiers())
+    print('\n', 'get_batter_rank_trends', '\n', get_batter_rank_trends())
+    print('\n', 'get_batter_ranks', '\n', get_batter_ranks())
+    print('\n', 'get_closing_pitcher_rank_trends', '\n', get_closing_pitcher_rank_trends())
+    print('\n', 'get_closing_pitcher_ranks', '\n', get_closing_pitcher_ranks())
+    print('\n', 'get_relief_pitcher_rank_trends', '\n', get_relief_pitcher_rank_trends())
+    print('\n', 'get_relief_pitcher_ranks', '\n', get_relief_pitcher_ranks())
