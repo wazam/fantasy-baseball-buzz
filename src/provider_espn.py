@@ -8,6 +8,8 @@ from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from webdriver_manager.firefox import GeckoDriverManager
 # from webdriver_manager.core.utils import read_version_from_cmd, PATTERN  # (used during testing)
 
+import utils.my_json as MyJ
+
 
 url_base = "http://fantasy.espn.com/baseball"
 
@@ -72,6 +74,8 @@ def get_added_dropped_trends():
                 xpath_row_name = "(//*[@class='Table'])[" + str(int(each_table+1)) + "]/tbody/tr[" + str(int(each_row+1)) + "]/td[2]/div/div/div[2]/div/div[1]/span[1]/a"
                 # Find the current Player's name
                 row_name = str(driver.find_element(By.XPATH, xpath_row_name).text)
+                # Add Player's name to combined json
+                MyJ.add_name_to(row_name, 'player-names')
                 # Create a search for each Player's 7 Day roster ownership trends
                 xpath_row_number =  "(//*[@class='Table'])[" + str(int(each_table+1)) + "]/tbody/tr[" + str(int(each_row+1)) + "]/td[5]/div/span"
                 # Find the current Player's 7 Day roster ownership trends
@@ -100,5 +104,4 @@ def get_added_dropped_trends():
 
 # Used for testing with `pipenv run python src/provider_espn.py`
 if __name__ == "__main__":
-    data = get_added_dropped_trends()
-    print(data)
+    print('\n', 'get_added_dropped_trends', '\n', get_added_dropped_trends())

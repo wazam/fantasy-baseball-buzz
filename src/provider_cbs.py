@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 
+import utils.my_json as MyJ
 
 url_base = "http://www.cbssports.com"
 trends_dictionary = {}
@@ -78,6 +79,7 @@ def finishup(elements_tabs, column):
                 #Add Player's name to permanent trends dictionary
                 if player_name not in trends_dictionary:
                     trends_dictionary[player_name] = player_change
+                MyJ.add_name_to(player_name, 'player-names')
 
     # Create a function to decide the custom sorting order
     def by_value(item):
@@ -94,5 +96,5 @@ def finishup(elements_tabs, column):
 # Used for testing with `pipenv run python src/provider_cbs.py`
 if __name__ == "__main__":
     print('\n', 'get_added_dropped_trends', '\n', get_added_dropped_trends())
-    print('\n', 'get_added_dropped_trends', '\n', get_viewed_trends())
-    print('\n', 'get_added_dropped_trends', '\n', get_traded_trends())
+    print('\n', 'get_viewed_trends', '\n', get_viewed_trends())
+    print('\n', 'get_traded_trends', '\n', get_traded_trends())
