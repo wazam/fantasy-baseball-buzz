@@ -197,9 +197,9 @@ services:
 
 </details>
 
-##
+## Disclaimers
 
-<details><summary><i>Disclaimers</i></summary>
+<details><summary><i>Click to see more...</i></summary>
 
 - [MLB Terms of Use](https://www.mlb.com/official-information/terms-of-use)
 - [Disney (ESPN) Terms of Use](https://disneytermsofuse.com/english/)
