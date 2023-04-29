@@ -11,6 +11,7 @@ flask = "*"
 unidecode = "*"
 ratelimit = "*"
 webdriver-manager = "*"
+jinja2 = "*"
 
 [dev-packages]
 
