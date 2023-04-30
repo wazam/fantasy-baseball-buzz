@@ -12,6 +12,7 @@ unidecode = "*"
 ratelimit = "*"
 webdriver-manager = "*"
 jinja2 = "*"
+pyairtable = "*"
 
 [dev-packages]
 

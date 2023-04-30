@@ -7,3 +7,7 @@ services:
     container_name: fantasy-baseball-buzz
     ports:
       - "5000:5000"
+    environment:
+      - TZ=America/New_York
+      - AIRTABLE_API_KEY={{YOUR_VALUE}}
+      - AIRTABLE_BASE_ID={{YOUR_VALUE}}

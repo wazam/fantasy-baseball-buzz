@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "bcbe43d6efb4d1043364df07b8728be1acb391b22ee6690235ff065a2b52e4b3"
+            "sha256": "dfd4f4b3ccce95ddd27bd5a673296a385a37d973a0e016a4836dfea9bdb2f65b"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -264,6 +264,14 @@
             ],
             "markers": "python_version >= '3.7'",
             "version": "==23.1"
+        },
+        "pyairtable": {
+            "hashes": [
+                "sha256:e2e9cf7b14afcf5bac69f79f6a61e61bb8c8ff94656e9c7ebeef406c0fbfbb8c",
+                "sha256:f127af0796bfe40d349937b4c1a0ff81b7740fc3c8ebd0e6d0e559f42026be4b"
+            ],
+            "index": "pypi",
+            "version": "==1.4.0"
         },
         "pysocks": {
             "hashes": [
