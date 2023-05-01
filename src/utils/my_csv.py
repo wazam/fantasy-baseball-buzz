@@ -6,9 +6,10 @@ ext = '.csv'
 
 # Check for already existing file, if not found create a new file with headers row
 def check_and_create(filename):
-    if os.path.isfile(os.path.join(filepath, filename + ext)) and os.access(os.path.join(filepath, filename + ext), os.R_OK):
-        # File exists
-        pass
+    if (os.path.isfile(os.path.join(filepath, filename + ext))
+        and os.access(os.path.join(filepath, filename + ext), os.R_OK)):
+            # File exists and is accessible
+            pass
     else:
         if filename == 'mlb-players':
             header = ["full_name"]
@@ -22,7 +23,15 @@ def check_and_create(filename):
 # Add a row of data to the end of a file
 def add_row(filename, data):
     check_and_create(filename)
-    with open(os.path.join(filepath, filename + ext), 'a', encoding='utf-8', newline='') as f:
+    with open(os.path.join(filepath, filename + ext), 'r+', encoding='utf-8', newline='') as f:
+        current_csv = f.read()
+        data_import = data
+        # Check for player with duplicate names and save incrementally starting with (2)
+        for each_possible_player_with_same_name in range(2, 10):
+            if data not in current_csv:
+                break
+            else:
+                data = data_import + ' (' + str(each_possible_player_with_same_name) + ')'
         writer = csv.writer(f)
         writer.writerow([data])
     return

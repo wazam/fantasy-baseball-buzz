@@ -1,7 +1,7 @@
 from os import environ
 from time import sleep
-
 from selenium import webdriver
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.service import Service as FirefoxService
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
@@ -13,9 +13,7 @@ import utils.my_dictionary as MyD
 import utils.my_json as MyJ
 import utils.my_unidecode as MyU
 
-
 url_base = "https://www.mlb.com"
-
 
 # Return data from search in current week's article
 def get_player_names():
@@ -55,7 +53,6 @@ def get_player_names():
     driver.quit()
 
     return
-
 
 # Used for testing with `pipenv run python src/provider_mlb.py`
 if __name__ == '__main__':

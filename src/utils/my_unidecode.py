@@ -7,5 +7,4 @@ def fix_str(unicode_string):
 
 # Used for testing with `pipenv run python src/utils/my_unidecode.py`
 if __name__ == "__main__":
-    data = fix_str("Ronald (Jose) Acuña, Jr.")
-    print(data)
+    print('\n', 'fix_str()', '\n', fix_str("áéíñóú.z̯̯͡a̧͎̺l̡͓̫g̹̲o̡̼̘"))
