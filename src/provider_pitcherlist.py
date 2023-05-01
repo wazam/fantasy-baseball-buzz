@@ -26,7 +26,7 @@ def get_ranks(rows):
         player_rank = int(rows[i].td.text)
         if player_name not in player_dict:
             player_dict[player_name] = player_rank
-        MyJ.add_name_to(player_name, 'player-names')
+        MyJ.check_and_add(player_name, 'player-names')
     return player_dict
 
 
@@ -47,7 +47,7 @@ def get_trends(rows):
             player_trend = int(player_trend_text)
         if player_name not in player_dict:
             player_dict[player_name] = player_trend
-        MyJ.add_name_to(player_name, 'player-names')
+        MyJ.check_and_add(player_name, 'player-names')
     return player_dict
 
 
@@ -78,7 +78,7 @@ def get_streaming_starting_pitcher_ranks():
         player_rank = int(row_streamers[i].td.text)
         if player_name not in player_dict:
             player_dict[player_name] = player_rank
-        MyJ.add_name_to(player_name, 'player-names')
+        MyJ.check_and_add(player_name, 'player-names')
     sorted_dict = MyD.sort_desc(player_dict)
     return sorted_dict
 
@@ -117,8 +117,8 @@ def get_starting_pitcher_matchup_tiers():
                 # No full name found, try scraping more
                 break
 
-        MyJ.add_name_to(player1_name_full, 'player-names')
-        MyJ.add_name_to(player2_name_full, 'player-names')
+        MyJ.check_and_add(player1_name_full, 'player-names')
+        MyJ.check_and_add(player2_name_full, 'player-names')
 
     sorted_dict = MyD.sort(player_dict)
     return sorted_dict

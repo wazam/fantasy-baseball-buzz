@@ -75,7 +75,7 @@ def get_added_dropped_trends():
                 # Find the current Player's name
                 row_name = str(driver.find_element(By.XPATH, xpath_row_name).text)
                 # Add Player's name to combined json
-                MyJ.add_name_to(row_name, 'player-names')
+                MyJ.check_and_add(row_name, 'player-names')
                 # Create a search for each Player's 7 Day roster ownership trends
                 xpath_row_number =  "(//*[@class='Table'])[" + str(int(each_table+1)) + "]/tbody/tr[" + str(int(each_row+1)) + "]/td[5]/div/span"
                 # Find the current Player's 7 Day roster ownership trends

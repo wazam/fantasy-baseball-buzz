@@ -1,7 +1,6 @@
 from datetime import date
 from datetime import timedelta
 
-
 # Returns the date in YYYY-MM-DD format of the day(s) before today 
 def days_before_today(days_back):
     date_today = date.today()
@@ -10,8 +9,7 @@ def days_before_today(days_back):
     return date_back
 
 
-# Used for testing with `pipenv run python src/utils/my_datetime.py` or `pipenv run python -m src.utils.my_datetime`
+# Used for testing with `pipenv run python src/utils/my_datetime.py`
 if __name__ == "__main__":
-    days_ago = 7
-    the_date = days_before_today(days_ago)
-    print(the_date, 'was the date', days_ago, 'days ago.')
+    days_back = 7
+    print('\n', days_back, ' day(s) ago the date was ', days_before_today(days_back), '.', sep="")

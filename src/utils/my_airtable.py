@@ -1,7 +1,5 @@
 from os import environ
-
 from pyairtable import Table
-
 
 # Returns Airtable Base Table
 def get_table():
@@ -11,7 +9,6 @@ def get_table():
     table = Table(auth_token, base_id, table_name)
     return table.all()
 
-
-# Used for testing with `pipenv run python src/utils/my_airtable.py` or `pipenv run python -m src.utils.my_airtable`
+# Used for testing with `pipenv run python src/utils/my_airtable.py`
 if __name__ == "__main__":
     print('\n', 'get_table', '\n', get_table())

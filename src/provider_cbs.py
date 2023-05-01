@@ -80,7 +80,7 @@ def finishup(elements_tabs, column):
                 #Add Player's name to permanent trends dictionary
                 if player_name not in trends_dictionary:
                     trends_dictionary[player_name] = player_change
-                MyJ.add_name_to(player_name, 'player-names')
+                MyJ.check_and_add(player_name, 'player-names')
 
     # Create a function to decide the custom sorting order
     def by_value(item):
