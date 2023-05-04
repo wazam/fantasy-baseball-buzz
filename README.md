@@ -201,9 +201,10 @@ services:
 - [❌ Baseball-Reference](https://www.baseball-reference.com/)
 - [❌ Draft Buddy Projections](https://www.draftbuddy.com/baseball/projections.php)
 - [❌ Razzball Rankings](https://razzball.com/2022-fantasy-baseball-rankings/)
-- [❌ MLB Pipeline Prospect Rankings](https://www.mlb.com/prospects/top100/)
+- [❌ MLB Pipeline's Prospect Rankings](https://www.mlb.com/prospects/top100/)
 - [❌ Baseball America Rankings](https://www.baseballamerica.com/rankings/)
 - [✅ MLB Players List](https://www.mlb.com/players)
+- [❌ MiLB Trending Players](https://www.milb.com/players)
 
 </details>
 
@@ -213,4 +214,6 @@ services:
 - [Disney (ESPN) Terms of Use](https://disneytermsofuse.com/english/)
 - [Yahoo Terms of Service](https://legal.yahoo.com/us/en/yahoo/terms/otos/index.html)
 - [Paramount (CBS) Terms of Use](https://www.viacomcbs.legal/us/en/cbsi/terms-of-use)
+- [Fantrax Terms of Service](https://www.fantrax.com/terms-of-service)
 - [Pitcher List Terms of Service](https://www.pitcherlist.com/terms-of-service/)
+- [FantasyPros Terms of Use](https://www.fantasypros.com/about/legal/)

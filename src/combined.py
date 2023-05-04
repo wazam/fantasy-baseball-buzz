@@ -1,23 +1,80 @@
-import utils.my_json as MyJ
+import os
+from util_json import json_get_from_file
+from util_csv import csv_get_from_file_as_list
+
+prefixed = [filename for filename in os.listdir('./data') if filename.startswith("mlb-players")]
+return_player_names = []
 
 
-# Return list of Player's full names
-def get_names():
-    return_player_names = []
-    player_name_data = MyJ.get_json('player-names')['players']
-
-    for _, player in enumerate(player_name_data):
-        full_name = player['full_name']
-        add_to_list = {"full_name": full_name}
-        return_player_names.append(add_to_list)
-    
-    # print(return_player_names)
-    # breakpoint()
+# Returns list of Player's full names
+def combined_get_names():
+    return_player_names.clear()
+    for file in prefixed:
+        filename = file.split('.', 1)[0]
+        if file.endswith('.json'):
+            player_name_data = json_get_from_file(filename)['players']
+            for _, player in enumerate(player_name_data):
+                name = player['full_name']
+                if name == '' or name == 'full_name':
+                    pass
+                else:
+                    if len(return_player_names) == 0:
+                        return_player_names.append({"full_name": name})
+                    else:
+                        name_check_jr = name + ' Jr.'
+                        name_check_second = name + ' II'
+                        name_check_lower_case = name.lower()
+                        for index, _ in enumerate(return_player_names):
+                            if name == return_player_names[index]['full_name']:
+                                # Player already present
+                                break
+                            elif name_check_jr == return_player_names[index]['full_name']:
+                                # Player already present
+                                break
+                            elif name_check_second == return_player_names[index]['full_name']:
+                                # Player already present
+                                break
+                            elif name_check_lower_case == return_player_names[index]['full_name'].lower():
+                                # Player already present
+                                break
+                            elif index == len(return_player_names)-1:
+                                return_player_names.append({"full_name": name})
+                                break
+        elif file.endswith('.csv'):
+            player_name_data = csv_get_from_file_as_list(filename)
+            for _, player in enumerate(player_name_data):
+                name = player
+                if name == [''] or name == ['full_name']:
+                    pass
+                else:
+                    if len(return_player_names) == 0:
+                        return_player_names.append({"full_name": name[0]})
+                    else:
+                        name_check_jr = name[0] + ' Jr.'
+                        name_check_second = name[0] + ' II'
+                        name_check_lower_case = name[0].lower()
+                        for index, _ in enumerate(return_player_names):
+                            # breakpoint()
+                            if name[0] == return_player_names[index]['full_name']:
+                                # Player already present
+                                break
+                            elif name_check_jr == return_player_names[index]['full_name']:
+                                # Player already present
+                                break
+                            elif name_check_second == return_player_names[index]['full_name']:
+                                # Player already present
+                                break
+                            elif name_check_lower_case == return_player_names[index]['full_name'].lower():
+                                # Player already present
+                                break
+                            elif index == len(return_player_names)-1:
+                                return_player_names.append({"full_name": name[0]})
+                                break
     return return_player_names
 
 
-# Return dictionary of Player's trends from a provider
-def get_trend(player_trend_data):    
+# Returns dictionary of Player's trends from a provider
+def combined_get_trend(player_trend_data):
     return_player_trend = {}
     for player in player_trend_data:
         full_name = player
@@ -25,28 +82,11 @@ def get_trend(player_trend_data):
         if full_name not in return_player_trend:
             add_to_dict = [{"trend": trend}]
             return_player_trend[full_name] = add_to_dict
-    
-    # print(return_player_trend)
-    # breakpoint()
     return return_player_trend
 
 
-# Unused (attempted to get/return multiple trends at once for combined web view)
-def get_trends(player_trends_data_list):
-    return_player_trends = []
-    for index, trend in enumerate(player_trends_data_list):
-        add_to_list = {index: get_trend(trend)}
-        return_player_trends.append(add_to_list)
-
-    # print(return_player_trends)
-    # breakpoint()
-    return return_player_trends
-
-
-# Used for testing with `pipenv run python src/combined.py`
-if __name__ == "__main__":
-    import provider_cbs as cbs
-    print('\n', 'get_names', '\n', get_names())
-    print('\n', 'get_trend()', '\n', get_trend(cbs.get_added_dropped_trends()))
-    # trend_columns = [cbs.get_viewed_trends(), cbs.get_traded_trends()]
-    # print('\n', 'get_trends([])', '\n', get_trends(trend_columns))
+# Tests with `pipenv run python src/combined.py`
+if __name__ == '__main__':
+    print('\n', 'combined_get_names', '\n', len(combined_get_names()))
+    # from provider_cbs import cbs_get_added_dropped_trends
+    # print('\n', 'combined_get_trend()', '\n', combined_get_trend(cbs_get_added_dropped_trends()))
