@@ -14,8 +14,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  test_file:
-    name: Test compose file
+  build:
+    name: Build & Test
     runs-on: ubuntu-latest
     steps:
 

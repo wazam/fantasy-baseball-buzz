@@ -18,8 +18,8 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  publish_image:
-    name: Publish docker image
+  build:
+    name: Build & Publish
     runs-on: ubuntu-latest
     permissions:
       contents: read

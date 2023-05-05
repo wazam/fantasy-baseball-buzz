@@ -15,13 +15,14 @@ permissions:
   contents: read
 
 jobs:
-  test_app:
-    name: Test python app
+  build:
+    name: Build & Test
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ["3.11.3"]
     steps:
+
     - name: Checkout repository
       uses: actions/checkout@v3
 
