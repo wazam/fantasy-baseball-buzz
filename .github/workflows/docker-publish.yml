@@ -1,6 +1,6 @@
 # https://github.com/actions/starter-workflows/blob/main/ci/docker-publish.yml
 
-name: Docker Publish
+name: Publish a Docker image
 
 on:
   schedule:
@@ -18,14 +18,13 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  build:
-
+  publish_image:
+    name: Publish docker image
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
       id-token: write
-
     steps:
 
       - name: Checkout repository

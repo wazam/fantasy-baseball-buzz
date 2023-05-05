@@ -1,39 +1,20 @@
 # https://github.com/actions/starter-workflows/blob/main/ci/docker-image.yml
 
-name: Docker Image
+name: Build a Docker image
 
 on:
   push:
     branches:
       - 'main'
-    paths:
-      - 'Dockerfile'
-      - 'docker-compose.yml'
-      - '.dockerignore'
-      - 'Pipfile'
-      - 'Pipfile.lock'
-      - 'src/**'
-      - 'static/**'
-      - 'templates/**'
   pull_request:
     branches:
       - 'main'
-    paths:
-      - 'Dockerfile'
-      - 'docker-compose.yml'
-      - '.dockerignore'
-      - 'Pipfile'
-      - 'Pipfile.lock'
-      - 'src/**'
-      - 'static/**'
-      - 'templates/**'
   workflow_dispatch:
 
 jobs:
-  build:
-
+  build_image:
+    name: Build docker image
     runs-on: ubuntu-latest
-
     steps:
 
     - name: Checkout repository
