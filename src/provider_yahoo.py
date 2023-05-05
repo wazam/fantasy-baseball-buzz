@@ -80,7 +80,7 @@ def yahoo_get_added_dropped_trends(number_of_days_to_scrape):
     return sorted_weekly_dict
 
 
-# Used for testing with `pipenv run python src/provider_yahoo.py`
+# Tests with `pipenv run python src/provider_yahoo.py`
 if __name__ == '__main__':
     print('\n', 'yahoo_get_added_dropped_trends-1day', '\n', yahoo_get_added_dropped_trends(1))
     # print('\n', 'yahoo_get_added_dropped_trends-7days', '\n', yahoo_get_added_dropped_trends(7))

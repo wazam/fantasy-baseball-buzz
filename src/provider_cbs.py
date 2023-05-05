@@ -83,7 +83,7 @@ def cbs_finishup(elements_tabs, column):
     return trends_dictionary
 
 
-# Used for testing with `pipenv run python src/provider_cbs.py`
+# Tests with `pipenv run python src/provider_cbs.py`
 if __name__ == '__main__':
     print('\n', 'cbs_get_added_dropped_trends', '\n', cbs_get_added_dropped_trends())
     print('\n', 'cbs_get_viewed_trends', '\n', cbs_get_viewed_trends())

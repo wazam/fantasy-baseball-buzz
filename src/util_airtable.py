@@ -12,6 +12,6 @@ def airtable_get_table():
     return table.all()
 
 
-# Used for testing with `pipenv run python src/util_airtable.py`
+# Tests with `pipenv run python src/util_airtable.py`
 if __name__ == '__main__':
     print('\n', 'airtable_get_table', '\n', airtable_get_table())

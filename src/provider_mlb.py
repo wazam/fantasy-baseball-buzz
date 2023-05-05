@@ -30,6 +30,6 @@ def mlb_get_player_names():
     webdriver_cleanup_driver(driver)
     return
 
-# Used for testing with `pipenv run python src/provider_mlb.py`
+# Tests with `pipenv run python src/provider_mlb.py`
 if __name__ == '__main__':
     print('\n', 'mlb_get_player_names', '\n', mlb_get_player_names())

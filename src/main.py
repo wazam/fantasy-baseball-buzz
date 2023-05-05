@@ -7,7 +7,7 @@ from provider_pitcherlist import pl_get_starting_pitcher_rank_trends, pl_get_sta
     pl_get_batter_rank_trends, pl_get_batter_ranks, pl_get_closing_pitcher_rank_trends, pl_get_closing_pitcher_ranks, \
     pl_get_relief_pitcher_rank_trends, pl_get_relief_pitcher_ranks
 from provider_yahoo import yahoo_get_added_dropped_trends
-from combined import combined_get_names, combined_get_trend
+from util_combine import combined_get_names, combined_get_trend
 
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.json.sort_keys = False
@@ -72,6 +72,6 @@ def yahoo_page():
     return yahoo_get_added_dropped_trends(7)
 
 
-# Used for testing with `pipenv run flask run` or `pipenv run python src/main.py`
+# Tests with `pipenv run flask run` or `pipenv run python src/main.py`
 if __name__ == '__main__':
     app.run()

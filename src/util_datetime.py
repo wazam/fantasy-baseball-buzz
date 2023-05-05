@@ -10,7 +10,7 @@ def date_X_days_ago(days):
     return date_back
 
 
-# Used for testing with `pipenv run python src/util_datetime.py`
+# Tests with `pipenv run python src/util_datetime.py`
 if __name__ == '__main__':
     days_back = 7
     print('\n', days_back, ' day(s) ago the date was ', date_X_days_ago(days_back), '.', sep='')

@@ -22,7 +22,7 @@ def dictionary_sort_desc(dict):
     return sorted_dict
 
 
-# Used for testing with `pipenv run python src/util_dictionary.py`
+# Tests with `pipenv run python src/util_dictionary.py`
 if __name__ == '__main__':
     print('\n', 'dictionary_sort()', '\n', dictionary_sort({'a': 1, 'b': 2}))
     print('\n', 'dictionary_sort_desc()', '\n', dictionary_sort_desc({'a': 9, 'b': 8}))

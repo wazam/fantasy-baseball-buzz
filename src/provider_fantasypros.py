@@ -21,6 +21,6 @@ def fp_get_player_names():
     return
 
 
-# Used for testing with `pipenv run python src/provider_fantasypros.py`
+# Tests with `pipenv run python src/provider_fantasypros.py`
 if __name__ == '__main__':
     print('\n', 'fp_get_player_names', '\n', fp_get_player_names())

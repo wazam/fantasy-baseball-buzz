@@ -56,6 +56,6 @@ def espn_get_added_dropped_trends():
     return sorted_dict
 
 
-# Used for testing with `pipenv run python src/provider_espn.py`
+# Tests with `pipenv run python src/provider_espn.py`
 if __name__ == '__main__':
     print('\n', 'espn_get_added_dropped_trends', '\n', espn_get_added_dropped_trends())

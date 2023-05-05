@@ -38,7 +38,7 @@ def beautifulsoup_find(soup_import, find_all, find_name, href):
     return results
 
 
-# Used for testing with `pipenv run python src/util_beautifulsoup.py`
+# Tests with `pipenv run python src/util_beautifulsoup.py`
 if __name__ == '__main__':
     url = 'http://baseball.fantasysports.yahoo.com/b1/buzzindex'
     print('\n', 'beautifulsoup_scrape_class()', '\n', beautifulsoup_scrape_class(url, 'all', 'a', 'Navtarget', True)[46::])

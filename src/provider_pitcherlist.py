@@ -182,7 +182,7 @@ def pl_get_relief_pitcher_ranks():
     return sorted_dict
 
 
-# Used for testing with `pipenv run python src/provider_pitcherlist.py`
+# Tests with `pipenv run python src/provider_pitcherlist.py`
 if __name__ == '__main__':
     print('\n', 'pl_get_starting_pitcher_rank_trends', '\n', pl_get_starting_pitcher_rank_trends())
     print('\n', 'pl_get_starting_pitcher_ranks', '\n', pl_get_starting_pitcher_ranks())

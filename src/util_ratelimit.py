@@ -13,7 +13,7 @@ def ratelimit_get_url(url, headers):
     return response
 
 
-# Used for testing with `pipenv run python src/util_ratelimit.py`
+# Tests with `pipenv run python src/util_ratelimit.py`
 if __name__ == '__main__':
     url = 'https://baseball.fantasysports.yahoo.com/b1/buzzindex'
     headers = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0"}

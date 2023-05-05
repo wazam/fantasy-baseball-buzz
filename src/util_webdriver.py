@@ -38,7 +38,7 @@ def webdriver_cleanup_driver(driver):
     return
 
 
-# Used for testing with `pipenv run python src/util_webdriver.py`
+# Tests with `pipenv run python src/util_webdriver.py`
 if __name__ == '__main__':
     driver = webdriver_setup_driver()
     print('\n', 'webdriver_setup_driver', '\n', driver.get('https://github.com'))
