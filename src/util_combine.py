@@ -6,7 +6,7 @@ prefixed = [filename for filename in os.listdir('./data') if filename.startswith
 return_player_names = []
 
 
-# Returns list of Player's full names
+# Returns combined list of Players' full names from multiple source files
 def combined_get_names():
     return_player_names.clear()
     for file in prefixed:
