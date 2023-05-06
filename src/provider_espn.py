@@ -1,16 +1,20 @@
 from time import sleep
 from selenium.webdriver.common.by import By
+from util_airtable import airtable_check_player_name, airtable_update_player_data
 from util_dictionary import dictionary_sort
-from util_json import json_check_and_add_to_file
+from util_json import json_check_and_create_file, json_check_and_add_to_file
 from util_webdriver import webdriver_setup_driver, webdriver_cleanup_driver
 
 url_base = 'https://fantasy.espn.com/baseball'
 trends_dictionary = {}
+json_filename = 'mlb-players-espn'
 
 
 # Returns a numerically ordered dictionary of Players' names with their roster trends
 def espn_get_added_dropped_trends():
     url_tab = '/addeddropped'
+    column_name = 'espn_get_added_dropped_trends'
+    json_check_and_create_file(json_filename)  # Replace with separate espn_get_player_names()
     url = url_base + url_tab
     driver = webdriver_setup_driver()
     trends_dictionary.clear()
@@ -42,7 +46,7 @@ def espn_get_added_dropped_trends():
                 # Find the current Player's name
                 row_name = str(driver.find_element(By.XPATH, xpath_row_name).text)
                 # Add Player's name to file
-                json_check_and_add_to_file(row_name, 'mlb-players-espn')
+                json_check_and_add_to_file(row_name, json_filename)
                 # Create a search for each Player's 7 Day roster ownership trends
                 xpath_row_number =  "(//*[@class='Table'])[" + str(int(each_table+1)) + "]/tbody/tr[" + str(int(each_row+1)) + "]/td[5]/div/span"
                 # Find the current Player's 7 Day roster ownership trends
@@ -51,6 +55,7 @@ def espn_get_added_dropped_trends():
                 if row_name not in trends_dictionary:
                     # Add Player to daily dictionary with net change in 7 Day roster ownership trends
                     trends_dictionary[row_name] = row_number
+                    airtable_update_player_data(airtable_check_player_name(row_name), row_number, column_name)
     webdriver_cleanup_driver(driver)
     sorted_dict = dictionary_sort(trends_dictionary)
     return sorted_dict

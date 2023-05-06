@@ -1,16 +1,18 @@
 from util_beautifulsoup import beautifulsoup_scrape_class, beautifulsoup_find_class
 from util_dictionary import dictionary_sort_desc
-from util_json import json_check_and_add_to_file
+from util_json import json_check_and_create_file, json_check_and_add_to_file
 
 url_base = 'https://www.cbssports.com'
 trends_dictionary = {}
 sorted_trends_dictionary = {}
+json_filename = 'mlb-players-cbs'
 
 
 # Returns data of web page to search
 def cbs_startup(url_tab):
     trends_dictionary.clear()
     sorted_trends_dictionary.clear()
+    json_check_and_create_file(json_filename)  # Replace with separate _get_player_names()
     url = url_base + url_tab
     results_page = beautifulsoup_scrape_class(url, '', 'div', 'Page-shell', False)
     return results_page
@@ -55,7 +57,6 @@ def cbs_finishup(elements_tabs, column):
         url_tab = str(tab['href'])
         url = url_base + url_tab
         results_page = beautifulsoup_scrape_class(url, '', 'div', 'Page-shell', False)
-
         # Loop through all positions
         elements_positions = beautifulsoup_find_class(results_page, 'all', 'a', 'Dropdown-link', True)
         for position in elements_positions:
@@ -66,7 +67,6 @@ def cbs_finishup(elements_tabs, column):
             elements_players_info = beautifulsoup_find_class(results_table, 'all', 'span', 'CellPlayerName--long', False)
             start = column - 1
             elements_7day_change = beautifulsoup_find_class(results_table, 'all', 'td', 'TableBase-bodyTd', False)[start::column]
-
             # Loop through all rows
             for index, _ in enumerate(elements_rows):
                 # Find Player's name
@@ -79,7 +79,7 @@ def cbs_finishup(elements_tabs, column):
                 # Add Player's name to permanent trends dictionary
                 if player_name not in trends_dictionary:
                     trends_dictionary[player_name] = player_change
-                json_check_and_add_to_file(player_name, 'mlb-players-cbs')
+                json_check_and_add_to_file(player_name, json_filename)
     return trends_dictionary
 
 

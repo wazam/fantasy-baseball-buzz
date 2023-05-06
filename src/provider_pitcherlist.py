@@ -1,14 +1,16 @@
 from util_beautifulsoup import beautifulsoup_scrape_class, beautifulsoup_find_class, beautifulsoup_find
 from util_dictionary import dictionary_sort, dictionary_sort_desc
-from util_json import json_check_and_add_to_file, json_get_from_file
+from util_json import json_check_and_create_file, json_check_and_add_to_file, json_get_from_file
 from util_unidecode import fix_str_format
 
 url_base = 'https://www.pitcherlist.com'
 player_dict = {}
+json_filename = 'mlb-players-pl'
 
 
 # Return data from search in current week's article
 def pl_startup(url_tab, all, name, attrib, href):
+    json_check_and_create_file(json_filename)  # Replace with separate _get_player_names()
     player_dict.clear()
     url_start_page = url_base + url_tab
     start_page = beautifulsoup_scrape_class(url_start_page, '', 'div', 'hold-me', False)
@@ -25,7 +27,7 @@ def pl_get_ranks(rows):
         player_rank = int(rows[i].td.text)
         if player_name not in player_dict:
             player_dict[player_name] = player_rank
-        json_check_and_add_to_file(player_name, 'mlb-players-pl')
+        json_check_and_add_to_file(player_name, json_filename)
     return player_dict
 
 
@@ -46,7 +48,7 @@ def pl_get_trends(rows):
             player_trend = int(player_trend_text)
         if player_name not in player_dict:
             player_dict[player_name] = player_trend
-        json_check_and_add_to_file(player_name, 'mlb-players-pl')
+        json_check_and_add_to_file(player_name, json_filename)
     return player_dict
 
 
@@ -77,7 +79,7 @@ def pl_get_streaming_starting_pitcher_ranks():
         player_rank = int(row_streamers[i].td.text)
         if player_name not in player_dict:
             player_dict[player_name] = player_rank
-        json_check_and_add_to_file(player_name, 'mlb-players-pl')
+        json_check_and_add_to_file(player_name, json_filename)
     sorted_dict = dictionary_sort_desc(player_dict)
     return sorted_dict
 
@@ -116,8 +118,8 @@ def pl_get_starting_pitcher_matchup_tiers():
                 # No full name found, try scraping more
                 break
 
-        json_check_and_add_to_file(player1_name_full, 'mlb-players-pl')
-        json_check_and_add_to_file(player2_name_full, 'mlb-players-pl')
+        json_check_and_add_to_file(player1_name_full, json_filename)
+        json_check_and_add_to_file(player2_name_full, json_filename)
 
     sorted_dict = dictionary_sort(player_dict)
     return sorted_dict

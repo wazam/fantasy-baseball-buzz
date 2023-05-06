@@ -1,17 +1,23 @@
+from util_airtable import airtable_check_player_name, airtable_update_player_data
 from util_beautifulsoup import beautifulsoup_scrape_class, beautifulsoup_find_class, beautifulsoup_find
 from util_datetime import date_X_days_ago
 from util_dictionary import dictionary_sort
-from util_json import json_add_to_file, json_check_and_add_to_file, json_get_from_file
+from util_json import json_check_and_create_file, json_add_to_file, json_check_and_add_to_file, json_get_from_file
 from util_unidecode import fix_str_format
 
 url_base = 'https://baseball.fantasysports.yahoo.com'
 weekly_dict = {}
 daily_dict = {}
 data_rows = []
+trends_dictionary = {}
+json_filename = 'mlb-players-yahoo'
 
 # Returns a numerically ordered dictionary of Players' names with their add/drop roster trends
 def yahoo_get_added_dropped_trends(number_of_days_to_scrape):
+    column_name = 'yahoo_get_added_dropped_trends'
+    json_check_and_create_file(json_filename)  # Replace with separate _get_player_names()
     weekly_dict.clear()
+    trends_dictionary.clear()
 
     # Get position page URLs from daily page
     for day in range(0, int(number_of_days_to_scrape)):
@@ -43,7 +49,6 @@ def yahoo_get_added_dropped_trends(number_of_days_to_scrape):
                         player_name_short = fix_str_format(str(str(data_rows[index][0].split('\n')[1].strip()).rsplit(team, 2)[0].strip()))
                         break
 
-                # breakpoint()
                 # Get Player's full name from JSON file (web request and save to JSON if full name is not present)
                 players_json = json_get_from_file('lookup-first-name-abbreviation')
                 for key, _ in enumerate(players_json['players']):
@@ -64,9 +69,8 @@ def yahoo_get_added_dropped_trends(number_of_days_to_scrape):
                 player_change = player_add - player_drop
                 if player_name_full not in daily_dict:
                     daily_dict[player_name_full] = player_change
-
                 # Add Player's full name to combined file from all sources
-                json_check_and_add_to_file(player_name_full, 'mlb-players-yahoo')
+                json_check_and_add_to_file(player_name_full, json_filename)
 
         # Add Player's Name and Change to weekly dictionary, add Changes across all days
         for key in daily_dict.keys():
@@ -75,6 +79,13 @@ def yahoo_get_added_dropped_trends(number_of_days_to_scrape):
             else:
                 weekly_dict[key] = weekly_dict[key] + daily_dict[key]
 
+    # Send the combined multi-day data to Airtable
+    for key in weekly_dict.keys():
+        if key not in trends_dictionary:
+            # breakpoint()
+            trends_dictionary[key] = weekly_dict[key]
+            airtable_update_player_data(airtable_check_player_name(key), weekly_dict[key], column_name)
+
     # Sort the weekly dictionary from High to Low
     sorted_weekly_dict = dictionary_sort(weekly_dict)
     return sorted_weekly_dict
@@ -82,6 +93,6 @@ def yahoo_get_added_dropped_trends(number_of_days_to_scrape):
 
 # Tests with `pipenv run python src/provider_yahoo.py`
 if __name__ == '__main__':
-    print('\n', 'yahoo_get_added_dropped_trends-1day', '\n', yahoo_get_added_dropped_trends(1))
+    print('\n', 'yahoo_get_added_dropped_trends-1day', '\n', yahoo_get_added_dropped_trends(2))
     # print('\n', 'yahoo_get_added_dropped_trends-7days', '\n', yahoo_get_added_dropped_trends(7))
     # print('\n', 'yahoo_get_added_dropped_trends-7days', '\n', yahoo_get_added_dropped_trends(14))

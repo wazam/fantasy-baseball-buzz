@@ -7,7 +7,7 @@ from provider_pitcherlist import pl_get_starting_pitcher_rank_trends, pl_get_sta
     pl_get_batter_rank_trends, pl_get_batter_ranks, pl_get_closing_pitcher_rank_trends, pl_get_closing_pitcher_ranks, \
     pl_get_relief_pitcher_rank_trends, pl_get_relief_pitcher_ranks
 from provider_yahoo import yahoo_get_added_dropped_trends
-from util_combine import combined_get_names, combined_get_trend
+from util_combine import combine_get_names, combine_get_trend
 
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.json.sort_keys = False
@@ -32,24 +32,24 @@ def about_page():
 @app.route('/combined')
 def combined_page():
     return render_template('combined.html', \
-        apiPlayers=combined_get_names(), \
-        apiTrends01=combined_get_trend(espn_get_added_dropped_trends()), \
-        apiTrends02=combined_get_trend(cbs_get_added_dropped_trends()), \
-        apiTrends03=combined_get_trend(yahoo_get_added_dropped_trends(7)), \
-        apiTrends04=combined_get_trend(yahoo_get_added_dropped_trends(1)), \
-        apiTrends05=combined_get_trend(cbs_get_viewed_trends()), \
-        apiTrends06=combined_get_trend(cbs_get_traded_trends()), \
-        apiTrends07=combined_get_trend(pl_get_starting_pitcher_rank_trends()), \
-        apiTrends08=combined_get_trend(pl_get_starting_pitcher_ranks()), \
-        apiTrends09=combined_get_trend(pl_get_streaming_starting_pitcher_ranks()), \
-        apiTrends10=combined_get_trend(pl_get_starting_pitcher_matchup_tiers()), \
-        apiTrends11=combined_get_trend(pl_get_two_start_starting_pitcher_matchup_tiers()), \
-        apiTrends12=combined_get_trend(pl_get_batter_rank_trends()), \
-        apiTrends13=combined_get_trend(pl_get_batter_ranks()), \
-        apiTrends14=combined_get_trend(pl_get_closing_pitcher_rank_trends()), \
-        apiTrends15=combined_get_trend(pl_get_closing_pitcher_ranks()), \
-        apiTrends16=combined_get_trend(pl_get_relief_pitcher_rank_trends()), \
-        apiTrends17=combined_get_trend(pl_get_relief_pitcher_ranks()))
+        apiPlayers=combine_get_names(), \
+        apiTrends01=combine_get_trend(espn_get_added_dropped_trends()), \
+        apiTrends02=combine_get_trend(cbs_get_added_dropped_trends()), \
+        apiTrends03=combine_get_trend(yahoo_get_added_dropped_trends(7)), \
+        apiTrends04=combine_get_trend(yahoo_get_added_dropped_trends(1)), \
+        apiTrends05=combine_get_trend(cbs_get_viewed_trends()), \
+        apiTrends06=combine_get_trend(cbs_get_traded_trends()), \
+        apiTrends07=combine_get_trend(pl_get_starting_pitcher_rank_trends()), \
+        apiTrends08=combine_get_trend(pl_get_starting_pitcher_ranks()), \
+        apiTrends09=combine_get_trend(pl_get_streaming_starting_pitcher_ranks()), \
+        apiTrends10=combine_get_trend(pl_get_starting_pitcher_matchup_tiers()), \
+        apiTrends11=combine_get_trend(pl_get_two_start_starting_pitcher_matchup_tiers()), \
+        apiTrends12=combine_get_trend(pl_get_batter_rank_trends()), \
+        apiTrends13=combine_get_trend(pl_get_batter_ranks()), \
+        apiTrends14=combine_get_trend(pl_get_closing_pitcher_rank_trends()), \
+        apiTrends15=combine_get_trend(pl_get_closing_pitcher_ranks()), \
+        apiTrends16=combine_get_trend(pl_get_relief_pitcher_rank_trends()), \
+        apiTrends17=combine_get_trend(pl_get_relief_pitcher_ranks()))
 
 
 @app.route('/cbs')

@@ -7,7 +7,7 @@ return_player_names = []
 
 
 # Returns combined list of Players' full names from multiple source files
-def combined_get_names():
+def combine_get_names():
     return_player_names.clear()
     for file in prefixed:
         filename = file.split('.', 1)[0]
@@ -15,26 +15,29 @@ def combined_get_names():
             player_name_data = json_get_from_file(filename)['players']
             for _, player in enumerate(player_name_data):
                 name = player['full_name']
-                if name == '' or name == 'full_name':
+                if name == '' or name == 'full_name' or name == 'undefined undefined':
                     pass
                 else:
                     if len(return_player_names) == 0:
                         return_player_names.append({"full_name": name})
                     else:
-                        name_check_jr = name + ' Jr.'
-                        name_check_second = name + ' II'
-                        name_check_lower_case = name.lower()
+                        name_check_jr = name + ' Jr.'  # Ronald Acuna Jr., Vladimir Guerrero Jr.
+                        name_check_sr = name + ' Sr.'  # Travis Lakins Sr.
+                        name_check_second = name + ' II'  # Michael Harris II, Cedric Mullins II
+                        name_check_case = name.lower()  # Ha-seong Kim
+                        name_check_hypen = name.replace('-', ' ')  # Ji-Hwan Bae, Ji-Man Choi, Hyun-Jin Ryu
+                        name_check_period = name.replace('.', '')  # A.J. Pollock, D.J. Stewart
+                        # Broken: Luis F. Ortiz and Luis L. Ortiz vs Luis Ortiz (1) and (2) ... -> use column_team
+                        # Broken: Jean-Carlos Mejia vs J.C. Mejia
+                        # Broken: tracking for other (2) and (3) named players ... -> use column_team
                         for index, _ in enumerate(return_player_names):
-                            if name == return_player_names[index]['full_name']:
-                                # Player already present
-                                break
-                            elif name_check_jr == return_player_names[index]['full_name']:
-                                # Player already present
-                                break
-                            elif name_check_second == return_player_names[index]['full_name']:
-                                # Player already present
-                                break
-                            elif name_check_lower_case == return_player_names[index]['full_name'].lower():
+                            if name == return_player_names[index]['full_name'] or \
+                                    name_check_jr == return_player_names[index]['full_name'] or \
+                                    name_check_sr == return_player_names[index]['full_name'] or \
+                                    name_check_second == return_player_names[index]['full_name'] or \
+                                    name_check_case == return_player_names[index]['full_name'].lower() or \
+                                    name_check_hypen == return_player_names[index]['full_name'] or \
+                                    name_check_period == return_player_names[index]['full_name']:
                                 # Player already present
                                 break
                             elif index == len(return_player_names)-1:
@@ -44,27 +47,26 @@ def combined_get_names():
             player_name_data = csv_get_from_file_as_list(filename)
             for _, player in enumerate(player_name_data):
                 name = player
-                if name == [''] or name == ['full_name']:
+                if name == [''] or name == ['full_name'] or name == ['undefined undefined']:
                     pass
                 else:
                     if len(return_player_names) == 0:
                         return_player_names.append({"full_name": name[0]})
                     else:
                         name_check_jr = name[0] + ' Jr.'
+                        name_check_sr = name[0] + ' Sr.'
                         name_check_second = name[0] + ' II'
-                        name_check_lower_case = name[0].lower()
+                        name_check_case = name[0].lower()
+                        name_check_hypen = name[0].replace('-', ' ')
+                        name_check_period = name[0].replace('.', '')
                         for index, _ in enumerate(return_player_names):
-                            # breakpoint()
-                            if name[0] == return_player_names[index]['full_name']:
-                                # Player already present
-                                break
-                            elif name_check_jr == return_player_names[index]['full_name']:
-                                # Player already present
-                                break
-                            elif name_check_second == return_player_names[index]['full_name']:
-                                # Player already present
-                                break
-                            elif name_check_lower_case == return_player_names[index]['full_name'].lower():
+                            if name[0] == return_player_names[index]['full_name'] or \
+                                    name_check_jr == return_player_names[index]['full_name'] or \
+                                    name_check_sr == return_player_names[index]['full_name'] or \
+                                    name_check_second == return_player_names[index]['full_name'] or \
+                                    name_check_case == return_player_names[index]['full_name'].lower() or \
+                                    name_check_hypen == return_player_names[index]['full_name'] or \
+                                    name_check_period == return_player_names[index]['full_name']:
                                 # Player already present
                                 break
                             elif index == len(return_player_names)-1:
@@ -74,7 +76,7 @@ def combined_get_names():
 
 
 # Returns dictionary of Player's trends from a provider
-def combined_get_trend(player_trend_data):
+def combine_get_trend(player_trend_data):
     return_player_trend = {}
     for player in player_trend_data:
         full_name = player
@@ -85,8 +87,8 @@ def combined_get_trend(player_trend_data):
     return return_player_trend
 
 
-# Tests with `pipenv run python src/combined.py`
+# Tests with `pipenv run python src/util_combine.py`
 if __name__ == '__main__':
-    print('\n', 'combined_get_names', '\n', len(combined_get_names()))
+    print('\n', 'combine_get_names', '\n', combine_get_names())
     # from provider_cbs import cbs_get_added_dropped_trends
-    # print('\n', 'combined_get_trend()', '\n', combined_get_trend(cbs_get_added_dropped_trends()))
+    # print('\n', 'combine_get_trend()', '\n', combine_get_trend(cbs_get_added_dropped_trends()))
