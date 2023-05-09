@@ -1,4 +1,4 @@
-from util_airtable import airtable_check_player_name, airtable_update_player_data
+# from util_airtable import airtable_check_player_name, airtable_update_player_data
 from util_beautifulsoup import beautifulsoup_scrape_class, beautifulsoup_find_class, beautifulsoup_find
 from util_datetime import date_X_days_ago
 from util_dictionary import dictionary_sort
@@ -84,7 +84,10 @@ def yahoo_get_added_dropped_trends(number_of_days_to_scrape):
         if key not in trends_dictionary:
             # breakpoint()
             trends_dictionary[key] = weekly_dict[key]
-            airtable_update_player_data(airtable_check_player_name(key), weekly_dict[key], column_name)
+            #
+            # 
+            # 
+            # airtable_update_player_data(airtable_check_player_name(key), weekly_dict[key], column_name)
 
     # Sort the weekly dictionary from High to Low
     sorted_weekly_dict = dictionary_sort(weekly_dict)
