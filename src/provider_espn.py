@@ -109,7 +109,7 @@ def espn_get_all_players():
     sleep(3)
 
     positition_page_start_on = 1  # 1 for Batters, 2 for Pitchers
-    positition_page_end_on = 2  # 2 for Batters, 3 for Pitchers
+    positition_page_end_on = 3  # 2 for Batters, 3 for Pitchers
 
     for position_page in range(positition_page_start_on, positition_page_end_on):  # First 2 position pages include all players
         if position_page == 1:
@@ -125,7 +125,7 @@ def espn_get_all_players():
         last_element_in_pagination_box = elements_in_pagination_box[number_of_elements_in_pagination_box - 1]
         number_of_pages_per_position = int(last_element_in_pagination_box.text)
 
-        page_start_on = 20
+        page_start_on = 1
 
         for page in range(1, page_start_on):
             driver.find_element(By.XPATH, "/html/body/div[1]/div[1]/div/div/div[5]/div[2]/div[3]/div/div/div[3]/nav/button[2]").click()
