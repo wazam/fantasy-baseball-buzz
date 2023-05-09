@@ -19,15 +19,14 @@ Jamball aggregates MLB player trends, statistics, and projections from multiple 
     cd ./fantasy-baseball-buzz
     ```
 
-4. Add your Airtable [`API key`](https://airtable.com/create/apikey) and `base ID` to the environment section of the `docker-compose.yml` file.
-5. If you want to change the default ports or environment values, then modify the `docker-compose.yml` file.
-6. Run the `docker-compose.yml` file to build and run the app.
+4. If you want to change the default ports or environment values, then modify the `docker-compose.yml` file.
+5. Run the `docker-compose.yml` file to build and run the app.
 
     ```sh
     docker-compose up -d
     ```
 
-7. Browse to <http://localhost:5000/> to start using Jamball.
+6. Browse to <http://localhost:5000/> to start using Jamball.
 
 ### docker-compose
 
@@ -44,8 +43,6 @@ services:
       - "5000:5000"
     environment:
       - TZ=America/New_York
-      - AIRTABLE_API_KEY={{YOUR_VALUE}}
-      - AIRTABLE_BASE_ID={{YOUR_VALUE}}
 ```
 
 </details>
