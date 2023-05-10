@@ -4,11 +4,16 @@ from pyairtable import Table, formulas
 auth_token = environ.get('AIRTABLE_API_KEY')
 base_id = environ.get('AIRTABLE_BASE_ID')
 table_name = environ.get('AIRTABLE_TABLE_NAME')
-table = Table(auth_token, base_id, table_name)
+
+# Returns Airtable table
+def airtable_setup():
+    table = Table(auth_token, base_id, table_name)
+    return table
 
 
 # Returns Player's Airtable ID (team/position lookup only used for players with exact same name)
 def airtable_get_player_id(name, team, position):
+    table = airtable_setup()
     player_found = False
     name_check_jr = name + ' Jr.'  # Ronald Acuna Jr., Vladimir Guerrero Jr.
     name_check_sr = name + ' Sr.'  # Travis Lakins Sr.
@@ -55,38 +60,43 @@ def airtable_get_player_id(name, team, position):
     return player_id
 
 
-# Creates record (row) for new Player in table
+# Creates row for new Player in table if it does not exist
 def airtable_check_and_create_player(name, team, position):
     if airtable_get_player_id(name, team, position) == False:
-        table.create({'Player': name, 'Team': team, 'Position': position})
+        table = airtable_setup()
+        fields = {'Player': name, 'Team': team, 'Position': position}
+        table.create(fields)
     return
 
 
-# Updates Player's data
+# Updates data in one column for Player
 def airtable_update_player_data(name, team, position, column, value):
-    player_id = str(airtable_get_player_id(name, team, position))
-    player_field = {str(column): value}
-    table.update(player_id, player_field)
+    table = airtable_setup()
+    id = str(airtable_get_player_id(name, team, position))
+    field = {str(column): value}
+    table.update(id, field)
     return
 
 
 # Updates Player's data in batch from list of records
-def airtable_batch_update_player_data(list_of_records):
-    # example_list_of_records = [{"id": "recwPQIfs4wKPyc9D", "fields": {"First Name": "Matt"}}, ...]
-    table.batch_update(list_of_records)
+def airtable_batch_update_player_data(records):
+    table = airtable_setup()
+    # example_list_of_records = [{"id": "recwPQIfs4wKPyc9D", "fields": {"First Name": "Matt", ...}}, {"id": ...]
+    table.batch_update(records)
     return
 
 
 # Tests with `pipenv run python src/util_airtable.py`
 if __name__ == '__main__':
+    print('\n', 'airtable_setup', '\n', airtable_setup())
     test_name = 'Jean-Carlos Mejia'
     test_team = 'Mil'
     test_position = 'RP'
     print('\n', 'airtable_get_player_id()', '\n', airtable_get_player_id(test_name, test_team, test_position))
     print('\n', 'airtable_check_and_create_player()', '\n', airtable_check_and_create_player(test_name, test_team, test_position))
-    test_value = True
     test_column = 'Watchlist'
+    test_value = True
     print('\n', 'airtable_update_player_data()', '\n', airtable_update_player_data(test_name, test_team, test_position, test_column, test_value))
     test_value = False
-    test_list = [{"id": airtable_get_player_id(test_name, test_team, test_position), 'fields': {'Player': test_name, 'Team': test_team, 'Position': test_position, test_column: test_value}}]
-    print('\n', 'airtable_batch_update_player_data()', '\n', airtable_batch_update_player_data(test_list))
+    test_records = [{"id": airtable_get_player_id(test_name, test_team, test_position), 'fields': {'Player': test_name, 'Team': test_team, 'Position': test_position, test_column: test_value}}]
+    print('\n', 'airtable_batch_update_player_data()', '\n', airtable_batch_update_player_data(test_records))
