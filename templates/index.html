@@ -1,38 +1,88 @@
 <!DOCTYPE html>
-
 <html>
-    <head>
-        <title>Jamball</title>
-        <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-        <!-- <style>
-            body {background-color: Black;}
-            h1 {color: Gold;}
-            h2 {color: Lime;}
-            p {color: Blue;}
-        </style> -->
-        <meta charset="UTF-8">
-        <meta http-equiv="refresh" content="600">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    </head>
-    <body>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {background-color: Black;}
+        h1 {color: Gold;}
+        p {color: White;}
+        h2 {color: Gold;}
+        h3 {color: White;}
+        a:link {color: DeepSkyBlue;}
+    </style>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <meta http-equiv="refresh" content="600">
+    <title>Jamball</title>
+</head>
+
+<body>
+    <header>
         <h1>Jamball</h1>
-        <br>
-        <h2>Combined</h2>
-        <p><a href="/combined">combined</a></p>
-        <br>
-        <h2>ESPN</h2>
-        <p><a href="/espn">added dropped trends</a></p>
-        <br>
-        <h2>Yahoo</h2>
-        <p><a href="/yahoo">added dropped trends 7d</a></p>
-        <br>
-        <h2>CBS</h2>
-        <p><a href="/cbs">added dropped trends</a></p>
-        <br>
-        <h2>Pitcher List</h2>
-        <p><a href="/pitcherlist">starting pitcher ranks</a></p>
-        <br>
-        <h2>Other</h2>
-        <p><a href="/about">about</a></p>
-    </body>
+        <p>Web interface to manually execute functions that refresh player data.</p>
+    </header>
+
+    <h2>Data</h2>
+
+    <p><a href="/airtable">Airtable</a></p>
+
+    <h2>Functions</h2>
+
+    <h3>ESPN</h3>
+
+    <p><a href="/espn_1">espn_get_added_dropped_trends</a></p>
+
+    <p><a href="/espn_2">espn_get_player_list</a></p>
+
+    <p><a href="/espn_3">espn_get_rostered_players</a></p>
+
+    <h3>Yahoo</h3>
+
+    <p><a href="/yahoo_1">yahoo_get_added_dropped_trends</a></p>
+
+    <p><a href="/yahoo_2">yahoo_get_player_list</a></p>
+
+    <p><a href="/yahoo_3">yahoo_get_player_list_deep</a></p>
+
+    <h3>CBS</h3>
+
+    <p><a href="/cbs_1">cbs_get_added_dropped_trends</a></p>
+
+    <h3>Pitcher List</h3>
+
+    <p><a href="/pitcherlist_1">pitcherlist_get_starting_pitcher_rank_trends</a></p>
+
+    <p><a href="/pitcherlist_2">pitcherlist_get_streaming_starting_pitcher_ranks</a></p>
+
+    <p><a href="/pitcherlist_3">pitcherlist_get_starting_pitcher_matchup_tiers</a></p>
+
+    <p><a href="/pitcherlist_4">pitcherlist_get_two_start_starting_pitcher_matchup_tiers</a></p>
+
+    <p><a href="/pitcherlist_5">pitcherlist_get_batter_rank_trends</a></p>
+
+    <p><a href="/pitcherlist_6">pitcherlist_get_batter_ranks</a></p>
+
+    <p><a href="/pitcherlist_7">pitcherlist_get_closing_pitcher_rank_trends</a></p>
+
+    <p><a href="/pitcherlist_8">pitcherlist_get_closing_pitcher_ranks</a></p>
+
+    <p><a href="/pitcherlist_9">pitcherlist_get_relief_pitcher_rank_trends</a></p>
+
+    <p><a href="/pitcherlist_10">pitcherlist_get_relief_pitcher_ranks</a></p>
+
+    <p><a href="/pitcherlist_11">pitcherlist_get_starting_pitcher_ranks</a></p>
+
+    <h3>MLB</h3>
+
+    <p><a href="/mlb_1">mlb_get_player_list</a></p>
+
+    <h3>FantasyPros</h3>
+
+    <p><a href="/fantasypros_1">fantasypros_get_player_list</a></p>
+
+    <h2>Other</h2>
+
+    <p><a href="/about">about me</a></p>
+
+</body>
 </html>
