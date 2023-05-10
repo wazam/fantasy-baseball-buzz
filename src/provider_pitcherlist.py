@@ -9,7 +9,7 @@ json_filename = 'mlb-players-pl'
 
 
 # Return data from search in current week's article
-def pl_startup(url_tab, all, name, attrib, href):
+def pitcherlist_startup(url_tab, all, name, attrib, href):
     json_check_and_create_file(json_filename)  # Replace with separate _get_player_names()
     player_dict.clear()
     url_start_page = url_base + url_tab
@@ -20,7 +20,7 @@ def pl_startup(url_tab, all, name, attrib, href):
 
 
 # Return Players' name and rank
-def pl_get_ranks(rows):
+def pitcherlist_get_ranks(rows):
     for i, _ in enumerate(rows):
         player_name_diacritics = rows[i].a.text
         player_name = fix_str_format(player_name_diacritics)
@@ -32,7 +32,7 @@ def pl_get_ranks(rows):
 
 
 # Return Players' name and change in rank
-def pl_get_trends(rows):
+def pitcherlist_get_trends(rows):
     for i, _ in enumerate(rows):
         player_name_diacritics = rows[i].a.text
         player_name = fix_str_format(player_name_diacritics)
@@ -53,24 +53,24 @@ def pl_get_trends(rows):
 
 
 # Return name and change in rank, sorted high to low
-def pl_get_starting_pitcher_rank_trends():
-    weekly_rows = pl_startup('/category/fantasy/the-list', 'all', 'tr', 'new-tier', False)
-    player_dict = pl_get_trends(weekly_rows)
+def pitcherlist_get_starting_pitcher_rank_trends():
+    weekly_rows = pitcherlist_startup('/category/fantasy/the-list', 'all', 'tr', 'new-tier', False)
+    player_dict = pitcherlist_get_trends(weekly_rows)
     sorted_dict = dictionary_sort(player_dict)
     return sorted_dict
 
 
 # Return name and rank, sorted low to high
-def pl_get_starting_pitcher_ranks():
-    weekly_rows = pl_startup('/category/fantasy/the-list', 'all', 'tr', 'new-tier', False)
-    player_dict = pl_get_ranks(weekly_rows)
+def pitcherlist_get_starting_pitcher_ranks():
+    weekly_rows = pitcherlist_startup('/category/fantasy/the-list', 'all', 'tr', 'new-tier', False)
+    player_dict = pitcherlist_get_ranks(weekly_rows)
     sorted_dict = dictionary_sort_desc(player_dict)
     return sorted_dict
 
 
 # Return name and rank, sorted low to high
-def pl_get_streaming_starting_pitcher_ranks():
-    streamers_page = pl_startup('/category/fantasy/sp-streamers/', '', 'div', 'row article-wrap', False)
+def pitcherlist_get_streaming_starting_pitcher_ranks():
+    streamers_page = pitcherlist_startup('/category/fantasy/sp-streamers/', '', 'div', 'row article-wrap', False)
     row_streamers = beautifulsoup_find(streamers_page, 'all', 'tr', False)
     for i, _ in enumerate(row_streamers):
         if row_streamers[i].a == None:
@@ -85,8 +85,8 @@ def pl_get_streaming_starting_pitcher_ranks():
 
 
 # Return name (short) and projected matchup(s) tier, combined for all weekly matchups, sorted high to low
-def pl_get_starting_pitcher_matchup_tiers():
-    matchups_page = pl_startup('/category/fantasy/sit-or-start/', '', 'div', 'row article-wrap', False)
+def pitcherlist_get_starting_pitcher_matchup_tiers():
+    matchups_page = pitcherlist_startup('/category/fantasy/sit-or-start/', '', 'div', 'row article-wrap', False)
     matchups_row = beautifulsoup_find(matchups_page, 'all', 'tr', False)
     for i, _ in enumerate(matchups_row):
         try:
@@ -126,8 +126,8 @@ def pl_get_starting_pitcher_matchup_tiers():
 
 
 # Return name and projected matchups tier
-def pl_get_two_start_starting_pitcher_matchup_tiers():
-    tables = pl_startup('/category/fantasy/two-start-pitchers/', 'all', 'table', 'dataTableLaunch bold centered rounded stats dataTable no-footer', False)
+def pitcherlist_get_two_start_starting_pitcher_matchup_tiers():
+    tables = pitcherlist_startup('/category/fantasy/two-start-pitchers/', 'all', 'table', 'dataTableLaunch bold centered rounded stats dataTable no-footer', False)
     for i, _ in enumerate(tables):
         for j in range(0, len(tables[i].find_all('a'))):
             player_name = tables[i].find_all('a')[j].text
@@ -137,63 +137,63 @@ def pl_get_two_start_starting_pitcher_matchup_tiers():
 
 
 # Return name and change in rank, sorted high to low
-def pl_get_batter_rank_trends():
-    weekly_rows = pl_startup('/category/fantasy/hitter-list', 'all', 'tr', 'new-tier', False)
-    player_dict = pl_get_trends(weekly_rows)
+def pitcherlist_get_batter_rank_trends():
+    weekly_rows = pitcherlist_startup('/category/fantasy/hitter-list', 'all', 'tr', 'new-tier', False)
+    player_dict = pitcherlist_get_trends(weekly_rows)
     sorted_dict = dictionary_sort(player_dict)
     return sorted_dict
 
 
 # Return name and rank, sorted low to high
-def pl_get_batter_ranks():
-    weekly_rows = pl_startup('/category/fantasy/hitter-list', 'all', 'tr', 'new-tier', False)
-    player_dict = pl_get_ranks(weekly_rows)
+def pitcherlist_get_batter_ranks():
+    weekly_rows = pitcherlist_startup('/category/fantasy/hitter-list', 'all', 'tr', 'new-tier', False)
+    player_dict = pitcherlist_get_ranks(weekly_rows)
     sorted_dict = dictionary_sort(player_dict)
     return sorted_dict
 
 
 # Return name and change in rank, sorted high to low
-def pl_get_closing_pitcher_rank_trends():
-    weekly_rows = pl_startup('/category/fantasy/closing-time/', 'all', 'tr', 'new-tier', False)
-    player_dict = pl_get_trends(weekly_rows)
+def pitcherlist_get_closing_pitcher_rank_trends():
+    weekly_rows = pitcherlist_startup('/category/fantasy/closing-time/', 'all', 'tr', 'new-tier', False)
+    player_dict = pitcherlist_get_trends(weekly_rows)
     sorted_dict = dictionary_sort(player_dict)
     return sorted_dict
 
 
 # Return name and rank, sorted low to high
-def pl_get_closing_pitcher_ranks():
-    weekly_rows = pl_startup('/category/fantasy/closing-time/', 'all', 'tr', 'new-tier', False)
-    player_dict = pl_get_ranks(weekly_rows)
+def pitcherlist_get_closing_pitcher_ranks():
+    weekly_rows = pitcherlist_startup('/category/fantasy/closing-time/', 'all', 'tr', 'new-tier', False)
+    player_dict = pitcherlist_get_ranks(weekly_rows)
     sorted_dict = dictionary_sort(player_dict)
     return sorted_dict
 
 
 # Return name and change in rank, sorted high to low
-def pl_get_relief_pitcher_rank_trends():
-    weekly_rows = pl_startup('/category/fantasy/the-hold-up/', 'all', 'tr', 'new-tier', False)
-    player_dict = pl_get_trends(weekly_rows)
+def pitcherlist_get_relief_pitcher_rank_trends():
+    weekly_rows = pitcherlist_startup('/category/fantasy/the-hold-up/', 'all', 'tr', 'new-tier', False)
+    player_dict = pitcherlist_get_trends(weekly_rows)
     sorted_dict = dictionary_sort(player_dict)
     return sorted_dict
 
 
 # Return name and rank, sorted low to high
-def pl_get_relief_pitcher_ranks():
-    weekly_rows = pl_startup('/category/fantasy/the-hold-up/', 'all', 'tr', 'new-tier', False)
-    player_dict = pl_get_ranks(weekly_rows)
+def pitcherlist_get_relief_pitcher_ranks():
+    weekly_rows = pitcherlist_startup('/category/fantasy/the-hold-up/', 'all', 'tr', 'new-tier', False)
+    player_dict = pitcherlist_get_ranks(weekly_rows)
     sorted_dict = dictionary_sort(player_dict)
     return sorted_dict
 
 
 # Tests with `pipenv run python src/provider_pitcherlist.py`
 if __name__ == '__main__':
-    print('\n', 'pl_get_starting_pitcher_rank_trends', '\n', pl_get_starting_pitcher_rank_trends())
-    print('\n', 'pl_get_starting_pitcher_ranks', '\n', pl_get_starting_pitcher_ranks())
-    print('\n', 'pl_get_streaming_starting_pitcher_ranks', '\n', pl_get_streaming_starting_pitcher_ranks())
-    print('\n', 'pl_get_starting_pitcher_matchup_tiers', '\n', pl_get_starting_pitcher_matchup_tiers())
-    print('\n', 'pl_get_two_start_starting_pitcher_matchup_tiers', '\n', pl_get_two_start_starting_pitcher_matchup_tiers())
-    print('\n', 'pl_get_batter_rank_trends', '\n', pl_get_batter_rank_trends())
-    print('\n', 'pl_get_batter_ranks', '\n', pl_get_batter_ranks())
-    print('\n', 'pl_get_closing_pitcher_rank_trends', '\n', pl_get_closing_pitcher_rank_trends())
-    print('\n', 'pl_get_closing_pitcher_ranks', '\n', pl_get_closing_pitcher_ranks())
-    print('\n', 'pl_get_relief_pitcher_rank_trends', '\n', pl_get_relief_pitcher_rank_trends())
-    print('\n', 'pl_get_relief_pitcher_ranks', '\n', pl_get_relief_pitcher_ranks())
+    print('\n', 'pitcherlist_get_starting_pitcher_rank_trends', '\n', pitcherlist_get_starting_pitcher_rank_trends())
+    print('\n', 'pitcherlist_get_starting_pitcher_ranks', '\n', pitcherlist_get_starting_pitcher_ranks())
+    print('\n', 'pitcherlist_get_streaming_starting_pitcher_ranks', '\n', pitcherlist_get_streaming_starting_pitcher_ranks())
+    print('\n', 'pitcherlist_get_starting_pitcher_matchup_tiers', '\n', pitcherlist_get_starting_pitcher_matchup_tiers())
+    print('\n', 'pitcherlist_get_two_start_starting_pitcher_matchup_tiers', '\n', pitcherlist_get_two_start_starting_pitcher_matchup_tiers())
+    print('\n', 'pitcherlist_get_batter_rank_trends', '\n', pitcherlist_get_batter_rank_trends())
+    print('\n', 'pitcherlist_get_batter_ranks', '\n', pitcherlist_get_batter_ranks())
+    print('\n', 'pitcherlist_get_closing_pitcher_rank_trends', '\n', pitcherlist_get_closing_pitcher_rank_trends())
+    print('\n', 'pitcherlist_get_closing_pitcher_ranks', '\n', pitcherlist_get_closing_pitcher_ranks())
+    print('\n', 'pitcherlist_get_relief_pitcher_rank_trends', '\n', pitcherlist_get_relief_pitcher_rank_trends())
+    print('\n', 'pitcherlist_get_relief_pitcher_ranks', '\n', pitcherlist_get_relief_pitcher_ranks())
