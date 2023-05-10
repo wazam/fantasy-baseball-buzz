@@ -6,7 +6,7 @@ csv_filename = 'mlb-players-fp'
 
 
 # Creates CSV file with list of Players' names
-def fp_get_player_names():
+def fantasypros_get_player_list():
     # Scrape table from URL
     url_tab = '/mlb/rankings/overall.php'
     csv_create_file(csv_filename)
@@ -23,4 +23,4 @@ def fp_get_player_names():
 
 # Tests with `pipenv run python src/provider_fantasypros.py`
 if __name__ == '__main__':
-    print('\n', 'fp_get_player_names', '\n', fp_get_player_names())
+    print('\n', 'fantasypros_get_player_list', '\n', fantasypros_get_player_list())
