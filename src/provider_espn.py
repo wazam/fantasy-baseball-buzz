@@ -1,70 +1,55 @@
 from os import environ
 from time import sleep
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException, NoSuchFrameException
 from selenium.webdriver.support.ui import Select
-from util_airtable import airtable_get_player_id, airtable_batch_update_player_data
+from selenium.common.exceptions import NoSuchElementException, NoSuchFrameException
+from requests.exceptions import HTTPError
+from util_airtable import airtable_get_player_id, airtable_batch_update_player_data, airtable_update_player_data
 from util_datetime import get_time_for_logs
 from util_dictionary import dictionary_sort
-from util_json import json_check_and_create_file, json_check_and_add_to_file # soon to remove
 from util_webdriver import webdriver_setup_driver, webdriver_cleanup_driver
 
 url_base = 'https://fantasy.espn.com/baseball'
 league_id_url = environ.get('ESPN_LEAGUE_ID')
 login_email = environ.get('ESPN_LOGIN_EMAIL')
 login_pass = environ.get('ESPN_LOGIN_PASSWORD')
-json_filename = 'mlb-players-espn'
-trends_dictionary = {}
+
 
 # Returns a numerically ordered dictionary of Players' names with their roster trends
 def espn_get_added_dropped_trends():
     url_tab = '/addeddropped'
     url = url_base + url_tab
-    trends_dictionary.clear()
-    column_name = 'espn_get_added_dropped_trends'
-    json_check_and_create_file(json_filename)  # Replace with separate espn_get_player_names()
+    trends_dictionary = {}
     driver = webdriver_setup_driver()
     driver.get(url)
     sleep(4)
-    # Count number of tables on the page
-    num_total_tables = len(driver.find_elements(By.XPATH, "//*[@class='ResponsiveTable players-table']"))
-    # Count number of rows on the page (across all tables)
-    num_total_rows = len(driver.find_elements(By.XPATH, "//*[@class='Table']/tbody/tr"))
-    # Calculate number of rows per each table
-    num_rows = int(num_total_rows / num_total_tables)
-    # Count number of available position pages
+    number_of_tables_on_page = len(driver.find_elements(By.XPATH, "//*[@class='ResponsiveTable players-table']"))
+    number_of_rows_on_page = len(driver.find_elements(By.XPATH, "//*[@class='Table']/tbody/tr"))
+    number_of_rows_per_table = int(number_of_rows_on_page / number_of_tables_on_page)
     num_total_positions = len(driver.find_elements(By.XPATH, "//*[@id='filterSlotIds']/label"))
-    # Loop through all position pages to scrape table data of Players
-    for p in range(2,num_total_positions+1):
-        # Create a search for each position page listed
-        xpath_position = "//*[@id='filterSlotIds']/label[" + str(p) + "]"
-        # Find the current position page
-        element_position = driver.find_element(By.XPATH, xpath_position)
-        # Click the position page navigation labl to update the web page and Player tables
-        element_position.click()
+    # Loop through all position pages
+    for position_page in range(2, num_total_positions+1):
+        xpath_of_position_page_box = "//*[@id='filterSlotIds']/label[" + str(position_page) + "]"
+        element_of_position_page_box = driver.find_element(By.XPATH, xpath_of_position_page_box)
+        element_of_position_page_box.click()
         sleep(1)
-        # Loop through all the tables
-        for each_table in range(0,num_total_tables):
-            # Loop through all the rows of Players on the current table on the current position page
-            for each_row in range(0,num_rows):
-                # Create a search for each Player's name
-                xpath_row_name = "(//*[@class='Table'])[" + str(int(each_table+1)) + "]/tbody/tr[" + str(int(each_row+1)) + "]/td[2]/div/div/div[2]/div/div[1]/span[1]/a"
-                # Find the current Player's name
-                row_name = str(driver.find_element(By.XPATH, xpath_row_name).text)
-                # Add Player's name to file
-                json_check_and_add_to_file(row_name, json_filename)
-                # Create a search for each Player's 7 Day roster ownership trends
-                xpath_row_number =  "(//*[@class='Table'])[" + str(int(each_table+1)) + "]/tbody/tr[" + str(int(each_row+1)) + "]/td[5]/div/span"
-                # Find the current Player's 7 Day roster ownership trends
-                row_number = float(driver.find_element(By.XPATH, xpath_row_number).text)
-                # Check if Player is already in trends dictionary to avoid duplicating Player's adds/drops for Players eligible on multiple position pages for the current day
-                if row_name not in trends_dictionary:
-                    # Add Player to daily dictionary with net change in 7 Day roster ownership trends
-                    trends_dictionary[row_name] = row_number
-                    #
-                    # 
-                    # 
-                    # airtable_update_player_data(airtable_check_player_name(row_name), row_number, column_name)
+        # Loop through both the tables
+        for each_table in range(0, number_of_tables_on_page):
+            # Loop through all the rows of Players on each table
+            for each_row in range(0, number_of_rows_per_table):
+                xpath_player = "(//*[@class='Table'])[" + str(int(each_table+1)) + "]/tbody/tr[" + str(int(each_row+1)) + "]"
+                xpath_player_name = xpath_player + "/td[2]/div/div/div[2]/div/div[1]/span[1]/a"
+                player_name = str(driver.find_element(By.XPATH, xpath_player_name).text)
+                xpath_player_team = xpath_player + "/td[2]/div/div/div[2]/div/div[2]/span[1]"
+                player_team = str(driver.find_element(By.XPATH, xpath_player_team).text)
+                xpath_player_position = xpath_player + "/td[2]/div/div/div[2]/div/div[2]/span[2]"
+                player_position = str(driver.find_element(By.XPATH, xpath_player_position).text)
+                xpath_trend_value =  xpath_player + "/td[5]/div/span"
+                trend_value = float(driver.find_element(By.XPATH, xpath_trend_value).text)
+                if player_name not in trends_dictionary:
+                    trends_dictionary[player_name] = trend_value
+                    print(player_name, player_team, player_position, trend_value)
+                    airtable_update_player_data(player_name, player_team, player_position, 'E +/-',  trend_value)
     webdriver_cleanup_driver(driver)
     sorted_dict = dictionary_sort(trends_dictionary)
     return sorted_dict
@@ -189,12 +174,18 @@ def espn_get_all_players():
 
                 player_id = airtable_get_player_id(player_name, player_team, player_position)
                 if player_id == False:
-                    print('break on player not found', player_name, player_team, player_position)
+                    print('break on player not found', player_name, player_team, player_position) ###
                     return
                 list_of_player_record.append({'id': str(player_id), 'fields': list_of_player_fields})
-                print(get_time_for_logs(), '| Updated', player_name)
-                airtable_batch_update_player_data(list_of_player_record)
-            print(get_time_for_logs(), '| Finished page', page+1, 'out of', number_of_pages_per_position)
+                print(get_time_for_logs(), '| Updated', player_name) ###
+
+                try:
+                    airtable_batch_update_player_data(list_of_player_record)
+                except HTTPError:
+                    sleep(15)
+                    airtable_batch_update_player_data(list_of_player_record) ###
+
+            print(get_time_for_logs(), '| Finished page', page+1, 'out of', number_of_pages_per_position) ###
             next_page_button = driver.find_element(By.XPATH, "/html/body/div[1]/div[1]/div/div/div[5]/div[2]/div[3]/div/div/div[3]/nav/button[2]")
             next_page_button.click()
             sleep(3)
@@ -205,4 +196,4 @@ def espn_get_all_players():
 # Tests with `pipenv run python src/provider_espn.py`
 if __name__ == '__main__':
     # print('\n', 'espn_get_added_dropped_trends', '\n', espn_get_added_dropped_trends())
-    print('\n', 'espn_get_all_players', '\n', espn_get_all_players())  # 3536 players x 2 secs/player = 2 hr runtime
+    print('\n', 'espn_get_all_players', '\n', espn_get_all_players())  #  3,534 players  x  1 secs/player  =  58.9 mins runtime
