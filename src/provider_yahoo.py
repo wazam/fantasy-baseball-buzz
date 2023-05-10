@@ -1,4 +1,4 @@
-# from util_airtable import airtable_check_player_name, airtable_update_player_data
+from util_airtable import airtable_check_player_name, airtable_update_player_data
 from util_beautifulsoup import beautifulsoup_scrape_class, beautifulsoup_find_class, beautifulsoup_find
 from util_datetime import date_X_days_ago
 from util_dictionary import dictionary_sort
@@ -79,23 +79,31 @@ def yahoo_get_added_dropped_trends(number_of_days_to_scrape):
             else:
                 weekly_dict[key] = weekly_dict[key] + daily_dict[key]
 
-    # Send the combined multi-day data to Airtable
     for key in weekly_dict.keys():
         if key not in trends_dictionary:
-            # breakpoint()
             trends_dictionary[key] = weekly_dict[key]
-            #
-            # 
-            # 
             # airtable_update_player_data(airtable_check_player_name(key), weekly_dict[key], column_name)
 
-    # Sort the weekly dictionary from High to Low
     sorted_weekly_dict = dictionary_sort(weekly_dict)
     return sorted_weekly_dict
 
 
+# Returns all Players to Airtable
+def yahoo_get_player_list():
+    url_tab = '/b1/149226/players?status=A&pos=B&cut_type=33&stat1=S_S_2023&myteam=0&sort=R_PO&sdir=1&count=1200'
+    url = url_base + url_tab
+    return
+
+
+# Returns all deeper-searched Players to Airtable
+def yahoo_get_player_list_deep():
+    url_tab = '/b1/149226/showforced'
+    url = url_base + url_tab
+    return
+
+
 # Tests with `pipenv run python src/provider_yahoo.py`
 if __name__ == '__main__':
-    print('\n', 'yahoo_get_added_dropped_trends-1day', '\n', yahoo_get_added_dropped_trends(2))
-    # print('\n', 'yahoo_get_added_dropped_trends-7days', '\n', yahoo_get_added_dropped_trends(7))
-    # print('\n', 'yahoo_get_added_dropped_trends-7days', '\n', yahoo_get_added_dropped_trends(14))
+    print('\n', 'yahoo_get_added_dropped_trends()', '\n', yahoo_get_added_dropped_trends(7))
+    print('\n', 'yahoo_get_player_list', '\n', yahoo_get_player_list())
+    print('\n', 'yahoo_get_player_list_deep', '\n', yahoo_get_player_list_deep())
