@@ -8,7 +8,7 @@ csv_filename = 'mlb-players-mlb'
 
 
 # Creates CSV file with list of Players' names
-def mlb_get_player_names():
+def mlb_get_player_list():
     # Setup URL in webdriver
     url_tab = '/players'
     url = url_base + url_tab
@@ -32,4 +32,4 @@ def mlb_get_player_names():
 
 # Tests with `pipenv run python src/provider_mlb.py`
 if __name__ == '__main__':
-    print('\n', 'mlb_get_player_names', '\n', mlb_get_player_names())
+    print('\n', 'mlb_get_player_list', '\n', mlb_get_player_list())
