@@ -10,9 +10,11 @@ from util_dictionary import dictionary_sort
 from util_webdriver import webdriver_setup_driver, webdriver_cleanup_driver
 
 url_base = 'https://fantasy.espn.com/baseball'
-league_id = environ.get('ESPN_LEAGUE_ID')
 login_email = environ.get('ESPN_LOGIN_EMAIL')
 login_pass = environ.get('ESPN_LOGIN_PASSWORD')
+league_id = environ.get('ESPN_LEAGUE_ID')
+team_name = environ.get('ESPN_TEAM_NAME')
+team_abbreviation = environ.get('ESPN_TEAM_ABBREVIATION')
 
 
 # Returns a numerically ordered dictionary of Players' names with their roster trends
@@ -57,20 +59,6 @@ def espn_get_added_dropped_trends():
 
 # Interacts with user login display box
 def espn_login(driver):
-    driver.find_element(By.XPATH, "//*[@id='InputLoginValue']").send_keys(login_email)
-    driver.find_element(By.XPATH, "//*[@id='InputPassword']").send_keys(login_pass)
-    driver.find_element(By.XPATH, "//*[@id='BtnSubmit']").click()
-    sleep(7)
-    return
-
-
-# Returns all Players to Airtable
-def espn_get_player_list():
-    url_tab = '/players/add?view=trending&leagueId=' + league_id
-    url = url_base + url_tab
-    driver = webdriver_setup_driver()
-    driver.get(url)
-    sleep(3)
     try:
         log_in_button_html = driver.find_element(By.XPATH, "/html/body/div[1]/div[1]/div/div/div[5]/div[2]/div[2]/div/div/button")
     except NoSuchElementException:
@@ -82,13 +70,30 @@ def espn_get_player_list():
         pass
     try:
         if log_in_button_iframe:
-            espn_login(driver)
+            driver.find_element(By.XPATH, "//*[@id='InputLoginValue']").send_keys(login_email)
+            driver.find_element(By.XPATH, "//*[@id='InputPassword']").send_keys(login_pass)
+            driver.find_element(By.XPATH, "//*[@id='BtnSubmit']").click()
+            sleep(7)
             driver.switch_to.default_content()
         elif log_in_button_html:
             log_in_button_html.click()
-            espn_login(driver)
+            driver.find_element(By.XPATH, "//*[@id='InputLoginValue']").send_keys(login_email)
+            driver.find_element(By.XPATH, "//*[@id='InputPassword']").send_keys(login_pass)
+            driver.find_element(By.XPATH, "//*[@id='BtnSubmit']").click()
+            sleep(7)
     except TypeError:
         pass
+    return
+
+# Returns all Players to Airtable
+def espn_get_player_list():
+    url_tab = '/players/add?view=trending&leagueId=' + league_id
+    url = url_base + url_tab
+    driver = webdriver_setup_driver()
+    driver.get(url)
+    sleep(3)
+    espn_login(driver)
+
     filter_button = driver.find_element(By.XPATH, "//*[@id='filterStatus']")
     Select(filter_button).select_by_visible_text('All')
     sleep(3)
@@ -110,12 +115,12 @@ def espn_get_player_list():
         last_element_in_pagination_box = elements_in_pagination_box[number_of_elements_in_pagination_box - 1]
         number_of_pages_per_position = int(last_element_in_pagination_box.text)
 
-        page_start_on = 34
+        page_start_on = 1
 
-        # Loop clickig next page button until arrival at desored start page
+        # Loop click next page button until arrival at desired starting page
         for page in range(1, page_start_on):
             driver.find_element(By.XPATH, "/html/body/div[1]/div[1]/div/div/div[5]/div[2]/div[3]/div/div/div[3]/nav/button[2]").click()
-            print('Loading page', page+1)
+            print(get_time_for_logs(), '| Loading page', page+1, 'out of', page_start_on) ###
             sleep(1)
 
         # Loop through the remaining pages
@@ -154,7 +159,7 @@ def espn_get_player_list():
 
                 list_of_player_fields['Injury'] = player_injury_status
 
-                if player_rostered_team == 'BIGJ': # My team
+                if player_rostered_team == team_abbreviation:  # My team
                     on_someones_roster = True
                     on_my_roster = True
                 elif player_rostered_team.startswith('WA ('):  # Waitlist
@@ -175,10 +180,11 @@ def espn_get_player_list():
                 player_id = airtable_get_player_id(player_name, player_team, player_position)
                 if player_id == False:
                     airtable_check_and_create_player(player_name, player_team, player_position)
+                    print(get_time_for_logs(), '| Created player', player_name, player_team, player_position) ###
                     player_id = airtable_get_player_id(player_name, player_team, player_position)
                 list_of_player_record.append({'id': str(player_id), 'fields': list_of_player_fields})
                 airtable_batch_update_player_data(list_of_player_record)
-                # print(get_time_for_logs(), '| Updated', player_name)
+                print(get_time_for_logs(), '| Updated player', player_name) ###
             print(get_time_for_logs(), '| Finished page', page+1, 'out of', number_of_pages_per_position) ###
             next_page_button = driver.find_element(By.XPATH, "/html/body/div[1]/div[1]/div/div/div[5]/div[2]/div[3]/div/div/div[3]/nav/button[2]")
             next_page_button.click()
@@ -194,12 +200,69 @@ def espn_get_rostered_players():
     driver = webdriver_setup_driver()
     driver.get(url)
     sleep(3)
+    espn_login(driver)
+    xpath_tables ="//*[@class='InnerLayout flex flex-auto flex-wrap']/div"
+    xpath_rows = "//*[@class='Table']/tbody/tr"
+    all_tables = driver.find_elements(By.XPATH, xpath_tables)
+    all_rows = driver.find_elements(By.XPATH, xpath_rows)
+    num_tables = len(all_tables)
+    num_rows = len(all_rows)
+    rows_per_table = int(num_rows / num_tables)
+    # Loop through all the tables
+    for table in range(0, num_tables):
+        # Loop through the rows of Player data
+        xpath_data = xpath_tables + "[" + str(int(table+1)) + "]"
+        xpath_row = xpath_data + "/div/div[1]/div/div[2]/div/div[2]/table/tbody/tr"
+        for row in range(0, rows_per_table):
+            xpath_player = xpath_row + "[" + str(int(row+1)) + "]/td[2]/div/div"
+            player = driver.find_element(By.XPATH, xpath_player).text
+            # Skip empty roster spots
+            if player == 'Empty':
+                break
+
+            xpath_player_name = xpath_player + "/div[2]/div/div[1]/span[1]/a"
+            xpath_player_team = xpath_player + "/div[2]/div/div[2]/span[1]"
+            xpath_player_position = xpath_player + "/div[2]/div/div[2]/span[2]"
+            xpath_player_injury_status = xpath_player + "/div[2]/div/div[1]/span[2]"
+            xpath_player_rostered_team = xpath_data + "/div/div[1]/div/div[1]/div/a/span"
+
+            player_name = driver.find_element(By.XPATH, xpath_player_name).text
+            player_team = driver.find_element(By.XPATH, xpath_player_team).text
+            player_position = driver.find_element(By.XPATH, xpath_player_position).text
+            player_injury_status = ''
+            try:
+                player_injury_status = driver.find_element(By.XPATH, xpath_player_injury_status).text
+            except NoSuchElementException:
+                pass
+            player_rostered_team = driver.find_element(By.XPATH, xpath_player_rostered_team).text
+
+            list_of_player_record = []
+            list_of_player_fields = {}
+            list_of_player_fields = {'Team': player_team, 'Position': player_position}
+            list_of_player_fields['Injury'] = player_injury_status
+            if player_rostered_team.lower() == team_name.lower():  # My team
+                on_someones_roster = True
+                on_my_roster = True
+            else:  # Another team
+                on_someones_roster = True
+                on_my_roster = False
+            list_of_player_fields['Available'] = on_someones_roster
+            list_of_player_fields['Rostered'] = on_my_roster
+
+            player_id = airtable_get_player_id(player_name, player_team, player_position)
+            if player_id == False:
+                airtable_check_and_create_player(player_name, player_team, player_position)
+                print(get_time_for_logs(), '| Created player', player_name, player_team, player_position) ###
+                player_id = airtable_get_player_id(player_name, player_team, player_position)
+            list_of_player_record.append({'id': str(player_id), 'fields': list_of_player_fields})
+            airtable_batch_update_player_data(list_of_player_record)
+            print(get_time_for_logs(), '| Updated player', player_name) ###
     webdriver_cleanup_driver(driver)
     return
 
 
 # Tests with `pipenv run python src/provider_espn.py`
 if __name__ == '__main__':
-    #print('\n', 'espn_get_added_dropped_trends', '\n', espn_get_added_dropped_trends())
+    # print('\n', 'espn_get_added_dropped_trends', '\n', espn_get_added_dropped_trends())
     print('\n', 'espn_get_player_list', '\n', espn_get_player_list())  #  3,534 players  x  1 secs/player  =  58.9 mins runtime
-    #print('\n', 'espn_get_player_list', '\n', espn_get_player_list())
+    # print('\n', 'espn_get_rostered_players', '\n', espn_get_rostered_players())
