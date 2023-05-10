@@ -5,9 +5,10 @@ from provider_espn import espn_get_added_dropped_trends, espn_get_player_list, e
 from provider_fantasypros import fantasypros_get_player_list
 from provider_mlb import mlb_get_player_list
 from provider_pitcherlist import pitcherlist_get_starting_pitcher_rank_trends, pitcherlist_get_starting_pitcher_ranks, \
-    pitcherlist_get_streaming_starting_pitcher_ranks, pitcherlist_get_starting_pitcher_matchup_tiers, pitcherlist_get_two_start_starting_pitcher_matchup_tiers, \
-    pitcherlist_get_batter_rank_trends, pitcherlist_get_batter_ranks, pitcherlist_get_closing_pitcher_rank_trends, pitcherlist_get_closing_pitcher_ranks, \
-    pitcherlist_get_relief_pitcher_rank_trends, pitcherlist_get_relief_pitcher_ranks
+    pitcherlist_get_streaming_starting_pitcher_ranks, pitcherlist_get_starting_pitcher_matchup_tiers, \
+    pitcherlist_get_two_start_starting_pitcher_matchup_tiers, pitcherlist_get_batter_rank_trends, pitcherlist_get_batter_ranks, \
+    pitcherlist_get_closing_pitcher_rank_trends, pitcherlist_get_closing_pitcher_ranks, pitcherlist_get_relief_pitcher_rank_trends, \
+    pitcherlist_get_relief_pitcher_ranks
 from provider_yahoo import yahoo_get_added_dropped_trends, yahoo_get_player_list, yahoo_get_player_list_deep
 
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
@@ -67,7 +68,14 @@ def yahoo_3():
 def cbs_1():
     data = cbs_get_added_dropped_trends()
     return data
-
+@app.route('/cbs_2')
+def cbs_2():
+    data = cbs_get_viewed_trends()
+    return data
+@app.route('/cbs_3')
+def cbs_3():
+    data = cbs_get_traded_trends()
+    return data
 
 @app.route('/pitcherlist_1')
 def pitcherlist_1():
