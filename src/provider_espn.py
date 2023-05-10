@@ -3,8 +3,8 @@ from time import sleep
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException, NoSuchFrameException
-from requests.exceptions import HTTPError
-from util_airtable import airtable_get_player_id, airtable_batch_update_player_data, airtable_update_player_data
+from util_airtable import airtable_get_player_id, airtable_batch_update_player_data, airtable_update_player_data, \
+    airtable_check_and_create_player
 from util_datetime import get_time_for_logs
 from util_dictionary import dictionary_sort
 from util_webdriver import webdriver_setup_driver, webdriver_cleanup_driver
@@ -110,17 +110,20 @@ def espn_get_player_list():
         last_element_in_pagination_box = elements_in_pagination_box[number_of_elements_in_pagination_box - 1]
         number_of_pages_per_position = int(last_element_in_pagination_box.text)
 
-        page_start_on = 1
+        page_start_on = 34
 
+        # Loop clickig next page button until arrival at desored start page
         for page in range(1, page_start_on):
             driver.find_element(By.XPATH, "/html/body/div[1]/div[1]/div/div/div[5]/div[2]/div[3]/div/div/div[3]/nav/button[2]").click()
             print('Loading page', page+1)
             sleep(1)
 
+        # Loop through the remaining pages
         for page in range(page_start_on-1, number_of_pages_per_position):
             xpath_of_table_row = "//*[@class='Table']/tbody/tr"
             number_of_table_rows_per_page = len(driver.find_elements(By.XPATH, xpath_of_table_row))
 
+            # Loop through the rows of Player data
             for row in range(0, number_of_table_rows_per_page):
                 xpath_of_player_row = xpath_of_table_row + "[" + str(int(row+1)) + "]/td[1]/div/div/div[2]/div/div["
                 xpath_of_player_name = xpath_of_player_row + "1]/span[1]/a"
@@ -147,9 +150,6 @@ def espn_get_player_list():
                 list_of_player_record = []  # Possible limit of 10 ids, but page has 50 players
                 list_of_player_fields = {}
 
-                # # Need way to add new names
-                # airtable_check_and_create_player(player_name)
-
                 list_of_player_fields = {'Team': player_team, 'Position': player_position}
 
                 list_of_player_fields['Injury'] = player_injury_status
@@ -174,17 +174,11 @@ def espn_get_player_list():
 
                 player_id = airtable_get_player_id(player_name, player_team, player_position)
                 if player_id == False:
-                    print('break on player not found', player_name, player_team, player_position) ###
-                    return
+                    airtable_check_and_create_player(player_name, player_team, player_position)
+                    player_id = airtable_get_player_id(player_name, player_team, player_position)
                 list_of_player_record.append({'id': str(player_id), 'fields': list_of_player_fields})
-                print(get_time_for_logs(), '| Updated', player_name) ###
-
-                try:
-                    airtable_batch_update_player_data(list_of_player_record)
-                except HTTPError:
-                    sleep(15)
-                    airtable_batch_update_player_data(list_of_player_record) ###
-
+                airtable_batch_update_player_data(list_of_player_record)
+                # print(get_time_for_logs(), '| Updated', player_name)
             print(get_time_for_logs(), '| Finished page', page+1, 'out of', number_of_pages_per_position) ###
             next_page_button = driver.find_element(By.XPATH, "/html/body/div[1]/div[1]/div/div/div[5]/div[2]/div[3]/div/div/div[3]/nav/button[2]")
             next_page_button.click()
@@ -206,6 +200,6 @@ def espn_get_rostered_players():
 
 # Tests with `pipenv run python src/provider_espn.py`
 if __name__ == '__main__':
-    print('\n', 'espn_get_added_dropped_trends', '\n', espn_get_added_dropped_trends())
+    #print('\n', 'espn_get_added_dropped_trends', '\n', espn_get_added_dropped_trends())
     print('\n', 'espn_get_player_list', '\n', espn_get_player_list())  #  3,534 players  x  1 secs/player  =  58.9 mins runtime
-    print('\n', 'espn_get_player_list', '\n', espn_get_player_list())
+    #print('\n', 'espn_get_player_list', '\n', espn_get_player_list())

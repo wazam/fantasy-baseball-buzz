@@ -1,5 +1,7 @@
 from os import environ
+from time import sleep
 from pyairtable import Table, formulas
+from requests.exceptions import HTTPError, ConnectionError
 
 auth_token = environ.get('AIRTABLE_API_KEY')
 base_id = environ.get('AIRTABLE_BASE_ID')
@@ -64,7 +66,7 @@ def airtable_get_player_id(name, team, position):
 def airtable_check_and_create_player(name, team, position):
     if airtable_get_player_id(name, team, position) == False:
         table = airtable_setup()
-        fields = {'Player': name, 'Team': team, 'Position': position}
+        fields = {'Player': name, 'Team': team, 'Position': position, 'New': True}
         table.create(fields)
     return
 
@@ -82,16 +84,21 @@ def airtable_update_player_data(name, team, position, column, value):
 def airtable_batch_update_player_data(records):
     table = airtable_setup()
     # example_list_of_records = [{"id": "recwPQIfs4wKPyc9D", "fields": {"First Name": "Matt", ...}}, {"id": ...]
-    table.batch_update(records)
+    try:
+        table.batch_update(records)
+    except (HTTPError, ConnectionError) as error:
+        print(error)
+        sleep(30)
+        table.batch_update(records)
     return
 
 
 # Tests with `pipenv run python src/util_airtable.py`
 if __name__ == '__main__':
     print('\n', 'airtable_setup', '\n', airtable_setup())
-    test_name = 'Jean-Carlos Mejia'
-    test_team = 'Mil'
-    test_position = 'RP'
+    test_name = 'Chris Okey'
+    test_team = 'LAA'
+    test_position = 'C'
     print('\n', 'airtable_get_player_id()', '\n', airtable_get_player_id(test_name, test_team, test_position))
     print('\n', 'airtable_check_and_create_player()', '\n', airtable_check_and_create_player(test_name, test_team, test_position))
     test_column = 'Watchlist'
