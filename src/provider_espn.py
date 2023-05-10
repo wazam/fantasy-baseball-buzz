@@ -10,7 +10,7 @@ from util_dictionary import dictionary_sort
 from util_webdriver import webdriver_setup_driver, webdriver_cleanup_driver
 
 url_base = 'https://fantasy.espn.com/baseball'
-league_id_url = environ.get('ESPN_LEAGUE_ID')
+league_id = environ.get('ESPN_LEAGUE_ID')
 login_email = environ.get('ESPN_LOGIN_EMAIL')
 login_pass = environ.get('ESPN_LOGIN_PASSWORD')
 
@@ -64,9 +64,9 @@ def espn_login(driver):
     return
 
 
-# Returns all Players' names to Airtable
-def espn_get_all_players():
-    url_tab = '/players/add?view=trending&leagueId=' + league_id_url
+# Returns all Players to Airtable
+def espn_get_player_list():
+    url_tab = '/players/add?view=trending&leagueId=' + league_id
     url = url_base + url_tab
     driver = webdriver_setup_driver()
     driver.get(url)
@@ -193,7 +193,19 @@ def espn_get_all_players():
     return
 
 
+# Returns all rostered Players to Airtable
+def espn_get_rostered_players():
+    url_tab = '/league/rosters?leagueId=' + league_id
+    url = url_base + url_tab
+    driver = webdriver_setup_driver()
+    driver.get(url)
+    sleep(3)
+    webdriver_cleanup_driver(driver)
+    return
+
+
 # Tests with `pipenv run python src/provider_espn.py`
 if __name__ == '__main__':
-    # print('\n', 'espn_get_added_dropped_trends', '\n', espn_get_added_dropped_trends())
-    print('\n', 'espn_get_all_players', '\n', espn_get_all_players())  #  3,534 players  x  1 secs/player  =  58.9 mins runtime
+    print('\n', 'espn_get_added_dropped_trends', '\n', espn_get_added_dropped_trends())
+    print('\n', 'espn_get_player_list', '\n', espn_get_player_list())  #  3,534 players  x  1 secs/player  =  58.9 mins runtime
+    print('\n', 'espn_get_player_list', '\n', espn_get_player_list())
