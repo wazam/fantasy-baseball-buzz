@@ -1,5 +1,5 @@
 from util_airtable import airtable_check_player_name, airtable_update_player_data
-from util_beautifulsoup import beautifulsoup_scrape_class, beautifulsoup_find_class, beautifulsoup_find
+from util_beautifulsoup import beautifulsoup_scrape, beautifulsoup_find
 from util_datetime import date_X_days_ago
 from util_dictionary import dictionary_sort
 from util_json import json_check_and_create_file, json_add_to_file, json_check_and_add_to_file, json_get_from_file
@@ -25,20 +25,20 @@ def yahoo_get_added_dropped_trends(number_of_days_to_scrape):
         date_scrape = date_X_days_ago(day)
         url_tab = '/b1/buzzindex?sort=BI_S&src=combined&bimtab=ALL&trendtab=O&pos=ALL&date='
         url_scrape = url_base + url_tab + str(date_scrape)
-        elements_positions = beautifulsoup_scrape_class(url_scrape, 'all', 'a', 'Navtarget', True)[46::]
+        elements_positions = beautifulsoup_scrape(url_scrape, 'all', 'a', 'Navtarget', True)[46::]
 
         # Get Players table data from position page
         for position in elements_positions:
             url_tab = str(position['href'])
             url_scrape = url_base + url_tab
-            results_table = beautifulsoup_scrape_class(url_scrape, 'all', 'table', 'Tst-table Table', False)[0]
-            elements_rows = beautifulsoup_find(results_table, 'all', 'tr', False)[2::]
-            elements_players = beautifulsoup_find_class(results_table, 'all', 'a', 'Nowrap', True)
+            results_table = beautifulsoup_scrape(url_scrape, 'all', 'table', 'Tst-table Table', False)[0]
+            elements_rows = beautifulsoup_find(results_table, 'all', 'tr', '', False)[2::]
+            elements_players = beautifulsoup_find(results_table, 'all', 'a', 'Nowrap', True)
 
             # Get index from row of all Player's column data
             data_rows.clear()
             for index, row in enumerate(elements_rows):
-                elements_columns = beautifulsoup_find(row, 'all', 'td', False)
+                elements_columns = beautifulsoup_find(row, 'all', 'td', '', False)
                 elements_columns = [each_column.text.strip() for each_column in elements_columns]
                 data_rows.append([each_column for each_column in elements_columns if each_column])
 
@@ -57,7 +57,7 @@ def yahoo_get_added_dropped_trends(number_of_days_to_scrape):
                         break
                     elif key == len(players_json['players']) - 1:
                         url_scrape = str(elements_players[index]['href'])
-                        element_player_name_full = beautifulsoup_scrape_class(url_scrape, '', 'span', 'ys-name', False)
+                        element_player_name_full = beautifulsoup_scrape(url_scrape, '', 'span', 'ys-name', False)
                         player_name_full = fix_str_format(element_player_name_full.text)
                         new_player_data = {"short_name": player_name_short, "full_name": player_name_full}
                         json_add_to_file(new_player_data, 'lookup-first-name-abbreviation')
@@ -105,5 +105,5 @@ def yahoo_get_player_list_deep():
 # Tests with `pipenv run python src/provider_yahoo.py`
 if __name__ == '__main__':
     print('\n', 'yahoo_get_added_dropped_trends()', '\n', yahoo_get_added_dropped_trends(7))
-    print('\n', 'yahoo_get_player_list', '\n', yahoo_get_player_list())
-    print('\n', 'yahoo_get_player_list_deep', '\n', yahoo_get_player_list_deep())
+    # print('\n', 'yahoo_get_player_list', '\n', yahoo_get_player_list())
+    # print('\n', 'yahoo_get_player_list_deep', '\n', yahoo_get_player_list_deep())
