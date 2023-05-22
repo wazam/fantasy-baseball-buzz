@@ -3,8 +3,7 @@ from time import sleep
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException, NoSuchFrameException
-from util_airtable import airtable_check_player_and_get_id, airtable_update_player_data, \
-    airtable_batch_update_player_data
+from util_airtable import airtable_check_player_and_get_id, airtable_update_player_data, airtable_batch_update_player_data
 from util_datetime import get_time_for_logs
 from util_dictionary import dictionary_sort
 from util_webdriver import webdriver_setup_driver, webdriver_cleanup_driver
@@ -93,7 +92,7 @@ def espn_get_player_list():
     url = url_base + url_tab
     driver = webdriver_setup_driver()
     driver.get(url)
-    sleep(3)
+    sleep(10)
     espn_login(driver)
     # Change filter to display all Players
     filter_button = driver.find_element(By.XPATH, "//*[@id='filterStatus']")

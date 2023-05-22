@@ -21,7 +21,7 @@ RUN groupadd --gid $USER_GID $USERNAME \
 
 WORKDIR /home/fbb/fantasy-baseball-buzz
 COPY Pipfile* ./
-RUN pip install pipenv && pipenv install --system --deploy --ignore-pipfile --verbose
+RUN pip install --upgrade pip && pip install pipenv && pipenv install --system --deploy --ignore-pipfile --verbose
 COPY . .
 
 EXPOSE 5000/tcp
