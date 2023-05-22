@@ -1,11 +1,15 @@
 FROM python:3.11.3-slim
 
+ENV DEBIAN_FRONTEND noninteractive
+ENV DEBCONF_NOWARNINGS="yes"
+
 ENV FLASK_APP=src/main.py
 ENV FLASK_RUN_HOST=0.0.0.0
 
 USER root
-RUN apt-get update
-RUN apt-get install -y --no-install-recommends firefox-esr
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        firefox-esr
 
 # https://code.visualstudio.com/remote/advancedcontainers/add-nonroot-user
 ARG USERNAME=fbb
@@ -26,5 +30,5 @@ COPY . .
 
 EXPOSE 5000/tcp
 
-# USER fbb
+USER fbb
 CMD pipenv run flask run

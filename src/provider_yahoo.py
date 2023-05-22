@@ -1,4 +1,4 @@
-from util_airtable import airtable_check_player_name, airtable_update_player_data
+from util_airtable import airtable_check_player_and_get_id, airtable_update_player_data
 from util_beautifulsoup import beautifulsoup_scrape, beautifulsoup_find
 from util_datetime import date_X_days_ago
 from util_dictionary import dictionary_sort
