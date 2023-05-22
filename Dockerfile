@@ -1,14 +1,14 @@
 FROM python:3.11.3-slim
 
-ENV DEBIAN_FRONTEND noninteractive
-ENV DEBCONF_NOWARNINGS="yes"
-
 ENV FLASK_APP=src/main.py
 ENV FLASK_RUN_HOST=0.0.0.0
 
+ARG DEBIAN_FRONTEND=noninteractive
+ARG DEBCONF_NOWARNINGS="yes"
+
 USER root
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
+    && apt-get --no-install-recommends --assume-yes --quiet install \
         firefox-esr
 
 # https://code.visualstudio.com/remote/advancedcontainers/add-nonroot-user
