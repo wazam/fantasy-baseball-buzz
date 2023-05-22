@@ -26,5 +26,5 @@ COPY . .
 
 EXPOSE 5000/tcp
 
-USER fbb
+# USER fbb
 CMD pipenv run flask run
