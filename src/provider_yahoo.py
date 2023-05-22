@@ -13,7 +13,7 @@ trends_dictionary = {}
 json_filename = 'mlb-players-yahoo'
 
 # Returns a numerically ordered dictionary of Players' names with their add/drop roster trends
-def yahoo_get_added_dropped_trends(number_of_days_to_scrape):
+def yahoo_get_added_dropped_trends_X_days(number_of_days_to_scrape):
     column_name = 'yahoo_get_added_dropped_trends'
     json_check_and_create_file(json_filename)  # Replace with separate _get_player_names()
     weekly_dict.clear()
@@ -89,21 +89,28 @@ def yahoo_get_added_dropped_trends(number_of_days_to_scrape):
 
 
 # Returns all Players to Airtable
+def yahoo_get_added_dropped_trends():
+    data = yahoo_get_added_dropped_trends_X_days(7)
+    return data
+
+
+# Returns all Players to Airtable
 def yahoo_get_player_list():
     url_tab = '/b1/149226/players?status=A&pos=B&cut_type=33&stat1=S_S_2023&myteam=0&sort=R_PO&sdir=1&count=1200'
     url = url_base + url_tab
-    return
+    return ('204', 204)
 
 
 # Returns all deeper-searched Players to Airtable
 def yahoo_get_player_list_deep():
     url_tab = '/b1/149226/showforced'
     url = url_base + url_tab
-    return
+    return ('204', 204)
 
 
 # Tests with `pipenv run python src/provider_yahoo.py`
 if __name__ == '__main__':
-    print('\n', 'yahoo_get_added_dropped_trends()', '\n', yahoo_get_added_dropped_trends(7))
+    print('\n', 'yahoo_get_added_dropped_trends_X_days()', '\n', yahoo_get_added_dropped_trends(1))
+    # print('\n', 'yahoo_get_added_dropped_trends', '\n', yahoo_get_added_dropped_trends())
     # print('\n', 'yahoo_get_player_list', '\n', yahoo_get_player_list())
     # print('\n', 'yahoo_get_player_list_deep', '\n', yahoo_get_player_list_deep())

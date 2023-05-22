@@ -37,38 +37,32 @@ def airtable_page():
     return redirect(url)
 
 
-@app.route('/espn_1')
-def espn_1():
-    data = espn_get_added_dropped_trends()
+@app.route('/espn/<int:func_id>')
+def show_espn(func_id):
+    func_list = [espn_get_added_dropped_trends, espn_get_player_list, espn_get_rostered_players]
+    if int(func_id) > 0 and int(func_id) <= len(func_list):
+        func_name = func_list[func_id-1]
+        data = func_name()
+    else:
+        data = (html_404_page, 404)
     return data
-@app.route('/espn_2')
-def espn_2():
-    espn_get_player_list()
-    return
-@app.route('/espn_3')
-def espn_3():
-    espn_get_rostered_players()
-    return
 
 
-@app.route('/yahoo_1')
-def yahoo_1():
-    data = yahoo_get_added_dropped_trends(7)
+@app.route('/yahoo/<int:func_id>')
+def show_yahoo(func_id):
+    func_list = [yahoo_get_added_dropped_trends, yahoo_get_player_list, yahoo_get_player_list_deep]
+    if int(func_id) > 0 and int(func_id) <= len(func_list):
+        func_name = func_list[func_id-1]
+        data = func_name()
+    else:
+        data = (html_404_page, 404)
     return data
-@app.route('/yahoo_2')
-def yahoo_2():
-    yahoo_get_player_list()
-    return
-@app.route('/yahoo_3')
-def yahoo_3():
-    yahoo_get_player_list_deep()
-    return
 
 
 @app.route('/cbs/<int:func_id>')
 def show_cbs(func_id):
+    func_list = [cbs_get_added_dropped_trends, cbs_get_viewed_trends, cbs_get_traded_trends]
     if int(func_id) > 0 and int(func_id) <= len(func_list):
-        func_list = [cbs_get_added_dropped_trends, cbs_get_viewed_trends, cbs_get_traded_trends]
         func_name = func_list[func_id-1]
         data = func_name()
     else:
@@ -78,13 +72,13 @@ def show_cbs(func_id):
 
 @app.route('/pitcherlist/<int:func_id>')
 def show_pitcherlist(func_id):
+    func_list = [pitcherlist_get_starting_pitcher_rank_trends, pitcherlist_get_starting_pitcher_ranks, \
+        pitcherlist_get_streaming_starting_pitcher_ranks, pitcherlist_get_starting_pitcher_matchup_tiers, \
+        pitcherlist_get_two_start_starting_pitcher_matchup_tiers, pitcherlist_get_batter_rank_trends, \
+        pitcherlist_get_batter_ranks, pitcherlist_get_closing_pitcher_rank_trends, \
+        pitcherlist_get_closing_pitcher_ranks, pitcherlist_get_relief_pitcher_rank_trends, \
+        pitcherlist_get_relief_pitcher_ranks]
     if int(func_id) > 0 and int(func_id) <= len(func_list):
-        func_list = [pitcherlist_get_starting_pitcher_rank_trends, pitcherlist_get_starting_pitcher_ranks, \
-            pitcherlist_get_streaming_starting_pitcher_ranks, pitcherlist_get_starting_pitcher_matchup_tiers, \
-            pitcherlist_get_two_start_starting_pitcher_matchup_tiers, pitcherlist_get_batter_rank_trends, \
-            pitcherlist_get_batter_ranks, pitcherlist_get_closing_pitcher_rank_trends, \
-            pitcherlist_get_closing_pitcher_ranks, pitcherlist_get_relief_pitcher_rank_trends, \
-            pitcherlist_get_relief_pitcher_ranks]
         func_name = func_list[func_id-1]
         # return_func = getattr(provider_pitcherlist, func_name)
         # data = return_func()
