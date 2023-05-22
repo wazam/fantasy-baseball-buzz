@@ -2,6 +2,7 @@ ARG DOCKER_PYTHON_V="3.11.3-slim"
 
 # https://pipenv.pypa.io/en/latest/docker/
 FROM docker.io/python:$DOCKER_PYTHON_V AS builder
+
 RUN pip install --upgrade pip \
     && pip install --user pipenv
 ENV PIPENV_VENV_IN_PROJECT=1
@@ -12,9 +13,6 @@ RUN /root/.local/bin/pipenv sync
 FROM docker.io/python:$DOCKER_PYTHON_V AS runtime
 RUN mkdir -v /usr/src/.venv
 COPY --from=builder /usr/src/.venv/ /usr/src/.venv/
-
-ENV FLASK_APP=src/main.py
-ENV FLASK_RUN_HOST=0.0.0.0
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG DEBCONF_NOWARNINGS="yes"
@@ -34,9 +32,11 @@ RUN groupadd --gid $USER_GID $USERNAME \
     && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
 
-ADD . /usr/src/
+ENV FLASK_APP=src/main.py
+ENV FLASK_RUN_HOST=0.0.0.0
 
 WORKDIR /usr/src/
+ADD . .
 
 EXPOSE 5000/tcp
 
