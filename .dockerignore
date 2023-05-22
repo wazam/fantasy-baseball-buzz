@@ -2,6 +2,7 @@
 .github/
 .vscode/
 __pycache__/
+*.pyc
 .dockerignore
 .env
 .gitignore

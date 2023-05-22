@@ -1,6 +1,7 @@
 .vscode/
 data/
 __pycache__/
+*.pyc
 .env
 *.override.yml
 *.log

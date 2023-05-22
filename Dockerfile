@@ -1,9 +1,21 @@
-FROM python:3.11.3-slim
+ARG DOCKER_PYTHON_V="3.11.3-slim"
+
+# https://pipenv.pypa.io/en/latest/docker/
+FROM docker.io/python:$DOCKER_PYTHON_V AS builder
+RUN RUN pip install --upgrade pip \
+    && pip install --user pipenv
+ENV PIPENV_VENV_IN_PROJECT=1
+ADD Pipfile.lock Pipfile /usr/src/
+WORKDIR /usr/src
+RUN /root/.local/bin/pipenv sync
+
+FROM docker.io/python:$DOCKER_PYTHON_V AS runtime
+RUN mkdir -v /usr/src/.venv
+COPY --from=builder /usr/src/.venv/ /usr/src/.venv/
 
 ENV FLASK_APP=src/main.py
 ENV FLASK_RUN_HOST=0.0.0.0
 
-USER root
 ARG DEBIAN_FRONTEND=noninteractive
 ARG DEBCONF_NOWARNINGS="yes"
 RUN apt-get update \
@@ -22,14 +34,12 @@ RUN groupadd --gid $USER_GID $USERNAME \
     && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
 
-WORKDIR /home/fbb/fantasy-baseball-buzz
-COPY Pipfile* ./
-RUN pip install --upgrade pip \
-    && pip install pipenv \
-    && pipenv install --system --deploy --ignore-pipfile --quiet
-COPY . .
+ADD . /usr/src/
+
+WORKDIR /usr/src/
 
 EXPOSE 5000/tcp
 
 USER fbb
-CMD pipenv run flask run
+
+CMD ["./.venv/bin/python", "-m", "flask", "run"]
