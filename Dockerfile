@@ -3,10 +3,9 @@ FROM python:3.11.3-slim
 ENV FLASK_APP=src/main.py
 ENV FLASK_RUN_HOST=0.0.0.0
 
+USER root
 ARG DEBIAN_FRONTEND=noninteractive
 ARG DEBCONF_NOWARNINGS="yes"
-
-USER root
 RUN apt-get update \
     && apt-get --no-install-recommends --assume-yes --quiet install \
         firefox-esr
@@ -25,7 +24,9 @@ RUN groupadd --gid $USER_GID $USERNAME \
 
 WORKDIR /home/fbb/fantasy-baseball-buzz
 COPY Pipfile* ./
-RUN pip install --upgrade pip && pip install pipenv && pipenv install --system --deploy --ignore-pipfile --verbose
+RUN pip install --upgrade pip \
+    && pip install pipenv \
+    && pipenv install --system --deploy --ignore-pipfile --quiet
 COPY . .
 
 EXPOSE 5000/tcp
