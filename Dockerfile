@@ -2,7 +2,7 @@ ARG DOCKER_PYTHON_V="3.11.3-slim"
 
 # https://pipenv.pypa.io/en/latest/docker/
 FROM docker.io/python:$DOCKER_PYTHON_V AS builder
-RUN RUN pip install --upgrade pip \
+RUN pip install --upgrade pip \
     && pip install --user pipenv
 ENV PIPENV_VENV_IN_PROJECT=1
 ADD Pipfile.lock Pipfile /usr/src/
