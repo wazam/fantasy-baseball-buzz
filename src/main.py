@@ -6,13 +6,14 @@ from provider_fantasypros import fantasypros_get_player_list
 from provider_mlb import mlb_get_player_list
 from provider_pitcherlist import pitcherlist_get_starting_pitcher_rank_trends, pitcherlist_get_starting_pitcher_ranks, \
     pitcherlist_get_streaming_starting_pitcher_ranks, pitcherlist_get_starting_pitcher_matchup_tiers, \
-    pitcherlist_get_two_start_starting_pitcher_matchup_tiers, pitcherlist_get_batter_rank_trends, pitcherlist_get_batter_ranks, \
-    pitcherlist_get_closing_pitcher_rank_trends, pitcherlist_get_closing_pitcher_ranks, pitcherlist_get_relief_pitcher_rank_trends, \
-    pitcherlist_get_relief_pitcher_ranks
+    pitcherlist_get_two_start_starting_pitcher_matchup_tiers, pitcherlist_get_batter_rank_trends, \
+    pitcherlist_get_batter_ranks, pitcherlist_get_closing_pitcher_rank_trends, pitcherlist_get_closing_pitcher_ranks, \
+    pitcherlist_get_relief_pitcher_rank_trends, pitcherlist_get_relief_pitcher_ranks
 from provider_yahoo import yahoo_get_added_dropped_trends, yahoo_get_player_list, yahoo_get_player_list_deep
 
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.json.sort_keys = False
+html_404_page = '<!doctype html><html lang=en><title>404 Not Found</title><h1>Not Found</h1><p>The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.</p>'
 
 
 @app.route('/')
@@ -64,62 +65,32 @@ def yahoo_3():
     return
 
 
-@app.route('/cbs_1')
-def cbs_1():
-    data = cbs_get_added_dropped_trends()
-    return data
-@app.route('/cbs_2')
-def cbs_2():
-    data = cbs_get_viewed_trends()
-    return data
-@app.route('/cbs_3')
-def cbs_3():
-    data = cbs_get_traded_trends()
+@app.route('/cbs/<int:func_id>')
+def show_cbs(func_id):
+    if int(func_id) > 0 and int(func_id) <= len(func_list):
+        func_list = [cbs_get_added_dropped_trends, cbs_get_viewed_trends, cbs_get_traded_trends]
+        func_name = func_list[func_id-1]
+        data = func_name()
+    else:
+        data = (html_404_page, 404)
     return data
 
-@app.route('/pitcherlist_1')
-def pitcherlist_1():
-    data = pitcherlist_get_starting_pitcher_rank_trends()
-    return data
-@app.route('/pitcherlist_2')
-def pitcherlist_2():
-    data = pitcherlist_get_streaming_starting_pitcher_ranks()
-    return data
-@app.route('/pitcherlist_3')
-def pitcherlist_3():
-    data = pitcherlist_get_starting_pitcher_matchup_tiers()
-    return data
-@app.route('/pitcherlist_4')
-def pitcherlist_4():
-    data = pitcherlist_get_two_start_starting_pitcher_matchup_tiers()
-    return data
-@app.route('/pitcherlist_5')
-def pitcherlist_5():
-    data = pitcherlist_get_batter_rank_trends()
-    return data
-@app.route('/pitcherlist_6')
-def pitcherlist_6():
-    data = pitcherlist_get_batter_ranks()
-    return data
-@app.route('/pitcherlist_7')
-def pitcherlist_7():
-    data = pitcherlist_get_closing_pitcher_rank_trends()
-    return data
-@app.route('/pitcherlist_8')
-def pitcherlist_8():
-    data = pitcherlist_get_closing_pitcher_ranks()
-    return data
-@app.route('/pitcherlist_9')
-def pitcherlist_9():
-    data = pitcherlist_get_relief_pitcher_rank_trends()
-    return data
-@app.route('/pitcherlist_10')
-def pitcherlist_10():
-    data = pitcherlist_get_relief_pitcher_ranks()
-    return data
-@app.route('/pitcherlist_11')
-def pitcherlist_11():
-    data = pitcherlist_get_starting_pitcher_ranks()
+
+@app.route('/pitcherlist/<int:func_id>')
+def show_pitcherlist(func_id):
+    if int(func_id) > 0 and int(func_id) <= len(func_list):
+        func_list = [pitcherlist_get_starting_pitcher_rank_trends, pitcherlist_get_starting_pitcher_ranks, \
+            pitcherlist_get_streaming_starting_pitcher_ranks, pitcherlist_get_starting_pitcher_matchup_tiers, \
+            pitcherlist_get_two_start_starting_pitcher_matchup_tiers, pitcherlist_get_batter_rank_trends, \
+            pitcherlist_get_batter_ranks, pitcherlist_get_closing_pitcher_rank_trends, \
+            pitcherlist_get_closing_pitcher_ranks, pitcherlist_get_relief_pitcher_rank_trends, \
+            pitcherlist_get_relief_pitcher_ranks]
+        func_name = func_list[func_id-1]
+        # return_func = getattr(provider_pitcherlist, func_name)
+        # data = return_func()
+        data = func_name()
+    else:
+        data = (html_404_page, 404)
     return data
 
 

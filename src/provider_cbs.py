@@ -1,5 +1,5 @@
 from util_beautifulsoup import beautifulsoup_scrape, beautifulsoup_find
-from util_dictionary import dictionary_sort_desc
+from util_dictionary import dictionary_sort
 from util_json import json_check_and_create_file, json_check_and_add_to_file
 
 url_base = 'https://www.cbssports.com'
@@ -25,7 +25,7 @@ def cbs_get_added_dropped_trends():
     # Loop through tabs Most-Added and Most-Dropped
     elements_tabs = beautifulsoup_find(results_page, 'all', 'a', 'PageTabsNav-link', True)[0:2]
     player_dict = cbs_finishup(elements_tabs, 4)
-    sorted_dict = dictionary_sort_desc(player_dict)
+    sorted_dict = dictionary_sort(player_dict)
     return sorted_dict
 
 
@@ -36,7 +36,7 @@ def cbs_get_viewed_trends():
     # Loop through tab Most-Viewed
     elements_tabs = beautifulsoup_find(results_page, 'all', 'a', 'PageTabsNav-link', True)[2:3]
     player_dict = cbs_finishup(elements_tabs, 3)
-    sorted_dict = dictionary_sort_desc(player_dict)
+    sorted_dict = dictionary_sort(player_dict)
     return sorted_dict
 
 
@@ -47,7 +47,7 @@ def cbs_get_traded_trends():
     # Loop through tab Most-Traded
     elements_tabs = beautifulsoup_find(results_page, 'all', 'a', 'PageTabsNav-link', True)[3:4]
     player_dict = cbs_finishup(elements_tabs, 2)
-    sorted_dict = dictionary_sort_desc(player_dict)
+    sorted_dict = dictionary_sort(player_dict)
     return sorted_dict
 
 
