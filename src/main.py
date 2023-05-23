@@ -88,14 +88,14 @@ def show_pitcherlist(func_id):
     return data
 
 
-@app.route('/mlb_1')
-def mlb_1():
+@app.route('/mlb/1')
+def show_mlb():
     mlb_get_player_list()
     return
 
 
-@app.route('/fantasypros_1')
-def fantasypros_1():
+@app.route('/fantasypros/1')
+def show_fantasypros():
     fantasypros_get_player_list()
     return
 
