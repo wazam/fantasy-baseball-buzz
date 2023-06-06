@@ -100,6 +100,6 @@ def show_fantasypros():
     return
 
 
-# Tests with `pipenv run flask run` or `pipenv run python src/main.py`
+# Tests with `pipenv run flask run` or `pipenv run python src/main.py` or `pipenv run flask shell`
 if __name__ == '__main__':
     app.run()
