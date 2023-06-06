@@ -1,6 +1,6 @@
 # https://github.com/peter-evans/docker-compose-actions-workflow
 
-name: Docker Compose
+name: Test a docker-compose file
 
 on:
   schedule:
@@ -15,9 +15,8 @@ on:
 
 jobs:
   build:
-
+    name: Build & Test
     runs-on: ubuntu-latest
-
     steps:
 
     - name: Checkout repository

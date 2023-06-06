@@ -1,11 +1,24 @@
-FROM python:3.11.3-slim
+ARG DOCKER_PYTHON_V="3.11.3-slim"
 
-ENV FLASK_APP=src/main.py
-ENV FLASK_RUN_HOST=0.0.0.0
+# https://pipenv.pypa.io/en/latest/docker/
+FROM docker.io/python:$DOCKER_PYTHON_V AS builder
 
-USER root
-RUN apt-get update
-RUN apt-get install -y --no-install-recommends firefox-esr
+RUN pip install --upgrade pip \
+    && pip install --user pipenv
+ENV PIPENV_VENV_IN_PROJECT=1
+ADD Pipfile.lock Pipfile /usr/src/
+WORKDIR /usr/src
+RUN /root/.local/bin/pipenv sync
+
+FROM docker.io/python:$DOCKER_PYTHON_V AS runtime
+RUN mkdir -v /usr/src/.venv
+COPY --from=builder /usr/src/.venv/ /usr/src/.venv/
+
+ARG DEBIAN_FRONTEND=noninteractive
+ARG DEBCONF_NOWARNINGS="yes"
+RUN apt-get update \
+    && apt-get --no-install-recommends --assume-yes --quiet install \
+        firefox-esr
 
 # https://code.visualstudio.com/remote/advancedcontainers/add-nonroot-user
 ARG USERNAME=fbb
@@ -19,12 +32,14 @@ RUN groupadd --gid $USER_GID $USERNAME \
     && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
 
-WORKDIR /home/fbb/fantasy-baseball-buzz
-COPY Pipfile* ./
-RUN pip install pipenv && pipenv install --system --deploy --ignore-pipfile --verbose
-COPY . .
+ENV FLASK_APP=src/main.py
+ENV FLASK_RUN_HOST=0.0.0.0
+
+WORKDIR /usr/src/
+ADD . .
 
 EXPOSE 5000/tcp
 
 USER fbb
-CMD pipenv run flask run
+
+CMD ["./.venv/bin/python", "-m", "flask", "run"]
