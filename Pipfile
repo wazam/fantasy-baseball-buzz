@@ -7,14 +7,15 @@ name = "pypi"
 beautifulsoup4 = "*"
 requests = "*"
 selenium = "*"
-flask = "*"
 unidecode = "*"
 ratelimit = "*"
 webdriver-manager = "*"
 jinja2 = "*"
-pyairtable = "*"
+python-dotenv = "*"
+flask = "*"
 
 [dev-packages]
+flake8 = "*"
 
 [requires]
-python_full_version = "3.11.3"
+python_full_version = "3.13.2"

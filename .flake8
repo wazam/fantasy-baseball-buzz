@@ -1,0 +1,9 @@
+[flake8]
+max-line-length = 88
+max-complexity = 10
+exclude = .git,__pycache__,build,dist,venv,.venv,archive
+select = E,F,W
+ignore = E203, E266, E501, W503
+count = true
+show-source = true
+statistics = true

@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <div class="section">
+        <h2 class="{{ source }}">{{ source }}</h2>
+        <div class="function-list">
+            {% for trend in trend_keys %}
+                <div class="trend-card">
+                    <div class="badge-container">
+                        {% if trend.is_favorite %}
+                            <span class="tag-badge favorite">⭐</span>
+                        {% endif %}
+                        {% if trend.run_frequency %}
+                            <span class="tag-badge {{ trend.run_frequency }}">⏰ {{ trend.run_frequency }}</span>
+                        {% endif %}
+                        {% if trend.num_of_players %}
+                            <span class="tag-badge players">👨 {{ trend.num_of_players }}</span>
+                        {% endif %}
+                        {% if trend.num_of_pages %}
+                            <span class="tag-badge pages">📃 {{ trend.num_of_pages }}</span>
+                        {% endif %}
+                        <span class="tag-badge url"><a href="{{ trend.url }}" target="_blank">Source ➡️</a></span>
+                    </div>
+                    <h3><a href="/{{ source | lower }}/{{ loop.index }}">🔄 {{ trend.key }}</a></h3>
+                    <ul class="label-list {{ 'collapsed' if trend.labels|length > 3 }}">
+                        {% for label in trend.labels %}
+                            {% set prefix = source.source ~ ' ' %}
+                            {% if label.startswith(prefix) %}
+                                <li>{{ label | replace(prefix, '', 1) }}</li>
+                            {% else %}
+                                <li>{{ label }}</li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                    {% if trend.labels|length > 3 %}
+                        <div class="label-toggle">🔽 Show more</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+{% endblock %}

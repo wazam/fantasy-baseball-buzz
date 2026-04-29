@@ -1,0 +1,24 @@
+services:
+  fantasy-baseball-buzz:
+    image: ghcr.io/wazam/fantasy-baseball-buzz:latest
+    environment:
+      - NOCODB_API_TOKEN=
+      - NOCODB_TABLE_ID=
+      - NOCODB_PUBLIC_ID=
+    ports:
+      - 5000:5000
+
+  # nocodb:
+  #   image: nocodb/nocodb:latest
+  #   restart: unless-stopped
+  #   environment:
+  #     - NC_DB=pg://postgres:5432?u=postgres&p=password&d=postgres
+  #   ports:
+  #     - 8080:8080
+
+  # postgres:
+  #   image: postgres:16-alpine
+  #   environment:
+  #     - POSTGRES_PASSWORD=password
+  #   volumes:
+  #     - ./data/postgres:/var/lib/postgresql/data

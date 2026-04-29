@@ -1,0 +1,39 @@
+# https://github.com/peter-evans/docker-compose-actions-workflow
+
+name: Test Docker Compose Stack
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '22 22 * * 3'
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Validate Buzz Stack with Docker Compose
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        run: docker build -t ghcr.io/wazam/fantasy-baseball-buzz:latest .
+
+      - name: Start full stack
+        run: docker compose up -d
+
+      - name: Wait for services
+        run: sleep 30
+
+      - name: Verify Buzz is running
+        run: docker run --network container:buzz curl --retry 10 --retry-connrefused --fail http://localhost:5000/index
+
+      - name: Teardown
+        if: always()
+        run: docker compose down --volumes --remove-orphans
