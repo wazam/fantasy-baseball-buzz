@@ -44,6 +44,9 @@ ENV FLASK_RUN_HOST=0.0.0.0
 WORKDIR /usr/src/
 COPY . .
 
+RUN mkdir -p /usr/src/data/results && \
+    chown -R fbb:fbb /usr/src/data
+
 EXPOSE 5000/tcp
 
 USER fbb
