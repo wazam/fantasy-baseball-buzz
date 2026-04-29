@@ -1,4 +1,4 @@
-ARG DOCKER_PYTHON_V=3.13.2-alpine
+ARG DOCKER_PYTHON_V=3.13.13-alpine
 ARG GIT_COMMIT
 ARG BUILD_DATE
 ARG IMAGE_VERSION
@@ -21,7 +21,7 @@ LABEL org.opencontainers.image.title="Buzz" \
     org.opencontainers.image.source="https://github.com/wazam/fantasy-baseball-buzz" \
     org.opencontainers.image.documentation="https://github.com/wazam/fantasy-baseball-buzz#readme" \
     org.opencontainers.image.licenses="MIT" \
-    org.opencontainers.image.authors="James (wazam)" \
+    org.opencontainers.image.authors="James Wazam" \
     org.opencontainers.image.vendor="wazam" \
     org.opencontainers.image.revision="${GIT_COMMIT:-unknown}" \
     org.opencontainers.image.created="${BUILD_DATE:-unknown}"

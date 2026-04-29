@@ -18,4 +18,4 @@ flask = "*"
 flake8 = "*"
 
 [requires]
-python_full_version = "3.13.2"
+python_version = "3.13"
