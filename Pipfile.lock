@@ -18,11 +18,11 @@
     "default": {
         "attrs": {
             "hashes": [
-                "sha256:427318ce031701fea540783410126f03899a97ffc6f61596ad581ac2e40e3bc3",
-                "sha256:75d7cefc7fb576747b2c81b4442d4d4a1ce0900973527c011d1030fd3bf4af1b"
+                "sha256:c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309",
+                "sha256:d03ceb89cb322a8fd706d4fb91940737b6642aa36998fe130a9bc96c985eff32"
             ],
-            "markers": "python_version >= '3.8'",
-            "version": "==25.3.0"
+            "markers": "python_version >= '3.9'",
+            "version": "==26.1.0"
         },
         "beautifulsoup4": {
             "hashes": [
@@ -203,11 +203,11 @@
         },
         "h11": {
             "hashes": [
-                "sha256:8f19fbbe99e72420ff35c00b27a34cb9937e902a8b810e2c88300c6f0a3b699d",
-                "sha256:e3fe4ac4b851c468cc8363d500db52c2ead036020723024a109d37346efaa761"
+                "sha256:4e35b956cf45792e4caa5885e69fba00bdbc6ffafbfa020300e549b208ee5ff1",
+                "sha256:63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86"
             ],
-            "markers": "python_version >= '3.7'",
-            "version": "==0.14.0"
+            "markers": "python_version >= '3.8'",
+            "version": "==0.16.0"
         },
         "idna": {
             "hashes": [
@@ -381,12 +381,12 @@
         },
         "selenium": {
             "hashes": [
-                "sha256:16ab890fc7cb21a01e1b1e9a0fbaa9445fe30837eabc66e90b3bacf12138126a",
-                "sha256:90bcd3be86a1762100a093b33e5e4530b328226da94208caadb15ce13243dffd"
+                "sha256:4f97639055dcfa9eadf8ccf549ba7b0e49c655d4e2bde19b9a44e916b754e769",
+                "sha256:bada5c08a989f812728a4b5bea884d8e91894e939a441cc3a025201ce718581e"
             ],
             "index": "pypi",
-            "markers": "python_version >= '3.9'",
-            "version": "==4.30.0"
+            "markers": "python_version >= '3.10'",
+            "version": "==4.43.0"
         },
         "sniffio": {
             "hashes": [
@@ -413,11 +413,11 @@
         },
         "trio": {
             "hashes": [
-                "sha256:d8c463f1a9cc776ff63e331aba44c125f423a5a13c684307e828d930e625ba66",
-                "sha256:ea0d3967159fc130acb6939a0be0e558e364fee26b5deeecc893a6b08c361bdf"
+                "sha256:3bd5d87f781d9b0192d592aef28691f8951d6c2e41b7e1da4c25cde6c180ae9b",
+                "sha256:a29b92b73f09d4b48ed249acd91073281a7f1063f09caba5dc70465b5c7aa970"
             ],
-            "markers": "python_version >= '3.9'",
-            "version": "==0.29.0"
+            "markers": "python_version >= '3.10'",
+            "version": "==0.33.0"
         },
         "trio-websocket": {
             "hashes": [
@@ -466,11 +466,11 @@
         },
         "websocket-client": {
             "hashes": [
-                "sha256:17b44cc997f5c498e809b22cdf2d9c7a9e71c02c8cc2b6c56e7c2d1239bfa526",
-                "sha256:3239df9f44da632f96012472805d40a23281a991027ce11d2f45a6f24ac4c3da"
+                "sha256:9e813624b6eb619999a97dc7958469217c3176312b3a16a4bd1bc7e08a46ec98",
+                "sha256:af248a825037ef591efbf6ed20cc5faa03d3b47b9e5a2230a529eeee1c1fc3ef"
             ],
-            "markers": "python_version >= '3.8'",
-            "version": "==1.8.0"
+            "markers": "python_version >= '3.9'",
+            "version": "==1.9.0"
         },
         "werkzeug": {
             "hashes": [
@@ -482,11 +482,11 @@
         },
         "wsproto": {
             "hashes": [
-                "sha256:ad565f26ecb92588a3e43bc3d96164de84cd9902482b130d0ddbaa9664a85065",
-                "sha256:b9acddd652b585d75b20477888c56642fdade28bdfd3579aa24a4d2c037dd736"
+                "sha256:61eea322cdf56e8cc904bd3ad7573359a242ba65688716b0710a5eb12beab584",
+                "sha256:b86885dcf294e15204919950f666e06ffc6c7c114ca900b060d6e16293528294"
             ],
-            "markers": "python_full_version >= '3.7.0'",
-            "version": "==1.2.0"
+            "markers": "python_version >= '3.10'",
+            "version": "==1.3.2"
         }
     },
     "develop": {
