@@ -4,6 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException, NoSuchFrameException
 from util_webdriver import webdriver_setup_driver, webdriver_cleanup_driver
+from util_nocodb import search_record, create_records, update_records
 import time
 from bs4 import BeautifulSoup # 2025, ?
 from urllib.parse import urlparse, parse_qs
@@ -62,6 +63,7 @@ def espn_get_added_dropped_trends():
     url_tab = '/addeddropped'
     url = url_base + url_tab
     trends_dictionary = {}
+    records_to_process = []
     driver = webdriver_setup_driver()
     driver.get(url)
     sleep(4)
@@ -90,10 +92,29 @@ def espn_get_added_dropped_trends():
                 trend_value = float(driver.find_element(By.XPATH, xpath_trend_value).text)
                 if player_name not in trends_dictionary:
                     trends_dictionary[player_name] = trend_value
-                    # print(get_time_for_logs(), '| Updated player', player_name)
-                    airtable_update_player_data(player_name, player_team, player_position, 'E +/- %',  trend_value)
+                    records_to_process.append({
+                        'Player': player_name,
+                        'Team': player_team,
+                        'Position': player_position,
+                        'E +/- %': trend_value
+                    })
     webdriver_cleanup_driver(driver)
-    sorted_dict = dictionary_sort(trends_dictionary)
+
+    # Update or create NocoDB records for each player's trend data
+    update_list, create_list = [], []
+    for record in records_to_process:
+        existing = search_record(record, "ESPN")
+        if existing:
+            update_list.append({'Id': existing['Id'], 'E +/- %': record['E +/- %']})
+        else:
+            create_list.append(record)
+
+    if update_list:
+        update_records(update_list, "ESPN")
+    if create_list:
+        create_records(create_list)
+
+    sorted_dict = dict(sorted(trends_dictionary.items(), key=lambda x: x[1], reverse=True))
     return sorted_dict
 
 
@@ -126,7 +147,7 @@ def espn_login(driver):
     return
 
 
-# Returns all Players to Airtable
+# Returns all Players to NocoDB
 def espn_get_player_list():
     url_tab = '/players/add?view=trending&leagueId=' + league_id
     print(get_time_for_logs(), '| Starting up', url_tab)  ###
@@ -191,9 +212,6 @@ def espn_get_player_list():
                 player_rostered_team = driver.find_element(By.XPATH, xpath_of_player_rostered_team).text
                 player_ownership_percentage = driver.find_element(By.XPATH, xpath_of_player_ownership_percentage).text
                 player_ownership_change = driver.find_element(By.XPATH, xpath_of_player_ownership_change).text
-                # Setup Players record list for AirTable
-                # Limit of 10 ids, but typical page has 50 players(ids)
-                list_of_player_record = []  
                 # Setup Player fields dict
                 list_of_player_fields = {}
                 # Setup Player Name Team Pos identifying data
@@ -226,10 +244,13 @@ def espn_get_player_list():
                     player_rostered = float(player_ownership_percentage)
                 list_of_player_fields['E %ROST'] = player_rostered
                 list_of_player_fields['E +/- %'] = float(player_ownership_change)
-                # Send data fields to Player's Airtable row
-                player_id = airtable_check_player_and_get_id(player_name, player_team, player_position)
-                list_of_player_record.append({'id': str(player_id), 'fields': list_of_player_fields})
-                airtable_batch_update_player_data(list_of_player_record)
+                # Send data fields to Player's NocoDB row
+                entry = {'Player': player_name, 'Team': player_team, 'Position': player_position}
+                existing = search_record(entry, "ESPN")
+                if existing:
+                    update_records([{'Id': existing['Id'], **list_of_player_fields}], "ESPN")
+                else:
+                    create_records([{**entry, **list_of_player_fields}])
                 # print(get_time_for_logs(), '| Updated player', player_name)
             print(get_time_for_logs(), '| Finished page', page+1, 'out of', number_of_pages_per_position) ###
             next_page_button = driver.find_element(By.XPATH, "/html/body/div[1]/div[1]/div/div/div[5]/div[2]/div[3]/div/div/div[3]/nav/button[2]")
@@ -241,7 +262,7 @@ def espn_get_player_list():
     return
 
 
-# Returns all rostered Players to Airtable
+# Returns all rostered Players to NocoDB
 def espn_get_rostered_players():
     url_tab = '/league/rosters?leagueId=' + league_id
     url = url_base + url_tab
@@ -284,10 +305,7 @@ def espn_get_rostered_players():
             except NoSuchElementException:
                 pass
             player_rostered_team = driver.find_element(By.XPATH, xpath_player_rostered_team).text
-            # Setup Players record list for AirTable
-            list_of_player_record = []
             # Setup Player fields dict
-            list_of_player_fields = {}
             list_of_player_fields = {'Team': player_team, 'Position': player_position}
             list_of_player_fields['Injury'] = player_injury_status
             # if player_rostered_team.lower() == team_name.lower():  # My team
@@ -299,10 +317,13 @@ def espn_get_rostered_players():
             # list_of_player_fields['Available'] = on_someones_roster
             # list_of_player_fields['Rostered'] = on_my_roster
             list_of_player_fields['Roster'] = player_rostered_team
-            # Send data fields to Player's Airtable row
-            player_id = airtable_check_player_and_get_id(player_name, player_team, player_position)
-            list_of_player_record.append({'id': str(player_id), 'fields': list_of_player_fields})
-            airtable_batch_update_player_data(list_of_player_record)
+            # Send data fields to Player's NocoDB row
+            entry = {'Player': player_name, 'Team': player_team, 'Position': player_position}
+            existing = search_record(entry, "ESPN")
+            if existing:
+                update_records([{'Id': existing['Id'], **list_of_player_fields}], "ESPN")
+            else:
+                create_records([{**entry, **list_of_player_fields}])
             # print(get_time_for_logs(), '| Updated player', player_name)
     webdriver_cleanup_driver(driver)
     return

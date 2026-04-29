@@ -1,8 +1,10 @@
 from util_beautifulsoup import beautifulsoup_scrape, beautifulsoup_find
+from util_nocodb import search_record, create_records, update_records
+from unidecode import unidecode
 from datetime import date
 from datetime import timedelta
 
-# Returns date in YYYY-MM-DD format of the day(s) before today
+
 def date_X_days_ago(days):
     date_today = date.today()
     date_days_back = timedelta(days=days)
@@ -20,15 +22,13 @@ url_base = 'https://baseball.fantasysports.yahoo.com'
 weekly_dict = {}
 daily_dict = {}
 data_rows = []
-trends_dictionary = {}
-json_filename = 'mlb-players-yahoo'
+
 
 # Returns a numerically ordered dictionary of Players' names with their add/drop roster trends
 def yahoo_get_added_dropped_trends_X_days(number_of_days_to_scrape):
     column_name = 'yahoo_get_added_dropped_trends'
-    json_check_and_create_file(json_filename)  # Replace with separate _get_player_names()
     weekly_dict.clear()
-    trends_dictionary.clear()
+    name_lookup_cache = {}  # in-memory cache replacing old JSON lookup file
 
     # Get position page URLs from daily page
     for day in range(0, int(number_of_days_to_scrape)):
@@ -57,62 +57,65 @@ def yahoo_get_added_dropped_trends_X_days(number_of_days_to_scrape):
                 mlb_teams = ['ARI', 'ATL', 'BAL', 'BOS', 'CWS', 'CHC', 'CIN', 'CLE', 'COL', 'DET', 'HOU', 'KC', 'LAA', 'LAD', 'MIA', 'MIL', 'MIN', 'NYY', 'NYM', 'OAK', 'PHI', 'PIT', 'SD', 'SF', 'SEA', 'STL', 'TB', 'TEX', 'TOR', 'WAS']
                 for team in mlb_teams:
                     if len(str(str(data_rows[index][0].split('\n')[1].strip()).rsplit(str(team + ' - '), 2)[0].strip())) < len(str(data_rows[index][0].split('\n')[1].strip())):
-                        player_name_short = fix_str_format(str(str(data_rows[index][0].split('\n')[1].strip()).rsplit(team, 2)[0].strip()))
+                        player_name_short = unidecode(str(str(data_rows[index][0].split('\n')[1].strip()).rsplit(team, 2)[0].strip())).title().strip()
                         break
 
-                # Get Player's full name from JSON file (web request and save to JSON if full name is not present)
-                players_json = json_get_from_file('lookup-first-name-abbreviation')
-                for key, _ in enumerate(players_json['players']):
-                    if player_name_short == players_json['players'][key]['short_name']:
-                        player_name_full = players_json['players'][key]['full_name']
-                        break
-                    elif key == len(players_json['players']) - 1:
-                        url_scrape = str(elements_players[index]['href'])
-                        element_player_name_full = beautifulsoup_scrape(url_scrape, '', 'span', 'ys-name', False)
-                        player_name_full = fix_str_format(element_player_name_full.text)
-                        new_player_data = {"short_name": player_name_short, "full_name": player_name_full}
-                        json_add_to_file(new_player_data, 'lookup-first-name-abbreviation')
-                        break
+                # Get Player's full name from in-memory cache, fall back to web request
+                if player_name_short in name_lookup_cache:
+                    player_name_full = name_lookup_cache[player_name_short]
+                else:
+                    url_scrape = str(elements_players[index]['href'])
+                    element_player_name_full = beautifulsoup_scrape(url_scrape, '', 'span', 'ys-name', False)
+                    player_name_full = unidecode(element_player_name_full.text).title().strip()
+                    name_lookup_cache[player_name_short] = player_name_full
 
-                # Add Player's Name and Change to daily dictionary, only on first occurrence, across all position pages for the day
+                # Add Player's Name and Change to daily dictionary, only on first occurrence
                 player_add = int(data_rows[index][4])
                 player_drop = int(data_rows[index][3])
                 player_change = player_add - player_drop
                 if player_name_full not in daily_dict:
                     daily_dict[player_name_full] = player_change
-                # Add Player's full name to combined file from all sources
-                json_check_and_add_to_file(player_name_full, json_filename)
 
-        # Add Player's Name and Change to weekly dictionary, add Changes across all days
+        # Add Player's Name and Change to weekly dictionary, accumulating across all days
         for key in daily_dict.keys():
             if key not in weekly_dict:
                 weekly_dict[key] = daily_dict[key]
             else:
                 weekly_dict[key] = weekly_dict[key] + daily_dict[key]
 
-    for key in weekly_dict.keys():
-        if key not in trends_dictionary:
-            trends_dictionary[key] = weekly_dict[key]
-            # airtable_update_player_data(airtable_check_player_name(key), weekly_dict[key], column_name)
+    # Update or create NocoDB records for each player's trend data
+    update_list, create_list = [], []
+    for player_name, change_value in weekly_dict.items():
+        entry = {"Player": player_name, column_name: change_value}
+        existing = search_record(entry, "Yahoo")
+        if existing:
+            update_list.append({"Id": existing["Id"], column_name: change_value})
+        else:
+            create_list.append(entry)
 
-    sorted_weekly_dict = dictionary_sort(weekly_dict)
+    if update_list:
+        update_records(update_list, "Yahoo")
+    if create_list:
+        create_records(create_list)
+
+    sorted_weekly_dict = dict(sorted(weekly_dict.items(), key=lambda x: x[1], reverse=True))
     return sorted_weekly_dict
 
 
-# Returns all Players to Airtable
+# Returns all Players' add/drop trends for the past week
 def yahoo_get_added_dropped_trends():
     data = yahoo_get_added_dropped_trends_X_days(7)
     return data
 
 
-# Returns all Players to Airtable
+# Returns all Players to NocoDB
 def yahoo_get_player_list():
     url_tab = '/b1/149226/players?status=A&pos=B&cut_type=33&stat1=S_S_2023&myteam=0&sort=R_PO&sdir=1&count=1200'
     url = url_base + url_tab
     return ('204', 204)
 
 
-# Returns all deeper-searched Players to Airtable
+# Returns all deeper-searched Players to NocoDB
 def yahoo_get_player_list_deep():
     url_tab = '/b1/149226/showforced'
     url = url_base + url_tab

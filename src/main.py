@@ -9,10 +9,17 @@ from source_cbs import cbs_get
 from source_fantrax import fantrax_get
 from config_source_keys import source_keys
 
+SOURCE_HANDLERS = {
+    'espn': espn_get,
+    'yahoo': yahoo_get,
+    'cbs': cbs_get,
+    'fantrax': fantrax_get,
+}
+
 load_dotenv(override=True)
 
 nocodb_url = os.getenv('NOCODB_URL', 'http://localhost:8080')
-dashboard_url = nocodb_url + '/dashboard/#/nc/view/' + os.getenv('NOCODB_PUBLIC_ID')
+dashboard_url = nocodb_url + '/dashboard/#/nc/view/' + os.getenv('NOCODB_PUBLIC_ID', '')
 
 nocodb_base_id = os.getenv('NOCODB_BASE_ID')
 nocodb_table_id = os.getenv('NOCODB_TABLE_ID')
@@ -71,7 +78,7 @@ def show_source_func(source, func_id):
 
     try:
         trend_type = source_data['trends'][func_id - 1]['key']
-        handler = source + '_get'
+        handler = SOURCE_HANDLERS.get(source_key)
         if not handler:
             abort(501, f"Data handler for source '{source}' is not implemented.")
 

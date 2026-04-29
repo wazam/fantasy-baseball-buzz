@@ -4,6 +4,7 @@ import json
 from datetime import datetime
 from dotenv import load_dotenv
 from util_beautifulsoup import beautifulsoup_scrape, beautifulsoup_find
+from util_nocodb import process_json_file
 from config_source_keys import source_keys
 
 load_dotenv()
@@ -15,12 +16,8 @@ os.makedirs(data_folder, exist_ok=True)
 
 cbs_config = next(source for source in source_keys if source['source'].lower() == 'cbs')
 trend_urls = {trend['key']: trend['url'] for trend in cbs_config['trends']}
-# trend_columns = {trend['key']: trend['columns'] for trend in cbs_config['trends']}
-#
-#
-# need to fix this below line, post-removing 'Columns' from config_source_keys
-trend_columns = [1,2,3,4]
 cbs_trend_labels = {trend['key']: trend['labels'] for trend in cbs_config['trends']}
+trend_columns = {key: list(range(1, len(labels) + 1)) for key, labels in cbs_trend_labels.items()}
 
 
 def cbs_get(trend_type):
@@ -111,6 +108,7 @@ def cbs_finishup(url_trend, columns, trend_type):
         json.dump(trends_list, json_file, indent=4)
 
     print(f"Processing complete. Saved results to {json_filename}")
+    process_json_file(json_filename)
     return trends_list
 
 

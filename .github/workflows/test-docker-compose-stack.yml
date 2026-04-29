@@ -23,7 +23,7 @@ jobs:
         uses: docker/setup-buildx-action@v4
 
       - name: Build image
-        run: docker build -t ghcr.io/wazam/fantasy-baseball-buzz:latest .
+        run: docker build --load -t ghcr.io/wazam/fantasy-baseball-buzz:latest .
 
       - name: Start full stack
         run: docker compose up -d
