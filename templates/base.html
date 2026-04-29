@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <link rel="stylesheet" href="{{ url_for('static', filename='style-common.css') }}?v={{ version_cache }}">
+        <link id="theme-link" rel="stylesheet" href="{{ url_for('static', filename='style-dark.css') }}?v={{ version_dark }}">
+
+        <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+        <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+        <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-title" content="Buzz">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <link rel="apple-touch-startup-image" href="{{ url_for('static', filename='apple-touch-startup-image.png') }}">
+
+        <title>Buzz</title>
+        {% block extra_head %}{% endblock %}
+    </head>
+
+    <body>
+        <header class="header-container">
+            <div class="logo-container">
+                <a href="/">
+                    <img src="{{ url_for('static', filename='favicon.png') }}"
+                        alt="Buzz Logo"
+                        class="logo">
+                </a>
+                <h1 class="header-title">Buzz</h1>
+            </div>
+
+            <div class="theme-toggle">
+                <button onclick="toggleTheme()">🌑/🌕</button>
+            </div>
+        
+            <div class="hamburger-menu" onclick="toggleMenu()">&#9776;</div>
+        </header>
+
+        <nav id="mobile-menu" class="mobile-menu">
+            <a href="/">Dashboard</a>
+            <a href="{{ dashboard_editor_url }}" target="_blank">Editor ➡️</a>
+            <a href="/index">Index</a>
+            <a href="/espn">ESPN</a>
+            <a href="/yahoo">Yahoo</a>
+            <a href="/cbs">CBS</a>
+            <a href="/fantrax">Fantrax</a>
+            <a href="/nfbc">NFBC</a>
+            <a href="https://github.com/wazam/fantasy-baseball-buzz" target="_blank">GitHub ➡️</a>
+        </nav>
+
+        <div class="content">
+            {% block content %}{% endblock %}
+        </div>
+
+        <script>
+            const version_dark = "{{ version_dark }}";  // Injected from Flask
+            const version_light = "{{ version_light }}";  // Injected from Flask
+
+            function toggleMenu() {
+                const menu = document.getElementById("mobile-menu");
+                menu.classList.toggle("show-menu");
+            }
+
+            function toggleTheme() {
+                const themeLink = document.getElementById("theme-link");
+                const currentTheme = themeLink.getAttribute("href");
+
+                if (currentTheme.includes("style-dark.css")) {
+                    themeLink.setAttribute("href", "{{ url_for('static', filename='style-light.css') }}?v=" + version_light);
+                    localStorage.setItem("theme", "light");  
+                } else {
+                    themeLink.setAttribute("href", "{{ url_for('static', filename='style-dark.css') }}?v=" + version_dark);
+                    localStorage.setItem("theme", "dark");  
+                }
+            }
+
+            window.onload = function () {
+                const savedTheme = localStorage.getItem("theme");
+                if (savedTheme === "light") {
+                    document.getElementById("theme-link").setAttribute("href", "{{ url_for('static', filename='style-light.css') }}?v=" + version_light);
+                }
+            };
+
+
+            document.addEventListener("DOMContentLoaded", function () {
+                document.querySelectorAll(".trend-card").forEach(card => {
+                    const toggle = card.querySelector(".label-toggle");
+                    const labelList = card.querySelector(".label-list");
+
+                    if (toggle && labelList) {
+                        toggle.addEventListener("click", (e) => {
+                            e.stopPropagation();
+                            const expanded = labelList.classList.toggle("expanded");
+                            card.classList.toggle("expanded", expanded);
+                            toggle.textContent = expanded ? "🔼 Show less" : "🔽 Show more";
+                        });
+                    }
+                });
+            });
+        </script>
+    </body>
+</html>

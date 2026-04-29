@@ -1,24 +1,89 @@
 import os
-from flask import Flask, render_template, send_from_directory, redirect
-from provider_cbs import cbs_get_added_dropped_trends, cbs_get_viewed_trends, cbs_get_traded_trends
-from provider_espn import espn_get_added_dropped_trends, espn_get_player_list, espn_get_rostered_players
-from provider_fantasypros import fantasypros_get_player_list
-from provider_mlb import mlb_get_player_list
-from provider_pitcherlist import pitcherlist_get_starting_pitcher_rank_trends, pitcherlist_get_starting_pitcher_ranks, \
-    pitcherlist_get_streaming_starting_pitcher_ranks, pitcherlist_get_starting_pitcher_matchup_tiers, \
-    pitcherlist_get_two_start_starting_pitcher_matchup_tiers, pitcherlist_get_batter_rank_trends, \
-    pitcherlist_get_batter_ranks, pitcherlist_get_closing_pitcher_rank_trends, pitcherlist_get_closing_pitcher_ranks, \
-    pitcherlist_get_relief_pitcher_rank_trends, pitcherlist_get_relief_pitcher_ranks
-from provider_yahoo import yahoo_get_added_dropped_trends, yahoo_get_player_list, yahoo_get_player_list_deep
+from flask import Flask, render_template, send_from_directory, abort, redirect, url_for
+from dotenv import load_dotenv
+from datetime import datetime, timezone
+
+from source_espn import espn_get
+from source_yahoo import yahoo_get
+from source_cbs import cbs_get
+from source_fantrax import fantrax_get
+from config_source_keys import source_keys
+
+load_dotenv(override=True)
+
+nocodb_url = os.getenv('NOCODB_URL', 'http://localhost:8080')
+dashboard_url = nocodb_url + '/dashboard/#/nc/view/' + os.getenv('NOCODB_PUBLIC_ID')
+
+nocodb_base_id = os.getenv('NOCODB_BASE_ID')
+nocodb_table_id = os.getenv('NOCODB_TABLE_ID')
+
+if nocodb_base_id:
+    dashboard_editor_url = f"{nocodb_url}/dashboard/#/nc/{nocodb_base_id}/{nocodb_table_id}"
+else:
+    dashboard_editor_url = nocodb_url
 
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
-app.json.sort_keys = False
-html_404_page = '<!doctype html><html lang=en><title>404 Not Found</title><h1>Not Found</h1><p>The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.</p>'
 
 
 @app.route('/')
-def start_page():
-    return render_template('index.html')
+def home():
+    return render_template(
+        'pages/dashboard.html',
+        source_keys=source_keys,
+        dashboard_url=dashboard_url,
+        dashboard_editor_url=dashboard_editor_url
+    )
+
+
+@app.route('/index')
+def index():
+    return render_template(
+        'pages/index.html',
+        source_keys=source_keys,
+        dashboard_url=dashboard_url,
+        dashboard_editor_url=dashboard_editor_url
+    )
+
+
+@app.route('/<source>')
+def source_page(source):
+    source_data = next(
+        (s for s in source_keys if s['source'].lower() == source.lower()), None
+    )
+    if not source_data:
+        abort(404)
+
+    return render_template(
+        'pages/sources.html',
+        source=source_data['source'],
+        trend_keys=source_data['trends'],
+        dashboard_url=dashboard_url,
+        dashboard_editor_url=dashboard_editor_url
+    )
+
+
+@app.route('/<source>/<int:func_id>')
+def show_source_func(source, func_id):
+    source_key = source.lower()
+    source_data = next((s for s in source_keys if s['source'].lower() == source_key), None)
+    if not source_data:
+        abort(404)
+
+    try:
+        trend_type = source_data['trends'][func_id - 1]['key']
+        handler = source + '_get'
+        if not handler:
+            abort(501, f"Data handler for source '{source}' is not implemented.")
+
+        data = handler(trend_type)
+        return data
+    except IndexError:
+        abort(404)
+
+
+@app.route('/dashboard')
+def dashboard_redirect():
+    return redirect(url_for('home'))
 
 
 @app.route('/favicon.ico')
@@ -26,80 +91,24 @@ def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 
-@app.route('/about')
-def about_page():
-    return redirect('https://github.com/wazam/fantasy-baseball-buzz')
-
-
-@app.route('/airtable')
-def airtable_page():
-    url = 'https://airtable.com/' + os.environ.get('AIRTABLE_BASE_ID')
-    return redirect(url)
-
-
-@app.route('/espn/<int:func_id>')
-def show_espn(func_id):
-    func_list = [espn_get_added_dropped_trends, espn_get_player_list, espn_get_rostered_players]
-    if int(func_id) > 0 and int(func_id) <= len(func_list):
-        func_name = func_list[func_id-1]
-        data = func_name()
+def get_file_version(filename):
+    filepath = os.path.join(app.static_folder, filename)
+    if os.path.exists(filepath):
+        ts = os.path.getmtime(filepath)
+        dt = datetime.fromtimestamp(ts, tz=timezone.utc)
+        return dt.strftime('%Y%m%d%H%M%S')
     else:
-        data = (html_404_page, 404)
-    return data
+        return datetime.now(tz=timezone.utc).strftime('%Y%m%d%H%M%S')
 
-
-@app.route('/yahoo/<int:func_id>')
-def show_yahoo(func_id):
-    func_list = [yahoo_get_added_dropped_trends, yahoo_get_player_list, yahoo_get_player_list_deep]
-    if int(func_id) > 0 and int(func_id) <= len(func_list):
-        func_name = func_list[func_id-1]
-        data = func_name()
-    else:
-        data = (html_404_page, 404)
-    return data
-
-
-@app.route('/cbs/<int:func_id>')
-def show_cbs(func_id):
-    func_list = [cbs_get_added_dropped_trends, cbs_get_viewed_trends, cbs_get_traded_trends]
-    if int(func_id) > 0 and int(func_id) <= len(func_list):
-        func_name = func_list[func_id-1]
-        data = func_name()
-    else:
-        data = (html_404_page, 404)
-    return data
-
-
-@app.route('/pitcherlist/<int:func_id>')
-def show_pitcherlist(func_id):
-    func_list = [pitcherlist_get_starting_pitcher_rank_trends, pitcherlist_get_starting_pitcher_ranks, \
-        pitcherlist_get_streaming_starting_pitcher_ranks, pitcherlist_get_starting_pitcher_matchup_tiers, \
-        pitcherlist_get_two_start_starting_pitcher_matchup_tiers, pitcherlist_get_batter_rank_trends, \
-        pitcherlist_get_batter_ranks, pitcherlist_get_closing_pitcher_rank_trends, \
-        pitcherlist_get_closing_pitcher_ranks, pitcherlist_get_relief_pitcher_rank_trends, \
-        pitcherlist_get_relief_pitcher_ranks]
-    if int(func_id) > 0 and int(func_id) <= len(func_list):
-        func_name = func_list[func_id-1]
-        # return_func = getattr(provider_pitcherlist, func_name)
-        # data = return_func()
-        data = func_name()
-    else:
-        data = (html_404_page, 404)
-    return data
-
-
-@app.route('/mlb/1')
-def show_mlb():
-    mlb_get_player_list()
-    return
-
-
-@app.route('/fantasypros/1')
-def show_fantasypros():
-    fantasypros_get_player_list()
-    return
+@app.context_processor
+def inject_version_cache():
+    return {
+        "version_cache": get_file_version("style-common.css"),
+        "version_dark": get_file_version("style-dark.css"),
+        "version_light": get_file_version("style-light.css"),
+    }
 
 
 # Tests with `pipenv run flask run` or `pipenv run python src/main.py` or `pipenv run flask shell`
 if __name__ == '__main__':
-    app.run()
+    app.run(host=os.getenv('FLASK_RUN_HOST'), port=os.getenv('FLASK_RUN_PORT'), debug=os.getenv('FLASK_DEBUG'))

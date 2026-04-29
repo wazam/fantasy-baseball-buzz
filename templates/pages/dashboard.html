@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block extra_head %}
+
+    <style>
+        body {
+            height: 100%;
+            overflow: hidden;
+            padding: 0;
+        }
+        .content {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - var(--header-height, 60px));
+        }
+        iframe {
+            flex-grow: 1;
+            width: 100%;
+            border: none;
+        }
+    </style>
+
+{% endblock %}
+
+{% block content %}
+
+    <iframe
+        class="noco-embed"
+        src="{{ dashboard_url }}">
+    </iframe>
+
+{% endblock %}

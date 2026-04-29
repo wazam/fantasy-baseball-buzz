@@ -1,42 +1,48 @@
-ARG DOCKER_PYTHON_V="3.11.3-slim"
+ARG DOCKER_PYTHON_V=3.13.2-alpine
+ARG GIT_COMMIT
+ARG BUILD_DATE
+ARG IMAGE_VERSION
 
-# https://pipenv.pypa.io/en/latest/docker/
-FROM docker.io/python:$DOCKER_PYTHON_V AS builder
+FROM docker.io/python:${DOCKER_PYTHON_V} AS builder
 
 RUN pip install --upgrade pip \
     && pip install --user pipenv
 ENV PIPENV_VENV_IN_PROJECT=1
-ADD Pipfile.lock Pipfile /usr/src/
+
+COPY Pipfile Pipfile.lock /usr/src/
 WORKDIR /usr/src
 RUN /root/.local/bin/pipenv sync
 
-FROM docker.io/python:$DOCKER_PYTHON_V AS runtime
+FROM docker.io/python:${DOCKER_PYTHON_V} AS runtime
+
+LABEL org.opencontainers.image.title="Buzz" \
+    org.opencontainers.image.description="Self-hosted dashboard for tracking MLB player trends, stats, and projections from top fantasy baseball sources" \
+    org.opencontainers.image.version="${IMAGE_VERSION}" \
+    org.opencontainers.image.source="https://github.com/wazam/fantasy-baseball-buzz" \
+    org.opencontainers.image.documentation="https://github.com/wazam/fantasy-baseball-buzz#readme" \
+    org.opencontainers.image.licenses="MIT" \
+    org.opencontainers.image.authors="James (wazam)" \
+    org.opencontainers.image.vendor="wazam" \
+    org.opencontainers.image.revision="${GIT_COMMIT:-unknown}" \
+    org.opencontainers.image.created="${BUILD_DATE:-unknown}"
+
+RUN apk update \
+    && apk add --no-cache firefox-esr
+
 RUN mkdir -v /usr/src/.venv
 COPY --from=builder /usr/src/.venv/ /usr/src/.venv/
 
-ARG DEBIAN_FRONTEND=noninteractive
-ARG DEBCONF_NOWARNINGS="yes"
-RUN apt-get update \
-    && apt-get --no-install-recommends --assume-yes --quiet install \
-        firefox-esr
-
-# https://code.visualstudio.com/remote/advancedcontainers/add-nonroot-user
 ARG USERNAME=fbb
 ARG USER_UID=1000
-ARG USER_GID=$USER_UID
-RUN groupadd --gid $USER_GID $USERNAME \
-    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
-    # [Optional] Add sudo support. Omit if you don't need to install software after connecting.
-    && apt-get update \
-    && apt-get install -y sudo \
-    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
-    && chmod 0440 /etc/sudoers.d/$USERNAME
+ARG USER_GID=${USER_UID}
+RUN addgroup -g ${USER_GID} ${USERNAME} && \
+    adduser -D -u ${USER_UID} -G ${USERNAME} ${USERNAME}
 
 ENV FLASK_APP=src/main.py
 ENV FLASK_RUN_HOST=0.0.0.0
 
 WORKDIR /usr/src/
-ADD . .
+COPY . .
 
 EXPOSE 5000/tcp
 

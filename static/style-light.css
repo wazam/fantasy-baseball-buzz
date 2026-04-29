@@ -1,0 +1,116 @@
+@import url("style-common.css");
+
+body {
+    background-color: rgb(255, 255, 255);
+}
+
+.header-container {
+    background-color: rgb(255, 255, 255);
+}
+.logo-container h1 {
+    color: rgb(0, 0, 0);
+}
+.theme-toggle button {
+    background-color: rgb(224, 224, 224);
+    color: rgb(40, 40, 40);
+    border: 1px solid rgb(204, 204, 204);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+.theme-toggle button:hover {
+    background-color: rgb(220, 220, 220);
+    color: rgb(0, 0, 0);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+.hamburger-menu {
+    color: rgb(0, 0, 0);
+}
+.hamburger-menu:hover {
+    color: rgb(80, 80, 80);
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+}
+
+.mobile-menu {
+    background-color: rgb(240, 240, 240);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.mobile-menu a {
+    color: rgb(40, 40, 40);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+.mobile-menu a:hover {
+    color: Blue;
+    background-color: rgb(220, 220, 220);
+}
+.mobile-menu a:focus {
+    outline: 2px solid rgb(0, 96, 223);
+}
+
+.section {
+    background-color: rgb(240, 240, 240);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+}
+.section h2.ESPN { color: rgb(202, 0, 0); }
+.section h2.Yahoo { color: rgb(96, 5, 208); }
+.section h2.CBS { color: rgb(0, 74, 204); }
+.section h2.Fantrax { color: rgb(70, 232, 46); }
+.section h2.NFBC { color: rgb(34, 160, 159); }
+
+.trend-card {
+    background-color: rgb(255, 255, 255);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+.trend-card:hover {
+    background-color: rgb(245, 245, 245);
+}
+.trend-card h3, .trend-card li {
+    color: rgb(0, 0, 0);
+}
+.trend-card a:link, .trend-card a:visited {
+    color: RoyalBlue;
+}
+.trend-card a:hover {
+    color: Blue;
+}
+.trend-card a:focus {
+    outline: 2px solid rgb(0, 96, 223);
+}
+
+.tag-badge.favorite {
+    background-color: #ffe08a;
+    color: #000;
+    border-color: #fcb100;
+}
+.tag-badge.daily {
+    background-color: #fce4ec;
+    color: #880e4f;
+    border-color: #ec407a;
+}
+.tag-badge.weekly {
+    background-color: #e9dcf9;
+    color: #5e239d;
+    border-color: #ae4fce;
+}
+.tag-badge.once {
+    background-color: #d9f9e0;
+    color: #2e7031;
+    border-color: #3ec427;
+}
+.tag-badge.players, .tag-badge.pages, .tag-badge.url {
+    background-color: #e5e7eb;
+    color: #1f2937;
+    border-color: #d1d5db;
+}
+.tag-badge.url a:hover {
+    color: #2563eb;
+}
+
+.label-toggle {
+    color: rgb(85, 85, 85);
+}
+.label-toggle:hover {
+    color: #1e3a8a;
+}
+
+.noco-embed {
+    filter: none;
+}
