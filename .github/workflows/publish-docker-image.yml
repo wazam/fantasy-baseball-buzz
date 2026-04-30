@@ -56,6 +56,9 @@ jobs:
             BUILD_DATE=${{ github.event.head_commit.timestamp }}
             IMAGE_VERSION=${{ steps.meta.outputs.version }}
 
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
       - name: Sign image
         run: |
           echo "${{ steps.meta.outputs.tags }}" | xargs -I {} cosign sign --yes {}@${{ steps.build-and-push.outputs.digest }}
