@@ -20,7 +20,9 @@
   <a href="https://github.com/wazam/fantasy-baseball-buzz/releases">
     <img src="https://img.shields.io/github/v/release/wazam/fantasy-baseball-buzz?sort=semver" alt="Latest Release" />
   </a>
-  <img src="https://img.shields.io/docker/image-size/ghcr.io/wazam/fantasy-baseball-buzz/latest?label=docker%20image&logo=docker" alt="Docker Image Size" />
+  <a href="https://github.com/wazam/fantasy-baseball-buzz/pkgs/container/fantasy-baseball-buzz">
+    <img src="https://img.shields.io/docker/image-size/wazam/fantasy-baseball-buzz/latest?registry_url=https://ghcr.io&label=docker%20image&logo=docker" alt="Docker Image Size" />
+  </a>
   <a href="https://github.com/wazam/fantasy-baseball-buzz/stargazers">
     <img src="https://img.shields.io/github/stars/wazam/fantasy-baseball-buzz?style=social" alt="GitHub Stars" />
   </a>
