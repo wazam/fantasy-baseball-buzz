@@ -1,25 +1,36 @@
 services:
-  fantasy-baseball-buzz:
-    build: .
+  buzz:
     image: ghcr.io/wazam/fantasy-baseball-buzz:latest
+    container_name: buzz
+    restart: unless-stopped
     environment:
-      - NOCODB_API_TOKEN=
-      - NOCODB_TABLE_ID=
-      - NOCODB_PUBLIC_ID=
+      - NOCODB_API_TOKEN=    # Required - see NocoDB Setup in README
+      - NOCODB_TABLE_ID=     # Required - see NocoDB Setup in README
+      - NOCODB_PUBLIC_ID=    # Required - see NocoDB Setup in README
     ports:
       - 5000:5000
+    depends_on:
+      - nocodb
 
-  # nocodb:
-  #   image: nocodb/nocodb:latest
-  #   restart: unless-stopped
-  #   environment:
-  #     - NC_DB=pg://postgres:5432?u=postgres&p=password&d=postgres
-  #   ports:
-  #     - 8080:8080
+  nocodb:
+    image: nocodb/nocodb:latest
+    container_name: nocodb
+    restart: unless-stopped
+    environment:
+      - NC_DB=pg://postgres:5432?u=postgres&p=password&d=postgres
+      - NC_DISABLE_TELE=true
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgres
 
-  # postgres:
-  #   image: postgres:16-alpine
-  #   environment:
-  #     - POSTGRES_PASSWORD=password
-  #   volumes:
-  #     - ./data/postgres:/var/lib/postgresql/data
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data

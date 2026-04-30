@@ -1,6 +1,5 @@
 .git/
 .github/
-.vscode/
 archive/
 assets/
 data/
@@ -10,7 +9,13 @@ src/__pycache__/
 .flake8
 .gitignore
 .tool-versions
-*.yaml
+compose.override.yaml
+compose.yaml
+CONTRIBUTING.md
 Dockerfile
-*.log
-*.md
+fantasy-baseball-buzz.code-workspace
+geckodriver.log
+LICENSE
+README.md
+ROADMAP.md
+TODO.md

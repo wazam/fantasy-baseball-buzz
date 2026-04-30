@@ -29,7 +29,7 @@ jobs:
         run: docker compose up -d
 
       - name: Wait for services
-        run: sleep 30
+        run: sleep 60
 
       - name: Verify Buzz is running
         run: curl --retry 10 --retry-connrefused --fail http://localhost:5000/index

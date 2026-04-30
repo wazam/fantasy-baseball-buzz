@@ -1,9 +1,9 @@
-.vscode/
 archive/
 data/
 src/__pycache__/
 *.pyc
 .env
-*.override.yaml
-*.code-workspace
-*.log
+compose.override.yaml
+fantasy-baseball-buzz.code-workspace
+geckodriver.log
+TODO.md
