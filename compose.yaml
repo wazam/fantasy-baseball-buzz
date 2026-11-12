@@ -1,36 +1,24 @@
+# https://github.com/wazam/fantasy-baseball-buzz
 services:
   buzz:
     image: ghcr.io/wazam/fantasy-baseball-buzz:latest
     container_name: buzz
     restart: unless-stopped
+    init: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges=true
+    read_only: true
+    user: "1000:1000"
+    mem_limit: 512m
+    pids_limit: 128
+    tmpfs:
+      - /tmp:size=256m
     environment:
-      - NOCODB_API_TOKEN=    # Required - see NocoDB Setup in README
-      - NOCODB_TABLE_ID=     # Required - see NocoDB Setup in README
-      - NOCODB_PUBLIC_ID=    # Required - see NocoDB Setup in README
-    ports:
-      - 5000:5000
-    depends_on:
-      - nocodb
-
-  nocodb:
-    image: nocodb/nocodb:latest
-    container_name: nocodb
-    restart: unless-stopped
-    environment:
-      - NC_DB=pg://postgres:5432?u=postgres&p=password&d=postgres
-      - NC_DISABLE_TELE=true
-    ports:
-      - 8080:8080
-    depends_on:
-      - postgres
-
-  postgres:
-    image: postgres:16-alpine
-    container_name: postgres
-    restart: unless-stopped
-    environment:
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
+      - FANTRAX_LEAGUE_ID=${FANTRAX_LEAGUE_ID:-}
+      - TZ=${TZ:-UTC}
     volumes:
-      - ./data/postgres:/var/lib/postgresql/data
+      - ./data:/usr/src/data
+    ports:
+      - "9108:9108"
