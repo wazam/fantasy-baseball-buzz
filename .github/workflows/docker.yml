@@ -1,0 +1,161 @@
+# https://github.com/actions/starter-workflows/blob/main/ci/docker-publish.yml
+
+name: Docker Publish
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  push-ghcr:
+    name: Push to GitHub Container Registry
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern=latest
+            type=raw,value=main
+
+      # The Dockerfile holds the image's fixed labels. GHCR shows a multi-platform image's description
+      # from the index annotation, so it's copied from the Dockerfile's label rather than written twice
+      - name: Read the image description
+        id: description
+        run: |
+          description=$(sed -n 's/.*org\.opencontainers\.image\.description="\([^"]*\)".*/\1/p' Dockerfile)
+          test -n "$description"
+          echo "text=$description" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push
+        id: build-and-push
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          # The GitHub attestation below records the build. buildx's own unsigned provenance would add
+          # an unknown/unknown manifest per platform to the image index
+          provenance: false
+          tags: ${{ steps.meta.outputs.tags }}
+          # Only the labels that change per build: metadata-action's full set would replace the Dockerfile's
+          # title and description with the repo name and its GitHub About text
+          labels: |
+            org.opencontainers.image.created=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ steps.meta.outputs.version }}
+          annotations: |
+            index:org.opencontainers.image.description=${{ steps.description.outputs.text }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Stored in GitHub's attestation store, not pushed to GHCR. A cosign signature pushed as a tag
+      # became the package's newest version, so the package page showed it instead of the image
+      - name: Attest build provenance
+        uses: actions/attest@v4
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          subject-digest: ${{ steps.build-and-push.outputs.digest }}
+
+  push-dockerhub:
+    name: Push to Docker Hub
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/fantasy-baseball-buzz
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern=latest
+            type=raw,value=main
+
+      # The Dockerfile holds the image's fixed labels. GHCR shows a multi-platform image's description
+      # from the index annotation, so it's copied from the Dockerfile's label rather than written twice
+      - name: Read the image description
+        id: description
+        run: |
+          description=$(sed -n 's/.*org\.opencontainers\.image\.description="\([^"]*\)".*/\1/p' Dockerfile)
+          test -n "$description"
+          echo "text=$description" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push
+        id: build-and-push
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          # The GitHub attestation below records the build. buildx's own unsigned provenance would add
+          # an unknown/unknown manifest per platform to the image index
+          provenance: false
+          tags: ${{ steps.meta.outputs.tags }}
+          # Only the labels that change per build: metadata-action's full set would replace the Dockerfile's
+          # title and description with the repo name and its GitHub About text
+          labels: |
+            org.opencontainers.image.created=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ steps.meta.outputs.version }}
+          annotations: |
+            index:org.opencontainers.image.description=${{ steps.description.outputs.text }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Attest build provenance
+        uses: actions/attest@v4
+        with:
+          subject-name: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/fantasy-baseball-buzz
+          subject-digest: ${{ steps.build-and-push.outputs.digest }}
