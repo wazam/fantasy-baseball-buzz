@@ -237,7 +237,9 @@ Report bugs or feature requests by opening an issue on the [GitHub repository](h
 - [Yahoo Terms of Service](https://legal.yahoo.com/us/en/yahoo/terms/otos/index.html)
 - [CBS Terms of Use](https://www.viacomcbs.legal/us/en/cbsi/terms-of-use)
 - [Fantrax Terms of Service](https://www.fantrax.com/terms-of-service)
-- [NFBC Terms of Service](https://idsrv.fanball.com/terms)
+- [NFBC Terms of Service](https://terms.shgn.com/terms?theme=nfc)
+- [MLB Terms of Use](https://www.mlb.com/official-information/terms-of-use)
+- [MLB Stats API Copyright Notice](https://gdx.mlb.com/components/copyright.txt)
 
 ## License
 
