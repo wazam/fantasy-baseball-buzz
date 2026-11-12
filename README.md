@@ -1,170 +1,51 @@
-<h1 align="center">
-  <a href="https://github.com/wazam/fantasy-baseball-buzz">
-    <img
-      width="120"
-      alt="Buzz Logo"
-      src="static/favicon.png">
-  </a>
-  <br/>
-  Buzz
-</h1>
+# Buzz
 
-<p align="center">
-  <a href="https://github.com/wazam/fantasy-baseball-buzz/actions/workflows/publish-docker-image.yml">
-    <img src="https://github.com/wazam/fantasy-baseball-buzz/actions/workflows/publish-docker-image.yml/badge.svg" alt="Build & Publish Docker Image CI Status" />
-  </a>
-  <a href="https://github.com/wazam/fantasy-baseball-buzz/actions/workflows/test-docker-compose-stack.yml">
-    <img src="https://github.com/wazam/fantasy-baseball-buzz/actions/workflows/test-docker-compose-stack.yml/badge.svg" alt="Test Docker Compose Stack CI Status" />
-  </a>
-  <br />
-  <a href="https://github.com/wazam/fantasy-baseball-buzz/releases">
-    <img src="https://img.shields.io/github/v/release/wazam/fantasy-baseball-buzz?sort=semver" alt="Latest Release" />
-  </a>
-  <a href="https://github.com/wazam/fantasy-baseball-buzz/pkgs/container/fantasy-baseball-buzz">
-    <img src="https://img.shields.io/docker/image-size/wazam/fantasy-baseball-buzz/latest?registry_url=https://ghcr.io&label=docker%20image&logo=docker" alt="Docker Image Size" />
-  </a>
-  <a href="https://github.com/wazam/fantasy-baseball-buzz/stargazers">
-    <img src="https://img.shields.io/github/stars/wazam/fantasy-baseball-buzz?style=social" alt="GitHub Stars" />
-  </a>
-</p>
+[![Docker Publish](https://github.com/wazam/fantasy-baseball-buzz/actions/workflows/docker.yml/badge.svg)](https://github.com/wazam/fantasy-baseball-buzz/actions/workflows/docker.yml)
+[![Compose Test](https://github.com/wazam/fantasy-baseball-buzz/actions/workflows/compose-test.yml/badge.svg)](https://github.com/wazam/fantasy-baseball-buzz/actions/workflows/compose-test.yml)
+[![Python Lint](https://github.com/wazam/fantasy-baseball-buzz/actions/workflows/lint.yml/badge.svg)](https://github.com/wazam/fantasy-baseball-buzz/actions/workflows/lint.yml)
+[![Latest Release](https://img.shields.io/github/v/release/wazam/fantasy-baseball-buzz?sort=semver&label=Latest%20Release)](https://github.com/wazam/fantasy-baseball-buzz/releases)
+[![Image Size](https://img.shields.io/docker/image-size/wazam123/fantasy-baseball-buzz/latest?label=Image%20Size&logo=docker)](https://hub.docker.com/r/wazam123/fantasy-baseball-buzz)
+[![Docker Hub Pulls](https://img.shields.io/docker/pulls/wazam123/fantasy-baseball-buzz?logo=docker&label=Docker%20Hub%20Pulls)](https://hub.docker.com/r/wazam123/fantasy-baseball-buzz)
+[![GHCR Pulls](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fghcr-badge.elias.eu.org%2Fapi%2Fwazam%2Ffantasy-baseball-buzz%2Ffantasy-baseball-buzz&query=downloadCountRaw&label=GHCR%20Pulls&logo=github)](https://github.com/wazam/fantasy-baseball-buzz/pkgs/container/fantasy-baseball-buzz)
 
-**Buzz** is a self-hosted fantasy baseball dashboard that aggregates **MLB player trends**, rankings, projections, and social fantasy signals like **% rostered**, **adds/drops**, and **% started** from top platforms. It presents a unified, sortable, and filterable view of how players are valued across fantasy leagues, combining social signals with real-life performance metrics and rest-of-season projections.
+![Buzz icon](static/favicon.ico) **Buzz** is a self-hosted fantasy baseball dashboard that aggregates **MLB player trends**, rankings, projections, and social fantasy signals like **% rostered**, **adds/drops**, and **% started** from top platforms. It presents a unified, sortable, and filterable view of how players are valued across fantasy leagues, combining social signals with real-life performance metrics and rest-of-season projections.
 
 Rather than forecasting player talent, Buzz reveals how the fantasy community is reacting, surfacing surging pickups, fading names, and platform-specific roster shifts. By tracking this behavior in near real time, you can act on emerging trends before your league does. Whether you're a data-driven GM or just playing the wire, Buzz delivers **fantasy market intelligence** with no third-party logins, no subscriptions, and no fluff.
 
-<details><summary><strong>Table of Contents</strong></summary>
+## Table of Contents
 
 - [Features](#features)
 - [Tech Stack](#tech-stack)
-- [NocoDB Setup](#nocodb-setup)
 - [Quick Start](#quick-start)
   - [Run via Docker Compose](#run-via-docker-compose)
   - [Build from Source](#build-from-source)
 - [Environment Variables](#environment-variables)
-  - [Additional NocoDB Environment Variables](#additional-nocodb-environment-variables)
-  - [Additional PostgreSQL Environment Variables](#additional-postgresql-environment-variables)
+- [Your Data](#your-data)
 - [Screenshots](#screenshots)
 - [Contributing](#contributing)
 - [Disclaimers](#disclaimers)
 - [License](#license)
 
-</details>
-
 ---
 
 ## Features
 
-- **Multi-Source Coverage**: Pulls fantasy player data from multiple popular league platforms for comprehensive tracking.
+- **Multi-Source Coverage**: Pulls fantasy player data from ESPN, Yahoo, CBS, Fantrax, and NFBC, and MLB IDs and player bios from MLB.
 - **Unified Player Dashboard**: See every eligible MLB player in a sortable, filterable table with side-by-side comparisons across platforms.
 - **Fantasy Sentiment Tracking**: Focuses on social signals like ownership trends and transaction volume to reveal shifts in player value before your league reacts.
 - **Fantasy Valuation Metrics**: Covers projection-based, statistic-based, and opinion-based rankings for various timeframes including preseason, weekly, and rest-of-season to give a complete picture of a player's value.
 - **Manual Data Refresh**: Trigger scrapes manually to pull the most up-to-date data directly from each platform with no stale caches or outdated snapshots.
 - **Fully Self-Hosted**: Runs entirely on your own machine with no third-party accounts, logins, or subscriptions required.
 - **Responsive Design**: Clean UI optimized for desktop and mobile use.
-- **One-Command Docker Launch**: Spin up the full stack with Docker Compose with no complicated setup needed.
+- **One-Command Docker Launch**: Start Buzz with a single Docker Compose command, with no database to set up.
 
 ## Tech Stack
 
-- **Language and Runtime**: Python, powered by Flask for the web app, Requests for HTTP, and BeautifulSoup for scraping, managed with Pipenv.
+- **Language and Runtime**: Python, powered by Flask for the web app served by Gunicorn, Requests for HTTP, and BeautifulSoup for scraping, managed with Pipenv.
 - **Frontend and Templating**: Jinja2 for dynamic HTML, styled with responsive CSS for mobile and desktop support.
-- **Database Layer**: PostgreSQL, accessed and managed visually through NocoDB (open-source Airtable alternative).
-- **Infrastructure and Deployment**: Containerized with Docker, orchestrated using Docker Compose for seamless local and server-side setup.
+- **Database Layer**: SQLite, a single file in the data folder, shown in a sortable, filterable players table built with Tabulator.
+- **Infrastructure and Deployment**: Containerized with Docker and run with Docker Compose, locally or on a server.
 - **Automation and CI/CD**: GitHub Actions for testing, building, and publishing Docker images automatically.
-
-## NocoDB Setup
-
-> [!NOTE]
-> These steps configure NocoDB and generate the required environment values for Buzz. Complete this after launching the stack for the first time.
-
-1. **Access NocoDB**
-
-    Go to [http://localhost:8080](http://localhost:8080) and register as a Super Admin (e.g. `example@anything.whatever` / `mysecretpassword`)
-
-    <details><summary>See Setup Screenshot</summary>
-
-    ![NocoDB Setup 01](assets/images/setup-nocodb-01.jpg)
-
-    </details>
-
-2. **Import JSON Template**
-
-    Import [`assets/setup/nocodb-template.json`](assets/setup/nocodb-template.json) as a new table.
-
-    > [!WARNING]
-    > Do not delete or rename columns, but feel free to reorder, resize, or hide them in your dashboard.
-
-    <details><summary>See Setup Screenshots</summary>
-
-    ![NocoDB Setup 02](assets/images/setup-nocodb-02.jpg)
-    ![NocoDB Setup 03](assets/images/setup-nocodb-03.jpg)
-    ![NocoDB Setup 04](assets/images/setup-nocodb-04.jpg)
-
-    </details>
-
-3. **Get API Token**
-
-    Go to *Account Settings > Tokens* to generate your personal token and copy it.
-
-    ```yaml
-        environment:
-          - NOCODB_API_TOKEN=EA_Lcy903zCah6GWiwnWyr6clTF0Alj43KIXuXRG
-    ```
-
-    <details><summary>See Setup Screenshots</summary>
-
-    ![NocoDB Setup 05](assets/images/setup-nocodb-05.jpg)
-    ![NocoDB Setup 06](assets/images/setup-nocodb-06.jpg)
-    ![NocoDB Setup 07](assets/images/setup-nocodb-07.jpg)
-    ![NocoDB Setup 08](assets/images/setup-nocodb-08.jpg)
-
-    </details>
-
-4. **Get Base ID and Table ID**
-
-    Navigate to the database view to copy your Base ID and Table ID.
-
-    ```yaml
-        environment:
-          - NOCODB_BASE_ID=p5qesumr1rzlee2
-          - NOCODB_TABLE_ID=m2ghe4zq9dgdzdf
-    ```
-
-    <details><summary>See Setup Screenshots</summary>
-
-    ![NocoDB Setup 09](assets/images/setup-nocodb-09.jpg)
-    ![NocoDB Setup 10](assets/images/setup-nocodb-10.jpg)
-    ![NocoDB Setup 11](assets/images/setup-nocodb-11.jpg)
-
-    </details>
-
-5. **Get Public URL and ID**
-
-    Click the **Share** button (top-right corner of table view), enable public viewing, change optional settings, and copy the URL. The raw copy paste has 2 parts you need to parse manually.
-
-    ```yaml
-        environment:
-          - NOCODB_URL=http://localhost:8080
-          - NOCODB_PUBLIC_ID=5b55dc5d-42b9-4aef-b89e-16f104d89b61
-    ```
-
-    <details><summary>See Setup Screenshot</summary>
-
-    ![NocoDB Setup 12](assets/images/setup-nocodb-12.jpg)
-
-    </details>
-
-6. **Apply Environment Variables**
-
-    Add all the required environment values to your `compose.yaml` file and restart:
-
-    ```sh
-    docker compose stop
-    docker compose up -d
-    ```
-
-7. **Access Buzz**
-
-    Success! Buzz is now connected to your NocoDB instance. Visit and bookmark [http://localhost:5000/](http://localhost:5000/) to begin using **Buzz**.
 
 ## Quick Start
 
@@ -173,54 +54,54 @@ Rather than forecasting player talent, Buzz reveals how the fantasy community is
 
 ### Run via Docker Compose
 
+> [!NOTE]
+> Images are published to [GHCR](https://github.com/wazam/fantasy-baseball-buzz/pkgs/container/fantasy-baseball-buzz) (`ghcr.io/wazam/fantasy-baseball-buzz`) and [Docker Hub](https://hub.docker.com/r/wazam123/fantasy-baseball-buzz) (`wazam123/fantasy-baseball-buzz`). The compose files use GHCR by default.
+
 1. **Create `compose.yaml`**
 
     ```yaml
+    # https://github.com/wazam/fantasy-baseball-buzz
     services:
       buzz:
         image: ghcr.io/wazam/fantasy-baseball-buzz:latest
         container_name: buzz
         restart: unless-stopped
+        init: true
+        cap_drop:
+          - ALL
+        security_opt:
+          - no-new-privileges=true
+        read_only: true
+        user: "1000:1000"
+        mem_limit: 512m
+        pids_limit: 128
+        tmpfs:
+          - /tmp:size=256m
         environment:
-          - NOCODB_API_TOKEN=    # Required - see NocoDB Setup above
-          - NOCODB_TABLE_ID=     # Required - see NocoDB Setup above
-          - NOCODB_PUBLIC_ID=    # Required - see NocoDB Setup above
-        ports:
-          - 5000:5000
-        depends_on:
-          - nocodb
-
-      nocodb:
-        image: nocodb/nocodb:latest
-        container_name: nocodb
-        restart: unless-stopped
-        environment:
-          - NC_DB=pg://postgres:5432?u=postgres&p=password&d=postgres
-          - NC_DISABLE_TELE=true
-        ports:
-          - 8080:8080
-        depends_on:
-          - postgres
-
-      postgres:
-        image: postgres:16-alpine
-        container_name: postgres
-        restart: unless-stopped
-        environment:
-          - POSTGRES_PASSWORD=password
-          - POSTGRES_DB=postgres
-          - POSTGRES_USER=postgres
+          - FANTRAX_LEAGUE_ID=${FANTRAX_LEAGUE_ID:-}
+          - TZ=${TZ:-UTC}
         volumes:
-          - ./data/postgres:/var/lib/postgresql/data
+          - ./data:/usr/src/data
+        ports:
+          - "9108:9108"
     ```
 
-2. **Launch the Docker stack**
+2. **Optionally, create `.env` next to `compose.yaml`**
+
+    Every setting is optional. To change any of the [Environment Variables](#environment-variables), copy [`.env.example`](.env.example) to `.env` and uncomment the ones you want.
+
+3. **Create the data folder and launch Buzz**
 
     ```sh
+    mkdir -p data
     docker compose up -d
     ```
 
-3. **Proceed to [NocoDB Setup](#nocodb-setup) to configure your instance**
+    `data` holds the players database and scrape results, and must exist before the first run, owned by the user in `user:` (`1000:1000` by default, run `id` to see yours). Otherwise Docker creates it as root and Buzz cannot write to it. If you change `user:` later, or the folder already has another owner, hand it over with `sudo chown -R <uid>:<gid> data`. Buzz checks this when it starts, and if it can't write to `data`, it stops and logs the command to run.
+
+4. **Fill the players table**
+
+    Open the Index page at [http://localhost:9108/index](http://localhost:9108/index) and select **Run** on a trend. Its results appear on the Players page at [http://localhost:9108/](http://localhost:9108/). Start with ESPN's **Players** trend, which adds every player along with their team and position.
 
 ### Build from Source
 
@@ -231,14 +112,33 @@ Rather than forecasting player talent, Buzz reveals how the fantasy community is
     cd fantasy-baseball-buzz
     ```
 
-2. **Build the Docker image and launch the app**
+2. **Optionally, create `.env` from the example to change any settings**
 
     ```sh
-    docker build -t ghcr.io/wazam/fantasy-baseball-buzz:latest .
-    docker compose up -d
+    cp .env.example .env
     ```
 
-3. **Proceed to [NocoDB Setup](#nocodb-setup) to configure your instance**
+3. **Build the image and launch Buzz**
+
+    `compose.override.yaml` is applied automatically. It builds a local `fantasy-baseball-buzz:local` image in place of the published one.
+
+    ```sh
+    mkdir -p data
+    docker compose up -d --build
+    ```
+
+    `data` holds the players database and scrape results, and must exist before the first run, owned by the user in `user:` (`1000:1000` by default, run `id` to see yours). Otherwise Docker creates it as root and Buzz cannot write to it. If you change `user:` later, or the folder already has another owner, hand it over with `sudo chown -R <uid>:<gid> data`. Buzz checks this when it starts, and if it can't write to `data`, it stops and logs the command to run.
+
+    For active development, also layer on `compose.dev.yaml`. It bind-mounts `src/`, `templates/`, and `static/`, and runs Flask's development server with `FLASK_DEBUG=1` in place of Gunicorn, so code and template changes reload without a rebuild. Passing any `-f` flag disables the automatic `compose.override.yaml` merge, so list it explicitly:
+
+    ```sh
+    docker compose -f compose.yaml -f compose.override.yaml -f compose.dev.yaml up -d --build
+    ```
+
+    > [!WARNING]
+    > `FLASK_DEBUG=1` exposes the interactive Werkzeug debugger on port 9108. Use `compose.dev.yaml` only on a trusted local machine.
+
+4. **Fill the players table** the same way as in [Run via Docker Compose](#run-via-docker-compose)
 
 ## Environment Variables
 
@@ -246,100 +146,90 @@ You can customize Buzz behavior using these optional environment variables:
 
 | Variable                | Description                                                                                                                                                                          | Default / Options                                                                                                                |
 |-------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------|
-| `NOCODB_BASE_ID`        | Private ID for the *Base* where the *Table* is. Used to personalize the menu's editor link directly to the user's *Table* for immediate dashboard editing. (already mentioned above) | *(not set)* (default), accepts any `string`                                                                                      |
-| `NOCODB_URL`            | Public-facing URL for the NocoDB backend. Used to embed the NocoDB dashboard table directly in the Buzz app. (already mentioned above)                                               | `http://localhost:8080` (default), accepts any `string` like `http://192.168.0.10:8080` or `https://nocodb.mysite.com`           |
-| `PRIMARY_LEAGUE_SOURCE` | Sets the authoritative fantasy platform for player names, positions, etc. to align the UI with your league's conventions.                                                            | `ESPN` (default), `Yahoo`, `CBS`, `Fantrax`, or `NFBC`                                                                           |
-| `LEAGUE_LOGIN_EMAIL`    | Email or username used to fetch rostered players from your private league.                                                                                                           | *(not set)* (default), accepts any `string`                                                                                      |
-| `LEAGUE_LOGIN_PASSWORD` | Password for the above login.                                                                                                                                                        | *(not set)* (default), accepts any `string`                                                                                      |
-| `REQUEST_DELAY_SECONDS` | Delay (in seconds) between outbound requests to a platform.                                                                                                                          | `5.5` (default), accepts any `float > 0`                                                                                         |
-| `REQUESTS_PER_WINDOW`   | Max number of requests allowed per rate limit window.                                                                                                                                | `1` (default), accepts any `int >= 1`                                                                                            |
-| `REQUEST_DELAY_MIN`     | Minimum randomized delay (in seconds) before each request.                                                                                                                           | `0.5` (default), accepts any `float > 0`                                                                                         |
-| `REQUEST_DELAY_MAX`     | Maximum randomized delay (in seconds) before each request.                                                                                                                           | `1.5` (default), accepts any `float > 0`                                                                                         |
-| `TZ`                    | Time zone used for logs and scraping schedules.                                                                                                                                      | `UTC` (docker default), accepts any TZ identifier from [list](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List) |
+| `FANTRAX_LEAGUE_ID`     | Your Fantrax league ID, the value after `/league/` in your league URL. Needed by the Fantrax trend, and must be a league from the current season, since Fantrax only serves stats for a league's own seasons.| *(not set)* (default), accepts any `string`                                                                                      |
+| `TZ`                    | Time zone used for logs and results file names.                                                                                                                                      | `UTC` (docker default), accepts any TZ identifier from [list](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List) |
 
 > [!TIP]
-> For remote access from another device, set `NOCODB_URL` or the app will only be reachable on `localhost`.
+> Other devices on your network can reach Buzz at `http://<host-ip>:9108`.
 >
 > Do not put this on the Internet if you do not know what you are doing.
 
-The `buzz` service does **not** include a health check by default, but you may add one.
+The `buzz` image includes a built-in health check against `/index`.
 
-```yaml
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/index"]
-      interval: 10s
-      retries: 5
-      start_period: 30s
-      timeout: 3s
+## Your Data
+
+Everything Buzz keeps is in the `data` folder:
+
+- `buzz.db`: the players table, a SQLite database. Buzz creates it on first start and adds a column for each new trend label.
+- `results/`: each scrape's raw results as JSON, plus `runs.jsonl`, the history of every run.
+- `trend-favorites.json`: trends you've made favorites, or taken off, on the Index page.
+- `player-lists.json`: the players on your Favorites and Compare lists from the Players page, saved by their MLB ID, or another source's ID when there's no MLB ID, so the lists survive starting over below.
+
+To back up, copy the `data` folder while Buzz is stopped.
+
+To start over with an empty players table and import your saved results again, oldest first:
+
+```sh
+docker compose stop buzz
+rm data/buzz.db*
+docker compose start buzz
+docker exec buzz ./.venv/bin/python src/db.py import
 ```
 
----
+To import only some results, list them after `import`, for example this season's:
 
-### Additional NocoDB Environment Variables
-
-| Variable                                                                                                  | Description                                                         | Default / Options                                                                                      |
-|-----------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------|
-| [`NC_DISABLE_TELE`](https://docs.nocodb.com/getting-started/self-hosted/environment-variables/#telemetry) | Disables the telemetry to prevent sending anonymous usage data.     | *(not set)* (default), `true`                                                                          |
-| [`NC_DB`](https://docs.nocodb.com/getting-started/self-hosted/environment-variables/#database)            | The primary database where all NocoDB metadata and data are stored. | *(not set)* (default), format: `pg://host.docker.internal:5432?u=username&p=password&d=database_name`. |
-| [`PORT`](https://docs.nocodb.com/getting-started/self-hosted/environment-variables/#backend)              | Specifies the network port on which NocoDB will run.                | `8080` (default)                                                                                       |
-
-> [!CAUTION]
-> If you're trying to use SQLite instead of PostgreSQL, you must:
->
-> - Remove the `postgres` service from `compose.yaml`.
-> - Remove the `NC_DB` environment variable entirely.
-> - Add a local volume mount for `./your/path/to/nocodb/data:/usr/app/data`.
-
----
-
-### Additional PostgreSQL Environment Variables
-
-| Variable                                                                                                       | Description                                              | Default    |
-|----------------------------------------------------------------------------------------------------------------|----------------------------------------------------------|------------|
-| [`POSTGRES_DB`](https://github.com/docker-library/docs/blob/master/postgres/README.md#postgres_db)             | Name of the default PostgreSQL database                  | `postgres` |
-| [`POSTGRES_USER`](https://github.com/docker-library/docs/blob/master/postgres/README.md#postgres_user)         | Username for PostgreSQL authentication                   | `postgres` |
-| [`POSTGRES_PASSWORD`](https://github.com/docker-library/docs/blob/master/postgres/README.md#postgres_password) | Password for the specified user (already required above) | `password` |
-
-> [!WARNING]
-> If you change any of these defaults, be sure to update the `NC_DB` environment variable for the `nocodb` service in your `compose.yaml` accordingly.
-
-The `postgres` service does **not** include a health check by default, but you may add one to ensure the container is ready before other services attempt to connect.
-
-```yaml
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
-      interval: 10s
-      timeout: 2s
-      retries: 10
+```sh
+docker exec buzz sh -c './.venv/bin/python src/db.py import data/results/2026-*.json'
 ```
+
+Buzz matches each player a source sends to a row by the source's ID, then by name, ignoring accents, case, periods, hyphens, and suffixes like `Jr.`, so `C.J. Abrams` and `CJ Abrams` are one player. When a name fits more than one row, the row that best matches the player's team, type (batter or pitcher), and position wins, with ESPN's row ahead when the rest is equal. If no row wins outright, Buzz adds a new row instead of guessing. A row whose team and type both differ is never a match, since that's a batter and a pitcher who share a name. Rows can still be split, for example when a team gone stale in an old result points to the wrong namesake. To list every name on more than one row, with each row's Id, team, position, and source IDs (once MLB's players trend has run, the row with an MLB ID is the major leaguer, and the others are usually minor leaguers who share the name):
+
+```sh
+docker exec buzz ./.venv/bin/python src/db.py duplicates
+```
+
+To merge two rows that are the same player, give the Id of the row to keep, then the Id of the row to delete. Without `--yes` it only shows what it would copy and delete:
+
+```sh
+docker exec buzz ./.venv/bin/python src/db.py merge 986 7
+docker exec buzz ./.venv/bin/python src/db.py merge 986 7 --yes
+```
+
+The kept row gets every field it's missing from the deleted row, its source IDs included, so later imports update the kept row and it stays on any Favorites or Compare list the deleted row was on. Buzz won't merge two rows holding different IDs from the same source, since those are different players. Merge while no trend is running, and back up the `data` folder first.
 
 ## Screenshots
 
-<table>
-<tr>
-<th>Desktop (Light)</th>
-<th>Mobile (Light)</th>
-</tr>
-<tr>
-<td><img src="assets/images/screenshot-desktop-dashboard.jpg" alt="Buzz Dashboard"/><br/><img src="assets/images/screenshot-desktop-page.jpg" alt="Platform Page 1"/><br/><img src="assets/images/screenshot-desktop-page-2.jpg" alt="Platform Page 2"/></td>
-<td><img src="assets/images/screenshot-mobile-dashboard.jpg" alt="Mobile Dashboard"/><br/><img src="assets/images/screenshot-mobile-page.jpg" alt="Mobile Page 1"/><br/><img src="assets/images/screenshot-mobile-page-2.jpg" alt="Mobile Page 2"/></td>
-</tr>
-</table>
+![Buzz Desktop Players Light](docs/screenshot-desktop-players.jpg)
 
-<table>
-<tr>
-<th>Desktop (Dark)</th>
-<th>Mobile (Dark)</th>
-</tr>
-<tr>
-<td><img src="assets/images/screenshot-desktop-dashboard-dark.jpg" alt="Dashboard Dark"/><br/><img src="assets/images/screenshot-desktop-page-dark.jpg" alt="Platform Dark"/></td>
-<td><img src="assets/images/screenshot-mobile-dashboard-dark.jpg" alt="Mobile Dashboard Dark"/><br/><img src="assets/images/screenshot-mobile-page-dark.jpg" alt="Mobile Page Dark"/></td>
-</tr>
-</table>
+The Players page in light mode: every player in one sortable, filterable table, with each source's columns grouped under its name. The buttons above the table show or hide each source's columns and the IDs, hide single columns from the Columns menu, filter to your Favorites or Compare players, and clear every filter. Select a star to add a player to Favorites, or the eye to add them to Compare; **Clear compare** empties Compare for a new week.
+
+![Buzz Desktop Players Dark](docs/screenshot-desktop-players-dark.jpg)
+
+The same Players page in dark mode, the default theme.
+
+![Buzz Desktop Index Light](docs/screenshot-desktop-index.jpg)
+
+The Index page in light mode, with a summary tile per source Buzz can scrape and a table of each source's supported trends showing the columns they fill, how often they run, their last run, their status, and a Run button. Trends not yet supported are listed below each table, and further down, sources planned for later list theirs.
+
+![Buzz Desktop Index Dark](docs/screenshot-desktop-index-dark.jpg)
+
+The Index page in dark mode.
+
+![Buzz Mobile Players Light](docs/screenshot-mobile-players.jpg)
+
+The Players page on a phone in light mode, where the table scrolls sideways to reach each source's columns.
+
+![Buzz Mobile Players Dark](docs/screenshot-mobile-players-dark.jpg)
+
+The Players page on a phone in dark mode.
+
+![Buzz Mobile Index Light](docs/screenshot-mobile-index.jpg)
+
+The Index page on a phone in light mode, with the source tiles in two columns and each trend stacked into its name, the columns it fills, and its run details.
 
 ## Contributing
 
-Report bugs or feature requests by opening an issue on the [GitHub repository](https://github.com/wazam/fantasy-baseball-buzz/issues). See [ROADMAP.md](ROADMAP.md) for planned and proposed features. See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on submitting pull requests.
+Report bugs or feature requests by opening an issue on the [GitHub repository](https://github.com/wazam/fantasy-baseball-buzz/issues). See [ROADMAP.md](ROADMAP.md) for planned and proposed features.
 
 ## Disclaimers
 
