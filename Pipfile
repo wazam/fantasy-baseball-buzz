@@ -9,13 +9,13 @@ requests = "*"
 selenium = "*"
 unidecode = "*"
 ratelimit = "*"
-webdriver-manager = "*"
 jinja2 = "*"
-python-dotenv = "*"
 flask = "*"
+gunicorn = "*"
 
 [dev-packages]
 flake8 = "*"
+flake8-implicit-str-concat = "*"
 
 [requires]
-python_version = "3.13"
+python_version = "3.14"
