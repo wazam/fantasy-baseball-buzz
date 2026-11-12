@@ -2,6 +2,12 @@
 
 Release notes for every version, newest first. Each version is tagged in git and has a matching [release on GitHub](https://github.com/wazam/fantasy-baseball-buzz/releases), and its images are on [GHCR](https://github.com/wazam/fantasy-baseball-buzz/pkgs/container/fantasy-baseball-buzz) and [Docker Hub](https://hub.docker.com/r/wazam123/fantasy-baseball-buzz). Changes that haven't been released yet collect under **Unreleased**, and [RELEASING.md](RELEASING.md) covers how to ship them.
 
+## Unreleased
+
+### Bug Fixes
+
+- With one player on Compare, **Clear compare** asks "Take 1 player off Compare?" instead of "Take all 1 players off Compare?".
+
 ## [v0.4.0](https://github.com/wazam/fantasy-baseball-buzz/releases/tag/v0.4.0) (2026-11-12)
 
 ### Upgrading

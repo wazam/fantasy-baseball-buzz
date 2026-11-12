@@ -377,7 +377,8 @@
             // Empties Compare for a new week, after a confirmation, since the list can't be brought back
             document.getElementById("clear-compare").addEventListener("click", async () => {
                 const n = table.getData().filter(row => row.Compare).length;
-                if (!n || !confirm("Take all " + n + " players off Compare?")) return;
+                const question = n === 1 ? "Take 1 player off Compare?" : "Take all " + n + " players off Compare?";
+                if (!n || !confirm(question)) return;
                 const response = await fetch("/players/compare/clear", { method: "POST" });
                 if (!response.ok) return;
                 table.blockRedraw();
