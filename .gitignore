@@ -1,9 +1,6 @@
-archive/
-data/
-src/__pycache__/
-*.pyc
+/data/
+__pycache__/
 .env
-compose.override.yaml
-fantasy-baseball-buzz.code-workspace
-geckodriver.log
+.env.*
+!.env.example
 TODO.md
