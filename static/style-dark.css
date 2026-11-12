@@ -10,38 +10,17 @@ body {
 .logo-container h1 {
     color: Gold;
 }
-.theme-toggle button {
+.toolbar-icon {
+    color: rgb(170, 170, 170);
+}
+.toolbar-icon:hover {
+    color: Gold;
     background-color: rgb(40, 40, 40);
-    color: rgb(224, 224, 224);
-    border: 1px solid rgb(68, 68, 68);
-    box-shadow: 0 2px 5px rgba(255, 255, 255, 0.1);
 }
-.theme-toggle button:hover {
-    background-color: rgb(58, 58, 58);
-    color: rgb(255, 255, 255);
-    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.25);
-}
-.hamburger-menu {
+.toolbar-icon[aria-current="page"] {
     color: Gold;
 }
-.hamburger-menu:hover {
-    color: rgb(255, 255, 204);
-    text-shadow: 0 0 8px Gold;
-}
-
-.mobile-menu {
-    background-color: rgb(30, 30, 30);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
-}
-.mobile-menu a {
-    color: rgb(224, 224, 224);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-.mobile-menu a:hover {
-    color: rgb(0, 191, 255);
-    background-color: rgb(58, 58, 58);
-}
-.mobile-menu a:focus {
+.toolbar-icon:focus-visible {
     outline: 2px solid rgb(255, 215, 0);
 }
 
@@ -49,68 +28,201 @@ body {
     background-color: rgb(30, 30, 30);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
 }
-.section h2.ESPN { color: rgb(255, 76, 76); }
-.section h2.Yahoo { color: rgb(160, 115, 255); }
-.section h2.CBS { color: rgb(92, 174, 255); }
-.section h2.Fantrax { color: rgb(121, 248, 92); }
-.section h2.NFBC { color: rgb(34, 160, 159); }
+/* Sources without a color of their own, such as those with only planned trends */
+.section h2 { color: rgb(160, 160, 160); }
+.section h2.ESPN, .source-name.ESPN { color: rgb(255, 76, 76); }
+.section h2.Yahoo, .source-name.Yahoo { color: rgb(160, 115, 255); }
+.section h2.CBS, .source-name.CBS { color: rgb(92, 174, 255); }
+.section h2.Fantrax, .source-name.Fantrax { color: rgb(121, 248, 92); }
+.section h2.NFBC, .source-name.NFBC { color: rgb(34, 160, 159); }
 
-.trend-card {
+.source-tile {
     background-color: rgb(42, 42, 42);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    color: rgb(160, 160, 160);
 }
-.trend-card:hover {
+.source-tile:hover {
     background-color: rgb(51, 51, 51);
 }
-.trend-card h3, .trend-card li {
-    color: rgb(224, 224, 224);
-}
-.trend-card a:link, .trend-card a:visited {
-    color: rgb(30, 144, 255);
-}
-.trend-card a:hover {
-    color: rgb(0, 191, 255);
-}
-.trend-card a:focus {
+.source-tile:focus-visible {
     outline: 2px solid rgb(255, 215, 0);
 }
+.tile-alert.failed {
+    color: #f87171;
+}
+.tile-alert.busy {
+    color: #60a5fa;
+}
 
-.tag-badge.favorite {
-    background-color: #a96e00;
-    color: #fff3dc;
-    border-color: #fcb100;
+.trend-table th {
+    color: rgb(160, 160, 160);
+    border-bottom: 1px solid rgb(68, 68, 68);
 }
-.tag-badge.daily {
-    background-color: #4a1831;
-    color: #ffc1e3;
-    border-color: #ec407a;
+.trend-table td {
+    color: rgb(224, 224, 224);
+    border-bottom: 1px solid rgb(48, 48, 48);
 }
-.tag-badge.weekly {
-    background-color: #2f1b4d;
-    color: #dbc1f7;
-    border-color: #ae4fce;
+.trend-row:hover td {
+    background-color: rgb(38, 38, 38);
 }
-.tag-badge.once {
+.trend-fills, .trend-frequency, .trend-last {
+    color: rgb(190, 190, 190);
+}
+.favorite-toggle {
+    color: #fcb100;
+}
+.favorite-toggle[aria-pressed="false"] {
+    color: rgb(110, 110, 110);
+}
+.favorite-toggle[aria-pressed="false"]:hover {
+    color: #fcb100;
+}
+/* Compare's eye is blue, so it reads apart from the Favorite star */
+.compare-toggle {
+    color: rgb(0, 191, 255);
+}
+.compare-toggle[aria-pressed="false"] {
+    color: rgb(110, 110, 110);
+}
+.compare-toggle[aria-pressed="false"]:hover, #compare-only[aria-pressed="true"] .icon-eye {
+    color: rgb(0, 191, 255);
+}
+.favorite-toggle:focus-visible {
+    outline: 2px solid rgb(255, 215, 0);
+}
+.trend-link, .unsupported a {
+    color: rgb(30, 144, 255);
+}
+.trend-link:hover, .unsupported a:hover {
+    color: rgb(0, 191, 255);
+}
+.trend-link:focus-visible, .unsupported a:focus-visible {
+    outline: 2px solid rgb(255, 215, 0);
+}
+.unsupported summary {
+    color: rgb(160, 160, 160);
+}
+.trend-error {
+    color: #f87171;
+}
+.status-badge.ok {
     background-color: #204c27;
     color: #d7ffe4;
     border-color: #3ec427;
 }
-.tag-badge.players, .tag-badge.pages, .tag-badge.url {
+.status-badge.failed {
+    background-color: #4c1d1d;
+    color: #fecaca;
+    border-color: #ef4444;
+}
+.status-badge.busy {
+    background-color: #1e3a5f;
+    color: #bfdbfe;
+    border-color: #3b82f6;
+}
+.status-badge.never {
     background-color: #374151;
     color: #e5e7eb;
     border-color: #4b5563;
 }
-.tag-badge.url a:hover {
-    color: #60a5fa;
+
+.run-trend {
+    background-color: rgb(40, 40, 40);
+    color: rgb(224, 224, 224);
+    border-color: rgb(85, 85, 85);
+}
+.run-trend:hover:not(:disabled) {
+    background-color: rgb(58, 58, 58);
+    border-color: rgb(0, 191, 255);
+}
+.run-trend:focus-visible {
+    outline: 2px solid rgb(255, 215, 0);
 }
 
-.label-toggle {
-    color: rgb(136, 136, 136)
+.pill {
+    background-color: rgb(40, 40, 40);
+    color: rgb(224, 224, 224);
+    border-color: rgb(85, 85, 85);
 }
-.label-toggle:hover {
-    color: #93c5fd;
+.pill:hover {
+    background-color: rgb(45, 45, 45);
+    border-color: rgb(0, 191, 255);
+}
+.pill:focus-visible {
+    outline: 2px solid rgb(255, 215, 0);
+}
+#favorites-only[aria-pressed="true"] .icon-star {
+    color: #fcb100;
+}
+.column-picker-panel {
+    color: rgb(224, 224, 224);
+    color-scheme: dark;
+    background-color: rgb(40, 40, 40);
+    border-color: rgb(85, 85, 85);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    scrollbar-color: rgb(85, 85, 85) rgb(40, 40, 40);
+}
+.players-count {
+    color: rgb(160, 160, 160);
 }
 
-.noco-embed {
-    filter: invert(1) hue-rotate(180deg);
+/* Players table */
+#players.tabulator {
+    /* Scrollbars follow the theme */
+    color-scheme: dark;
+    background-color: rgb(30, 30, 30);
+    border: 1px solid rgb(68, 68, 68);
+    color: rgb(224, 224, 224);
+}
+#players .tabulator-header, #players .tabulator-header .tabulator-col {
+    background-color: rgb(38, 38, 38);
+    color: rgb(224, 224, 224);
+    border-color: rgb(68, 68, 68);
+}
+#players .tabulator-header .tabulator-col.tabulator-sortable.tabulator-col-sorter-element:hover {
+    background-color: rgb(45, 45, 45);
+}
+#players .tabulator-header .tabulator-col-group .tabulator-col-group-cols {
+    border-top-color: rgb(68, 68, 68);
+}
+#players .tabulator-header-filter input, #players .tabulator-header-filter select {
+    background-color: rgb(40, 40, 40);
+    color: rgb(224, 224, 224);
+    border: 1px solid rgb(85, 85, 85);
+    border-radius: 3px;
+}
+#players .tabulator-tableholder {
+    scrollbar-color: rgb(85, 85, 85) rgb(30, 30, 30);
+}
+#players .tabulator-tableholder, #players .tabulator-tableholder .tabulator-table {
+    background-color: rgb(30, 30, 30);
+}
+#players .tabulator-row {
+    background-color: rgb(30, 30, 30);
+    color: rgb(224, 224, 224);
+    border-bottom-color: rgb(48, 48, 48);
+}
+#players .tabulator-row.tabulator-row-even {
+    background-color: rgb(34, 34, 34);
+}
+#players .tabulator-row:hover {
+    background-color: rgb(45, 45, 45);
+}
+#players .tabulator-row .tabulator-cell {
+    border-right-color: rgb(48, 48, 48);
+}
+#players .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+    border-right-color: rgb(68, 68, 68);
+}
+#players .tabulator-placeholder span {
+    color: rgb(160, 160, 160);
+}
+.tabulator-edit-list {
+    background-color: rgb(40, 40, 40);
+    color: rgb(224, 224, 224);
+    border-color: rgb(85, 85, 85);
+}
+.tabulator-edit-list .tabulator-edit-list-item.active, .tabulator-edit-list .tabulator-edit-list-item.focused {
+    background-color: rgb(45, 45, 45);
+    color: rgb(224, 224, 224);
 }

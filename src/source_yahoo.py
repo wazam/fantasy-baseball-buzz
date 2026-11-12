@@ -1,130 +1,235 @@
-from util_beautifulsoup import beautifulsoup_scrape, beautifulsoup_find
-from util_nocodb import search_record, create_records, update_records
-from unidecode import unidecode
-from datetime import date
-from datetime import timedelta
-
-
-def date_X_days_ago(days):
-    date_today = date.today()
-    date_days_back = timedelta(days=days)
-    date_back = date_today - date_days_back
-    return date_back
-
-
-##
-def yahoo_get(trend_type):
-    return None
-##
-
+from datetime import date, timedelta
+from urllib.parse import urljoin, urlparse, parse_qs
+from util_beautifulsoup import beautifulsoup_scrape, parse_number
+from db import save_and_import, clear_stale_values
+from sources import SOURCES
 
 url_base = 'https://baseball.fantasysports.yahoo.com'
-weekly_dict = {}
-daily_dict = {}
-data_rows = []
+yahoo_config = next(source for source in SOURCES if source['source'].lower() == 'yahoo')
+trend_keys = [trend['key'] for trend in yahoo_config['trends']]
+trend_labels = {trend['key']: trend['labels'] for trend in yahoo_config['trends']}
+
+# Between seasons every Yahoo fantasy baseball page answers "The document you requested was not found"
+OFFSEASON = "Yahoo takes it offline between seasons"
+
+# Buzz Index table headers mapped to the labels they fill, plus how many days each trend covers
+BUZZ_INDEX_TRENDS = {
+    'buzz-index': (1, {
+        '% Ros': 'Yahoo Roster %',
+        '% Start': 'Yahoo Active %',
+        'Adds': 'Yahoo Adds Today',
+        'Drops': 'Yahoo Drops Today',
+        'Trades': 'Yahoo Trades Today',
+    }),
+    'buzz-index-7d': (7, {
+        'Adds': 'Yahoo Adds 7D',
+        'Drops': 'Yahoo Drops 7D',
+        'Trades': 'Yahoo Trades 7D',
+    }),
+}
+
+# Who's Hot tabs: Batters and Pitchers, 25 players each
+WHOS_HOT_TABS = ['B', 'AP']
+
+# MVPs tabs and the labels they fill
+MVP_TABS = {'roto': 'Yahoo MVP % Roto', 'head': 'Yahoo MVP % H2H'}
+
+# Matchup Ratings' all-players view has a tab per position, each listing up to 50 players
+MATCHUP_POSITIONS = ['ALL', 'C', '1B', '2B', '3B', 'SS', 'OF', 'Util', 'SP', 'RP', 'P']
 
 
-# Returns a numerically ordered dictionary of Players' names with their add/drop roster trends
-def yahoo_get_added_dropped_trends_X_days(number_of_days_to_scrape):
-    column_name = 'yahoo_get_added_dropped_trends'
-    weekly_dict.clear()
-    name_lookup_cache = {}  # in-memory cache replacing old JSON lookup file
+def yahoo_get(trend_type):
+    """Return a list of player trends by trend type, and save them to a trend-specific JSON file."""
 
-    # Get position page URLs from daily page
-    for day in range(0, int(number_of_days_to_scrape)):
-        daily_dict.clear()
-        date_scrape = date_X_days_ago(day)
-        url_tab = '/b1/buzzindex?sort=BI_S&src=combined&bimtab=ALL&trendtab=O&pos=ALL&date='
-        url_scrape = url_base + url_tab + str(date_scrape)
-        elements_positions = beautifulsoup_scrape(url_scrape, 'all', 'a', 'Navtarget', True)[46::]
-
-        # Get Players table data from position page
-        for position in elements_positions:
-            url_tab = str(position['href'])
-            url_scrape = url_base + url_tab
-            results_table = beautifulsoup_scrape(url_scrape, 'all', 'table', 'Tst-table Table', False)[0]
-            elements_rows = beautifulsoup_find(results_table, 'all', 'tr', '', False)[2::]
-            elements_players = beautifulsoup_find(results_table, 'all', 'a', 'Nowrap', True)
-
-            # Get index from row of all Player's column data
-            data_rows.clear()
-            for index, row in enumerate(elements_rows):
-                elements_columns = beautifulsoup_find(row, 'all', 'td', '', False)
-                elements_columns = [each_column.text.strip() for each_column in elements_columns]
-                data_rows.append([each_column for each_column in elements_columns if each_column])
-
-                # Get Player's short name by trying to removing team names until the string is successfully shortened
-                mlb_teams = ['ARI', 'ATL', 'BAL', 'BOS', 'CWS', 'CHC', 'CIN', 'CLE', 'COL', 'DET', 'HOU', 'KC', 'LAA', 'LAD', 'MIA', 'MIL', 'MIN', 'NYY', 'NYM', 'OAK', 'PHI', 'PIT', 'SD', 'SF', 'SEA', 'STL', 'TB', 'TEX', 'TOR', 'WAS']
-                for team in mlb_teams:
-                    if len(str(str(data_rows[index][0].split('\n')[1].strip()).rsplit(str(team + ' - '), 2)[0].strip())) < len(str(data_rows[index][0].split('\n')[1].strip())):
-                        player_name_short = unidecode(str(str(data_rows[index][0].split('\n')[1].strip()).rsplit(team, 2)[0].strip())).title().strip()
-                        break
-
-                # Get Player's full name from in-memory cache, fall back to web request
-                if player_name_short in name_lookup_cache:
-                    player_name_full = name_lookup_cache[player_name_short]
-                else:
-                    url_scrape = str(elements_players[index]['href'])
-                    element_player_name_full = beautifulsoup_scrape(url_scrape, '', 'span', 'ys-name', False)
-                    player_name_full = unidecode(element_player_name_full.text).title().strip()
-                    name_lookup_cache[player_name_short] = player_name_full
-
-                # Add Player's Name and Change to daily dictionary, only on first occurrence
-                player_add = int(data_rows[index][4])
-                player_drop = int(data_rows[index][3])
-                player_change = player_add - player_drop
-                if player_name_full not in daily_dict:
-                    daily_dict[player_name_full] = player_change
-
-        # Add Player's Name and Change to weekly dictionary, accumulating across all days
-        for key in daily_dict.keys():
-            if key not in weekly_dict:
-                weekly_dict[key] = daily_dict[key]
-            else:
-                weekly_dict[key] = weekly_dict[key] + daily_dict[key]
-
-    # Update or create NocoDB records for each player's trend data
-    update_list, create_list = [], []
-    for player_name, change_value in weekly_dict.items():
-        entry = {"Player": player_name, column_name: change_value}
-        existing = search_record(entry, "Yahoo")
-        if existing:
-            update_list.append({"Id": existing["Id"], column_name: change_value})
-        else:
-            create_list.append(entry)
-
-    if update_list:
-        update_records(update_list, "Yahoo")
-    if create_list:
-        create_records(create_list)
-
-    sorted_weekly_dict = dict(sorted(weekly_dict.items(), key=lambda x: x[1], reverse=True))
-    return sorted_weekly_dict
+    if trend_type not in trend_keys:
+        raise ValueError(f"Invalid trend_type '{trend_type}'. Choose from: {trend_keys}")
+    if trend_type in BUZZ_INDEX_TRENDS:
+        days, columns = BUZZ_INDEX_TRENDS[trend_type]
+        return yahoo_buzz_index(trend_type, days, columns)
+    scraper = PAGE_TRENDS.get(trend_type)
+    return scraper(trend_type) if scraper else None
 
 
-# Returns all Players' add/drop trends for the past week
-def yahoo_get_added_dropped_trends():
-    data = yahoo_get_added_dropped_trends_X_days(7)
-    return data
+def player_entry(cell):
+    """Return the player in a row's first cell (name, team, position and Yahoo ID), or None if it has none."""
+    name_tag = cell.find('a', class_='name') if cell else None
+    if not name_tag:
+        return None
+
+    # Shown as 'MIN - SP' under the player's name; injury tags like 'IL10' share the Fz-xxs style
+    team_position = cell.select_one('span.D-b > span.Fz-xxs')
+    team, _, position = team_position.get_text(strip=True).partition(' - ') if team_position else ('', '', '')
+    return {
+        "Player": name_tag.get_text(strip=True),
+        "Position": position,
+        "Team": team,
+        "Id_Yahoo": name_tag.get('data-ys-playerid'),
+    }
 
 
-# Returns all Players to NocoDB
-def yahoo_get_player_list():
-    url_tab = '/b1/149226/players?status=A&pos=B&cut_type=33&stat1=S_S_2023&myteam=0&sort=R_PO&sdir=1&count=1200'
-    url = url_base + url_tab
-    return ('204', 204)
+def player_rows(table, wanted):
+    """Yield (player entry, {header: cell}) for each player row, reading the cells under the wanted headers."""
+    header_row = next((row for row in table.find_all('tr')
+                       if set(wanted) <= {cell.get_text(' ', strip=True) for cell in row.find_all(['th', 'td'])}), None)
+    if header_row is None:
+        raise RuntimeError(f"Yahoo's table has no {wanted} columns; the page may have changed")
+    headers = [cell.get_text(' ', strip=True) for cell in header_row.find_all(['th', 'td'])]
+
+    for row in table.find_all('tr'):
+        cells = row.find_all('td')
+        entry = player_entry(cells[0]) if cells else None
+        if entry:
+            yield entry, {header: cells[headers.index(header)] for header in wanted}
 
 
-# Returns all deeper-searched Players to NocoDB
-def yahoo_get_player_list_deep():
-    url_tab = '/b1/149226/showforced'
-    url = url_base + url_tab
-    return ('204', 204)
+def parse_buzz_table(table, columns):
+    """Return one entry per player row, with the values under each header in columns stored as its label."""
+    if table is None:
+        print("No Buzz Index table found.")
+        return []
+    try:
+        return [{**entry, **{label: parse_number(cells[header].get_text(strip=True)) for header, label in columns.items()}}
+                for entry, cells in player_rows(table, list(columns))]
+    except RuntimeError as e:
+        print(f"Buzz Index: {e}")
+        return []
 
 
-# Tests with `pipenv run python src/source_yahoo.py`
+def buzz_index_day(date_scrape, columns):
+    """Return the All Positions table plus each position tab's table for one day."""
+    url = f"{url_base}/b1/buzzindex?sort=BI_S&src=combined&bimtab=A&trendtab=O&pos=ALL&date={date_scrape}"
+    page = beautifulsoup_scrape(url, '', 'body', '', False)
+    if page is None:
+        return []
+
+    entries = parse_buzz_table(page.find('table', class_='Tst-table'), columns)
+
+    # Each position tab (C, 1B, ... P) lists that position's top 50, reaching deeper than All Positions
+    for link in page.find_all('a', class_='Navtarget', href=True):
+        query = parse_qs(urlparse(link['href']).query)
+        if query.get('bimtab') == ['A'] and query.get('trendtab') == ['O'] and query.get('pos', ['ALL']) != ['ALL']:
+            table = beautifulsoup_scrape(urljoin(url_base, link['href']), '', 'table', 'Tst-table', False)
+            entries += parse_buzz_table(table, columns)
+    return entries
+
+
+def yahoo_buzz_index(trend_type, days, columns):
+    """Process the Buzz Index for the last `days` days, summing each player's numbers across days."""
+    totals = {}
+    for day in range(days):
+        date_scrape = date.today() - timedelta(days=day)
+        print(f"Processing Buzz Index for {date_scrape} ({day + 1}/{days}) for trend type '{trend_type}'...")
+
+        # A player listed under several tabs counts once per day, from its first (All Positions) row
+        day_entries = {}
+        for entry in buzz_index_day(date_scrape, columns):
+            day_entries.setdefault(entry['Id_Yahoo'] or entry['Player'], entry)
+
+        # Today's row comes first, so each player keeps their latest name, team and position
+        for player_key, entry in day_entries.items():
+            if player_key not in totals:
+                totals[player_key] = entry
+                continue
+            for label in columns.values():
+                if isinstance(entry[label], (int, float)) and isinstance(totals[player_key][label], (int, float)):
+                    totals[player_key][label] += entry[label]
+
+    trends_list = list(totals.values())
+    if not trends_list:
+        raise RuntimeError(f"Yahoo's Buzz Index returned no player table; {OFFSEASON}")
+
+    save_and_import(trends_list, 'yahoo', trend_type)
+    return trends_list
+
+
+def fetch_table(path, page_name, table_class='Tst-table'):
+    """Return a Yahoo page's player table. Raises when the page or its table is missing, so a run never imports
+    part of a list and then clears the players on the page that failed."""
+    page = beautifulsoup_scrape(f"{url_base}{path}", '', 'body', '', False)
+    table = page.find('table', class_=table_class) if page else None
+    if table is None:
+        raise RuntimeError(f"Yahoo's {page_name} returned no player table; {OFFSEASON}")
+    return table
+
+
+def import_page_trend(trends_list, trend_type, page_name):
+    """Import a page trend's players, then blank its labels on players no longer listed."""
+    if not trends_list:
+        raise RuntimeError(f"Yahoo's {page_name} listed no players; {OFFSEASON}")
+    save_and_import(trends_list, 'yahoo', trend_type)
+    clear_stale_values(trend_labels[trend_type], 'Id_Yahoo', {entry['Id_Yahoo'] for entry in trends_list}, 'Yahoo')
+    return trends_list
+
+
+def whos_hot(trend_type):
+    """Rank the players on Who's Hot, 1 to 25 among batters and again among pitchers."""
+    trends_list = []
+    for tab in WHOS_HOT_TABS:
+        table = fetch_table(f"/b1/whoshot?pos={tab}", "Who's Hot")
+        trends_list += [{**entry, "Yahoo Rank Hot": rank}
+                        for rank, (entry, _) in enumerate(player_rows(table, ['Player']), 1)]
+    return import_page_trend(trends_list, trend_type, "Who's Hot")
+
+
+def mvps(trend_type):
+    """Return each MVP's percentage from the Rotisserie and Head-to-Head tabs. Between seasons the page shows
+    'MVPs data will be available on' a date instead of players."""
+    players = {}
+    for tab, label in MVP_TABS.items():
+        table = fetch_table(f"/b1/keystosuccess?st={tab}", "MVPs")
+        notice = table.get_text(' ', strip=True)
+        if 'will be available' in notice:
+            raise RuntimeError(f"Yahoo's MVPs page says '{notice}'")
+        for entry, cells in player_rows(table, ['Player', 'Percent']):
+            # Both labels are set, so a player on only one tab doesn't keep an old value on the other
+            player = players.setdefault(entry['Id_Yahoo'], {**entry, **{name: None for name in MVP_TABS.values()}})
+            player[label] = parse_number(cells['Percent'].get_text(strip=True))
+    return import_page_trend(list(players.values()), trend_type, "MVPs")
+
+
+def injuries(trend_type):
+    """Return every player on the injury report with their designation (IL10, IL60, DTD, SUSP) and injury."""
+    table = fetch_table("/b1/injuries", "injury report", 'Table-mid')
+    trends_list = []
+    for entry, cells in player_rows(table, ['Player', 'Note', 'Status']):
+        # The detailed designation sits beside the name; the Status column only says IL, DTD or SUSP
+        designation = cells['Player'].select_one('span.ysf-player-status span')
+        trends_list.append({
+            **entry,
+            "Yahoo Inj Status": (designation or cells['Status']).get_text(strip=True),
+            "Yahoo Inj Type": cells['Note'].get_text(' ', strip=True),
+        })
+    return import_page_trend(trends_list, trend_type, "injury report")
+
+
+def matchup_ratings(trend_type):
+    """Return each player's matchup rating (1 to 5 stars) and opponent from every position tab."""
+    players = {}
+    for position in MATCHUP_POSITIONS:
+        table = fetch_table(f"/b1/playermatchups?tab=ALL&pos={position}", "Matchup Ratings")
+        for entry, cells in player_rows(table, ['Player', 'Opp', 'Rating']):
+            # Every shaded star counts toward the rating, whether shaded positive, neutral or negative
+            stars = len(cells['Rating'].select('span.F-positive, span.F-neutral, span.F-negative'))
+            players.setdefault(entry['Id_Yahoo'], {
+                **entry,
+                "Yahoo Matchup Rating": stars,
+                "Yahoo Matchup Opp": cells['Opp'].get_text(' ', strip=True),
+            })
+    return import_page_trend(list(players.values()), trend_type, "Matchup Ratings")
+
+
+# Trends read from one page each (or one page per tab), keyed by trend
+PAGE_TRENDS = {
+    'whos-hot': whos_hot,
+    'mvps': mvps,
+    'injuries': injuries,
+    'matchup-ratings': matchup_ratings,
+}
+
+# Trends yahoo_get can scrape, which the app shows as runnable
+SUPPORTED_TRENDS = set(BUZZ_INDEX_TRENDS) | set(PAGE_TRENDS)
+
+
+# Tests with `docker exec buzz ./.venv/bin/python src/source_yahoo.py` (imports the results into the database)
 if __name__ == '__main__':
-    print('\n', 'yahoo_get_added_dropped_trends_X_days()', '\n', yahoo_get_added_dropped_trends(1))
-    # print('\n', 'yahoo_get_added_dropped_trends', '\n', yahoo_get_added_dropped_trends())
-    # print('\n', 'yahoo_get_player_list', '\n', yahoo_get_player_list())
-    # print('\n', 'yahoo_get_player_list_deep', '\n', yahoo_get_player_list_deep())
+    print('\n', 'yahoo_get(buzz-index)', '\n', yahoo_get('buzz-index'))

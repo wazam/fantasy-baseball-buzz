@@ -1,45 +1,43 @@
-import os
+import shutil
+from contextlib import contextmanager
 from selenium import webdriver
 from selenium.webdriver.firefox.service import Service as FirefoxService
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
-from webdriver_manager.firefox import GeckoDriverManager
-# from webdriver_manager.core.utils import read_version_from_cmd, PATTERN  # (used during testing)
 
-headless = int(os.environ.get('SELENIUM_HEADLESS', 1))
+# Fail a stuck page load instead of waiting Selenium's 5 minute default
+PAGE_LOAD_TIMEOUT_SECONDS = 60
 
 
-# Returns webdriver controlled browser environment, ready for URL and search
 def webdriver_setup_driver():
-    # Use optional non-headless mode during development with GUI access
+    """Return a headless Firefox driver, ready to load a URL."""
+    # Firefox and geckodriver come from the Dockerfile's Alpine packages
+    firefox_binary = shutil.which('firefox-esr')
+    driver_binary = shutil.which('geckodriver')
+    missing = [name for name, path in (('firefox-esr', firefox_binary), ('geckodriver', driver_binary)) if not path]
+    if missing:
+        raise RuntimeError(f'{" and ".join(missing)} not found on PATH (both ship in the Buzz image)')
+    # The container has no display, so Firefox always runs headless
     firefox_options = FirefoxOptions()
-    if headless == 1:
-        firefox_options.add_argument('--headless')  # .add_argument('--no-sandbox')
-    # # Returns current version of browser (used during testing)
-    # version = read_version_from_cmd('/usr/bin/firefox --version', PATTERN['firefox'])
-    # print(version)
-    # breakpoint()
-    # Firefox install in Dockerfile, manual install req. to run python file w/o Docker
-    firefox_options.binary_location = r'/usr/bin/firefox'
-    driver_binary = GeckoDriverManager().install()  # .install(version=version)
-    driver_service = FirefoxService(driver_binary)
-    driver = webdriver.Firefox(service=driver_service, options=firefox_options)
-    # # Returns current user-agent from browser (used during testing)
-    # user_agent = driver.execute_script('return navigator.userAgent;')
-    # headers = {'User-Agent': user_agent}
-    # print(headers)
-    # breakpoint()
+    firefox_options.add_argument('--headless')
+    firefox_options.binary_location = firefox_binary
+    driver = webdriver.Firefox(service=FirefoxService(driver_binary), options=firefox_options)
+    driver.set_page_load_timeout(PAGE_LOAD_TIMEOUT_SECONDS)
     return driver
 
 
-# Closes the webdriver elegantly
-def webdriver_cleanup_driver(driver):
-    driver.close()
-    driver.quit()
-    return
-
-
-# Tests with `pipenv run python src/util_webdriver.py`
-if __name__ == '__main__':
+@contextmanager
+def webdriver_session():
+    """Yield a driver and always quit it, even when scraping raises."""
     driver = webdriver_setup_driver()
-    print('\n', 'webdriver_setup_driver', '\n', driver.get('https://github.com'))
-    print('\n', 'webdriver_cleanup_driver()', '\n', webdriver_cleanup_driver(driver))
+    try:
+        yield driver
+    finally:
+        # Closes every window and stops geckodriver
+        driver.quit()
+
+
+# Tests with `docker exec buzz ./.venv/bin/python src/util_webdriver.py`
+if __name__ == '__main__':
+    with webdriver_session() as driver:
+        driver.get('https://github.com')
+        print('\n', 'webdriver_session()', '\n', driver.title)

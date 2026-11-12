@@ -1,20 +1,29 @@
+{% from "macros/icons.html" import icon %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
         <link rel="stylesheet" href="{{ url_for('static', filename='style-common.css') }}?v={{ version_cache }}">
         <link id="theme-link" rel="stylesheet" href="{{ url_for('static', filename='style-dark.css') }}?v={{ version_dark }}">
+        <script>
+            // Apply the saved theme before first paint so light mode doesn't flash dark
+            try {
+                if (localStorage.getItem("theme") === "light") {
+                    document.getElementById("theme-link").href = "{{ url_for('static', filename='style-light.css') }}?v={{ version_light }}";
+                }
+            } catch (e) {}
+        </script>
 
         <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
         <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 
         <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+        <meta name="mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-title" content="Buzz">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-        <link rel="apple-touch-startup-image" href="{{ url_for('static', filename='apple-touch-startup-image.png') }}">
 
         <title>Buzz</title>
         {% block extra_head %}{% endblock %}
@@ -23,7 +32,7 @@
     <body>
         <header class="header-container">
             <div class="logo-container">
-                <a href="/">
+                <a href="/" title="Players">
                     <img src="{{ url_for('static', filename='favicon.png') }}"
                         alt="Buzz Logo"
                         class="logo">
@@ -31,24 +40,13 @@
                 <h1 class="header-title">Buzz</h1>
             </div>
 
-            <div class="theme-toggle">
-                <button onclick="toggleTheme()">🌑/🌕</button>
-            </div>
-        
-            <div class="hamburger-menu" onclick="toggleMenu()">&#9776;</div>
+            <nav class="toolbar" aria-label="Site">
+                <a class="toolbar-icon" href="/" title="Players" aria-label="Players"{% if request.path == '/' %} aria-current="page"{% endif %}>{{ icon('users') }}</a>
+                <a class="toolbar-icon" href="/index" title="Index: sources and trends" aria-label="Index"{% if request.path == '/index' %} aria-current="page"{% endif %}>{{ icon('grid') }}</a>
+                <a class="toolbar-icon" href="https://github.com/wazam/fantasy-baseball-buzz" target="_blank" rel="noopener" title="GitHub repository" aria-label="GitHub repository">{{ icon('github') }}</a>
+                <button type="button" class="toolbar-icon" id="theme-toggle" onclick="toggleTheme()">{{ icon('contrast') }}</button>
+            </nav>
         </header>
-
-        <nav id="mobile-menu" class="mobile-menu">
-            <a href="/">Dashboard</a>
-            <a href="{{ dashboard_editor_url }}" target="_blank">Editor ➡️</a>
-            <a href="/index">Index</a>
-            <a href="/espn">ESPN</a>
-            <a href="/yahoo">Yahoo</a>
-            <a href="/cbs">CBS</a>
-            <a href="/fantrax">Fantrax</a>
-            <a href="/nfbc">NFBC</a>
-            <a href="https://github.com/wazam/fantasy-baseball-buzz" target="_blank">GitHub ➡️</a>
-        </nav>
 
         <div class="content">
             {% block content %}{% endblock %}
@@ -58,46 +56,214 @@
             const version_dark = "{{ version_dark }}";  // Injected from Flask
             const version_light = "{{ version_light }}";  // Injected from Flask
 
-            function toggleMenu() {
-                const menu = document.getElementById("mobile-menu");
-                menu.classList.toggle("show-menu");
+            function isDarkTheme() {
+                return document.getElementById("theme-link").getAttribute("href").includes("style-dark.css");
             }
 
-            function toggleTheme() {
-                const themeLink = document.getElementById("theme-link");
-                const currentTheme = themeLink.getAttribute("href");
-
-                if (currentTheme.includes("style-dark.css")) {
-                    themeLink.setAttribute("href", "{{ url_for('static', filename='style-light.css') }}?v=" + version_light);
-                    localStorage.setItem("theme", "light");  
-                } else {
-                    themeLink.setAttribute("href", "{{ url_for('static', filename='style-dark.css') }}?v=" + version_dark);
-                    localStorage.setItem("theme", "dark");  
-                }
+            // The button names the theme it switches to
+            function labelThemeToggle() {
+                const label = isDarkTheme() ? "Switch to light mode" : "Switch to dark mode";
+                const button = document.getElementById("theme-toggle");
+                button.title = label;
+                button.setAttribute("aria-label", label);
             }
 
-            window.onload = function () {
-                const savedTheme = localStorage.getItem("theme");
-                if (savedTheme === "light") {
-                    document.getElementById("theme-link").setAttribute("href", "{{ url_for('static', filename='style-light.css') }}?v=" + version_light);
-                }
+            const THEME_STYLESHEETS = {
+                light: "{{ url_for('static', filename='style-light.css') }}?v=" + version_light,
+                dark: "{{ url_for('static', filename='style-dark.css') }}?v=" + version_dark,
             };
 
+            function toggleTheme() {
+                const theme = isDarkTheme() ? "light" : "dark";
+                document.getElementById("theme-link").setAttribute("href", THEME_STYLESHEETS[theme]);
+                try {
+                    localStorage.setItem("theme", theme);
+                } catch (e) {}
+                labelThemeToggle();
+            }
+
+            labelThemeToggle();
+
+
+            // Trend runs: Run buttons queue a background scrape, and /status reports each trend's live
+            // state plus its latest and latest successful runs from the run log
+            const STATUS_POLL_MS = 3000;
+            let statusTimer = null;
+            let lastStatuses = {};
+
+            function formatDateTime(iso) {
+                return new Date(iso).toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
+            }
+
+            // '5 min ago', '3 h ago', '2 days ago', or the date once it's over a week old
+            function timeAgo(iso) {
+                const minutes = Math.round((Date.now() - new Date(iso)) / 60000);
+                if (minutes < 1) return "just now";
+                if (minutes < 60) return minutes + " min ago";
+                const hours = Math.round(minutes / 60);
+                if (hours < 24) return hours + " h ago";
+                const days = Math.round(hours / 24);
+                if (days < 8) return days + (days === 1 ? " day ago" : " days ago");
+                return new Date(iso).toLocaleDateString([], { dateStyle: "medium" });
+            }
+
+            function isBusy(status) {
+                return status.state === "queued" || status.state === "running";
+            }
+
+            // The latest run when it failed and nothing has succeeded since, otherwise null
+            function latestFailure(status) {
+                if (isBusy(status)) return null;
+                if (status.last_run && status.last_run.state === "failed") return status.last_run;
+                if (status.state === "failed") return status;  // a run that never started, e.g. Buzz was unreachable
+                return null;
+            }
+
+            function showFavorite(button, favorite) {
+                button.setAttribute("aria-pressed", favorite);
+                button.title = favorite ? "Unfavorite" : "Favorite";
+            }
+
+            function showRow(row, status) {
+                // Skip while a click is saving, so a poll from before the click can't undo it
+                const star = row.querySelector(".favorite-toggle");
+                if (!star.disabled) showFavorite(star, status.favorite);
+
+                const busy = isBusy(status);
+                const failure = latestFailure(status);
+                const success = status.last_success;
+                row.classList.toggle("busy", busy);
+                row.querySelector(".run-trend").disabled = busy;
+
+                const last = row.querySelector(".trend-last");
+                if (success) {
+                    const count = success.count == null ? "" : " · " + success.count.toLocaleString() + (success.count === 1 ? " player" : " players");
+                    last.textContent = timeAgo(success.finished_at) + count;
+                    last.title = formatDateTime(success.finished_at);
+                } else {
+                    last.textContent = "Never";
+                    last.title = "";
+                }
+
+                const badge = document.createElement("span");
+                badge.className = "status-badge";
+                if (status.state === "queued") {
+                    badge.classList.add("busy");
+                    badge.textContent = "Queued";
+                } else if (status.state === "running") {
+                    badge.classList.add("busy");
+                    badge.textContent = "Running";
+                    badge.title = "Since " + formatDateTime(status.started_at);
+                } else if (failure) {
+                    badge.classList.add("failed");
+                    badge.textContent = "Failed";
+                    if (failure.finished_at) badge.title = formatDateTime(failure.finished_at);
+                } else if (success) {
+                    badge.classList.add("ok");
+                    badge.textContent = "OK";
+                } else {
+                    badge.classList.add("never");
+                    badge.textContent = "Not run";
+                }
+                const state = row.querySelector(".trend-state");
+                state.replaceChildren(badge);
+                if (failure) {
+                    const error = document.createElement("small");
+                    error.className = "trend-error";
+                    error.textContent = failure.error;
+                    state.append(error);
+                }
+            }
+
+            // Each tile sums up its source's supported trends: newest successful run, and anything busy or failed
+            function showTiles(statuses) {
+                document.querySelectorAll(".source-tile").forEach(tile => {
+                    const own = Object.entries(statuses)
+                        .filter(([job, status]) => job.startsWith(tile.dataset.source + "/") && status.supported)
+                        .map(([, status]) => status);
+                    const times = own.filter(status => status.last_success).map(status => new Date(status.last_success.finished_at));
+                    tile.querySelector(".tile-last").textContent = times.length ? "Last run " + timeAgo(new Date(Math.max(...times))) : "Never run";
+
+                    const busy = own.filter(isBusy).length;
+                    const failed = own.filter(latestFailure).length;
+                    const alert = tile.querySelector(".tile-alert");
+                    alert.textContent = busy ? busy + " in progress" : failed ? failed + " failed" : "";
+                    alert.classList.toggle("busy", busy > 0);
+                    alert.classList.toggle("failed", !busy && failed > 0);
+                });
+            }
+
+            // Returns true while any trend is queued or running
+            function showStatuses(statuses) {
+                lastStatuses = statuses;
+                let anyBusy = false;
+                document.querySelectorAll(".trend-row[data-job]").forEach(row => {
+                    const status = statuses[row.dataset.job];
+                    if (!status) return;
+                    showRow(row, status);
+                    if (isBusy(status)) anyBusy = true;
+                });
+                showTiles(statuses);
+                return anyBusy;
+            }
+
+            async function refreshStatus() {
+                clearTimeout(statusTimer);
+                try {
+                    const statuses = await (await fetch("/status")).json();
+                    // Keep polling only while something is queued or running
+                    if (showStatuses(statuses)) statusTimer = setTimeout(refreshStatus, STATUS_POLL_MS);
+                } catch (e) {
+                    statusTimer = setTimeout(refreshStatus, STATUS_POLL_MS * 5);
+                }
+            }
+
+            async function runTrend(row) {
+                const job = row.dataset.job;
+                try {
+                    const response = await fetch("/" + job + "/run", { method: "POST" });
+                    lastStatuses[job] = { ...lastStatuses[job], ...(await response.json()) };
+                } catch (e) {
+                    lastStatuses[job] = { ...lastStatuses[job], state: "failed", error: "Could not reach Buzz" };
+                }
+                showStatuses(lastStatuses);
+                refreshStatus();
+            }
+
+            // Fills or empties the star at once, then puts it back if the save fails
+            async function toggleFavorite(button) {
+                const row = button.closest(".trend-row");
+                const job = row.dataset.job;
+                const favorite = button.getAttribute("aria-pressed") !== "true";
+                showFavorite(button, favorite);
+                button.disabled = true;
+                try {
+                    const response = await fetch("/" + job + "/favorite", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ favorite }),
+                    });
+                    if (!response.ok) throw new Error(response.status);
+                    lastStatuses[job] = { ...lastStatuses[job], favorite };
+                } catch (e) {
+                    showFavorite(button, !favorite);
+                }
+                button.disabled = false;
+            }
 
             document.addEventListener("DOMContentLoaded", function () {
-                document.querySelectorAll(".trend-card").forEach(card => {
-                    const toggle = card.querySelector(".label-toggle");
-                    const labelList = card.querySelector(".label-list");
+                const embedded = document.getElementById("trend-statuses");
+                if (!embedded) return;
 
-                    if (toggle && labelList) {
-                        toggle.addEventListener("click", (e) => {
-                            e.stopPropagation();
-                            const expanded = labelList.classList.toggle("expanded");
-                            card.classList.toggle("expanded", expanded);
-                            toggle.textContent = expanded ? "🔼 Show less" : "🔽 Show more";
-                        });
-                    }
+                document.querySelectorAll(".run-trend").forEach(button => {
+                    button.addEventListener("click", () => runTrend(button.closest(".trend-row")));
                 });
+                document.querySelectorAll(".favorite-toggle").forEach(button => {
+                    button.addEventListener("click", () => toggleFavorite(button));
+                });
+                if (showStatuses(JSON.parse(embedded.textContent))) refreshStatus();
+                // Keep the '5 min ago' times current on a page left open
+                setInterval(() => showStatuses(lastStatuses), 60000);
             });
         </script>
     </body>

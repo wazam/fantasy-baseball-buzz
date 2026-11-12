@@ -1,0 +1,88 @@
+{% from 'macros/icons.html' import icon %}
+
+{# Drops the source name from a label, so 'ESPN Roster %' reads 'Roster %' under ESPN #}
+{% macro short_label(label, source_name) -%}
+{%- set prefix = source_name ~ ' ' -%}
+{{ label[prefix | length:] if label.startswith(prefix) else label }}
+{%- endmacro %}
+
+{# One summary tile per source with a scraper; sources whose trends are all planned get none. The last run and
+   any failures are filled in from /status by base.html #}
+{% macro source_tile(source, statuses) %}
+{% set source_key = source.source | lower %}
+{% set ns = namespace(supported=0) %}
+{% for trend in source.trends %}
+    {% if statuses[source_key ~ '/' ~ loop.index].supported %}{% set ns.supported = ns.supported + 1 %}{% endif %}
+{% endfor %}
+{% if ns.supported %}
+<a class="source-tile" href="#{{ source_key }}" data-source="{{ source_key }}">
+    <span class="source-name {{ source.source }}">{{ source.name or source.source }}</span>
+    <span class="tile-line">{{ ns.supported }} of {{ source.trends | length }} trends supported</span>
+    <span class="tile-line tile-last"></span>
+    <span class="tile-line tile-alert"></span>
+</a>
+{% endif %}
+{% endmacro %}
+
+{# One source's trends: a row per supported trend, then the rest folded into a list.
+   data-job matches the keys of /status and the /<source>/<n>/run endpoint #}
+{% macro trend_table(source, statuses) %}
+{% set source_key = source.source | lower %}
+{% set ns = namespace(unsupported=[], supported=0) %}
+{% for trend in source.trends %}
+    {% if statuses[source_key ~ '/' ~ loop.index].supported %}{% set ns.supported = ns.supported + 1 %}
+    {% else %}{% set ns.unsupported = ns.unsupported + [trend] %}{% endif %}
+{% endfor %}
+<section class="section" id="{{ source_key }}">
+    <h2 class="{{ source.source }}">{{ source.name or source.source }}</h2>
+    {# A source with no scraper yet has only the list of planned trends #}
+    {% if ns.supported %}
+    <table class="trend-table">
+        <thead>
+            <tr><th class="col-name">Trend</th><th>Fills</th><th class="col-runs">Runs</th><th class="col-last">Last run</th><th class="col-status">Status</th><th class="col-action"><span class="visually-hidden">Run</span></th></tr>
+        </thead>
+        <tbody>
+        {% for trend in source.trends %}
+            {% set job = source_key ~ '/' ~ loop.index %}
+            {% if statuses[job].supported %}
+            <tr class="trend-row" data-job="{{ job }}">
+                <td class="trend-name">
+                    {% set favorite = statuses[job].favorite %}
+                    <button type="button" class="favorite-toggle" aria-pressed="{{ 'true' if favorite else 'false' }}" title="{{ 'Unfavorite' if favorite else 'Favorite' }}" aria-label="Favorite {{ trend.name }}">{{ icon('star') }}</button>
+                    {{ trend.name }}
+                    <a class="trend-link" href="{{ trend.url }}" target="_blank" rel="noopener" title="Open source page" aria-label="Open the {{ trend.name }} source page">{{ icon('external') }}</a>
+                </td>
+                <td class="trend-fills">
+                    {% if trend.labels | length > 2 %}
+                    <details>
+                        <summary>{{ short_label(trend.labels[0], source.source) }}, {{ short_label(trend.labels[1], source.source) }} +{{ trend.labels | length - 2 }} more</summary>
+                        <ul>{% for label in trend.labels %}<li>{{ short_label(label, source.source) }}</li>{% endfor %}</ul>
+                    </details>
+                    {% else %}
+                    {% for label in trend.labels %}{{ short_label(label, source.source) }}{{ ', ' if not loop.last }}{% endfor %}
+                    {% endif %}
+                </td>
+                <td class="trend-frequency" title="How often this trend is meant to run">{{ trend.run_frequency }}</td>
+                <td class="trend-last"></td>
+                <td class="trend-state" aria-live="polite"></td>
+                <td class="trend-action">
+                    <button type="button" class="run-trend" aria-label="Run {{ trend.name }} now">{{ icon('refresh') }}<span>Run</span></button>
+                </td>
+            </tr>
+            {% endif %}
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+    {% if ns.unsupported %}
+    <details class="unsupported"{% if not ns.supported %} open{% endif %}>
+        <summary>Not yet supported ({{ ns.unsupported | length }})</summary>
+        <ul>
+            {% for trend in ns.unsupported %}
+            <li><a href="{{ trend.url }}" target="_blank" rel="noopener">{{ trend.name }} {{ icon('external') }}</a></li>
+            {% endfor %}
+        </ul>
+    </details>
+    {% endif %}
+</section>
+{% endmacro %}

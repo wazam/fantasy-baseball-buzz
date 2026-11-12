@@ -1,336 +1,130 @@
-from os import environ
-from time import sleep
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import Select
-from selenium.common.exceptions import NoSuchElementException, NoSuchFrameException
-from util_webdriver import webdriver_setup_driver, webdriver_cleanup_driver
-from util_nocodb import search_record, create_records, update_records
-import time
-from bs4 import BeautifulSoup # 2025, ?
-from urllib.parse import urlparse, parse_qs
+import json
+from util_beautifulsoup import ratelimit_get_url
+from db import save_and_import, clear_stale_values
+from sources import SOURCES, SEASON
 
-# Returns time in HH:MM:SS format for use in log terminal with print()
-def get_time_for_logs():
-    time_now = time.localtime()
-    time_now_format = time.strftime("%H:%M:%S", time_now)
-    return time_now_format
+espn_config = next(source for source in SOURCES if source['source'].lower() == 'espn')
+trend_keys = [trend['key'] for trend in espn_config['trends']]
+
+# fantasy.espn.com loads its player tables from this JSON service, so no browser or login is needed.
+# leaguedefaults/2 is ESPN's default points league, which is where the "ESPN Pts" values come from.
+# ESPN doesn't document this service. These notes cover it, plus its news feed, for the planned ESPN trends:
+#   https://github.com/pseudo-r/Public-ESPN-API
+#   https://gist.github.com/akeaswaran/b48b02f1c94f873c6655e7129910fc3b
+#   https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/news
+API_URL = f'https://lm-api-reads.fantasy.espn.com/apis/v3/games/flb/seasons/{SEASON}'
+PLAYERS_URL = f'{API_URL}/segments/0/leaguedefaults/2'
+PAGE_SIZE = 500
+
+# Stat split IDs for actual (not projected) stats
+SPLIT_SEASON, SPLIT_7D, SPLIT_15D, SPLIT_30D = 0, 1, 2, 3
+
+# ESPN position IDs, for a player's main position and the lineup slots they're eligible for
+DEFAULT_POSITIONS = {1: 'SP', 2: 'C', 3: '1B', 4: '2B', 5: '3B', 6: 'SS', 7: 'LF', 8: 'CF', 9: 'RF', 10: 'DH', 11: 'RP'}
+SLOT_POSITIONS = {0: 'C', 1: '1B', 2: '2B', 3: '3B', 4: 'SS', 5: 'OF', 11: 'DH', 14: 'SP', 15: 'RP'}
+
+# Trends espn_get can scrape, which the app shows as runnable; the others return None (not implemented)
+# until they are mapped from the same data
+SUPPORTED_TRENDS = {'players'}
 
 
-##
 def espn_get(trend_type):
-    return None
-##
+    """Return a list of player trends by trend type, and save them to a trend-specific JSON file."""
+
+    if trend_type not in trend_keys:
+        raise ValueError(f"Invalid trend_type '{trend_type}'. Choose from: {trend_keys}")
+    if trend_type not in SUPPORTED_TRENDS:
+        return None
+
+    return espn_players(trend_type)
 
 
-url_base = 'https://fantasy.espn.com/baseball'
-login_email = environ.get('ESPN_LOGIN_EMAIL')
-login_pass = environ.get('ESPN_LOGIN_PASSWORD')
-league_id = environ.get('ESPN_LEAGUE_ID')
-team_name = environ.get('ESPN_TEAM_NAME')
-team_abbreviation = environ.get('ESPN_TEAM_ABBREVIATION')
-
-# 2025
-def espn_after_login_get_user_league_ids():
-
-    start_url = "https://www.espn.com/fantasy/baseball/"
-
-    html_snippet_1 = '''<a class="favItem__team" href="http://fantasy.espn.com/baseball/team?leagueId=2664&amp;teamId=4&amp;seasonId=2025">...</a>'''
-    soup = BeautifulSoup(html_snippet_1, "html.parser")
-    href = soup.find("a", class_="favItem__team")["href"]
-
-    parsed_url = urlparse(href)
-    query_params = parse_qs(parsed_url.query)
-
-    league_id = query_params.get("leagueId", [None])[0]
-    team_id = query_params.get("teamId", [None])[0]
-
-    settings_url = f"https://fantasy.espn.com/baseball/team/settings?leagueId={league_id}&teamId={team_id}&view=myTeam"
-
-    html_snippet_2 = '<input class="form__control team-setting-form__input team-setting-form__input-name" value="Corbin Your Enthusiasm">'
-    html_snippet_3 = '<input class="form__control team-setting-form__input team-setting-form__input-abbrev" value="BIGJ">'
-
-    soup2 = BeautifulSoup(html_snippet_2, "html.parser")
-    team_name = soup2.find("input")["value"]
-
-    soup3 = BeautifulSoup(html_snippet_3, "html.parser")
-    team_abbrev = soup3.find("input")["value"]
-
-    return None # WIP
+def espn_api_get(url, params, fantasy_filter=None):
+    """Return the JSON from one ESPN API request, raising on any HTTP error."""
+    extra_headers = {'X-Fantasy-Filter': json.dumps(fantasy_filter)} if fantasy_filter else None
+    response = ratelimit_get_url(url, extra_headers=extra_headers, params=params)
+    response.raise_for_status()
+    return response.json()
 
 
-# Returns a numerically ordered dictionary of Players' names with their roster trends
-def espn_get_added_dropped_trends():
-    url_tab = '/addeddropped'
-    url = url_base + url_tab
-    trends_dictionary = {}
-    records_to_process = []
-    driver = webdriver_setup_driver()
-    driver.get(url)
-    sleep(4)
-    number_of_tables_on_page = len(driver.find_elements(By.XPATH, "//*[@class='ResponsiveTable players-table']"))
-    number_of_rows_on_page = len(driver.find_elements(By.XPATH, "//*[@class='Table']/tbody/tr"))
-    number_of_rows_per_table = int(number_of_rows_on_page / number_of_tables_on_page)
-    num_total_positions = len(driver.find_elements(By.XPATH, "//*[@id='filterSlotIds']/label"))
-    # Loop through all position pages
-    for position_page in range(2, num_total_positions+1):
-        xpath_of_position_page_box = "//*[@id='filterSlotIds']/label[" + str(position_page) + "]"
-        element_of_position_page_box = driver.find_element(By.XPATH, xpath_of_position_page_box)
-        element_of_position_page_box.click()
-        sleep(1)
-        # Loop through both the tables
-        for each_table in range(0, number_of_tables_on_page):
-            # Loop through all the rows of Players on each table
-            for each_row in range(0, number_of_rows_per_table):
-                xpath_player = "(//*[@class='Table'])[" + str(int(each_table+1)) + "]/tbody/tr[" + str(int(each_row+1)) + "]"
-                xpath_player_name = xpath_player + "/td[2]/div/div/div[2]/div/div[1]/span[1]/a"
-                player_name = str(driver.find_element(By.XPATH, xpath_player_name).text)
-                xpath_player_team = xpath_player + "/td[2]/div/div/div[2]/div/div[2]/span[1]"
-                player_team = str(driver.find_element(By.XPATH, xpath_player_team).text)
-                xpath_player_position = xpath_player + "/td[2]/div/div/div[2]/div/div[2]/span[2]"
-                player_position = str(driver.find_element(By.XPATH, xpath_player_position).text)
-                xpath_trend_value =  xpath_player + "/td[5]/div/span"
-                trend_value = float(driver.find_element(By.XPATH, xpath_trend_value).text)
-                if player_name not in trends_dictionary:
-                    trends_dictionary[player_name] = trend_value
-                    records_to_process.append({
-                        'Player': player_name,
-                        'Team': player_team,
-                        'Position': player_position,
-                        'E +/- %': trend_value
-                    })
-    webdriver_cleanup_driver(driver)
-
-    # Update or create NocoDB records for each player's trend data
-    update_list, create_list = [], []
-    for record in records_to_process:
-        existing = search_record(record, "ESPN")
-        if existing:
-            update_list.append({'Id': existing['Id'], 'E +/- %': record['E +/- %']})
-        else:
-            create_list.append(record)
-
-    if update_list:
-        update_records(update_list, "ESPN")
-    if create_list:
-        create_records(create_list)
-
-    sorted_dict = dict(sorted(trends_dictionary.items(), key=lambda x: x[1], reverse=True))
-    return sorted_dict
+def fetch_team_abbreviations():
+    """Return ESPN's team abbreviations by team ID, e.g. {30: 'TB', 0: 'FA'}."""
+    teams = espn_api_get(API_URL, {'view': 'proTeamSchedules_wl'})['settings']['proTeams']
+    return {team['id']: team['abbrev'] for team in teams}
 
 
-# Interacts with user login display box
-def espn_login(driver):
-    try:
-        log_in_button_html = driver.find_element(By.XPATH, "/html/body/div[1]/div[1]/div/div/div[5]/div[2]/div[2]/div/div/button")
-    except NoSuchElementException:
-        pass
-    try:
-        driver.switch_to.frame('oneid-iframe')
-        log_in_button_iframe = driver.find_element(By.XPATH, "//*[@id='BtnSubmit']")
-    except NoSuchFrameException:
-        pass
-    try:
-        if log_in_button_iframe:
-            driver.find_element(By.XPATH, "//*[@id='InputLoginValue']").send_keys(login_email)
-            driver.find_element(By.XPATH, "//*[@id='InputPassword']").send_keys(login_pass)
-            driver.find_element(By.XPATH, "//*[@id='BtnSubmit']").click()
-            sleep(7)
-            driver.switch_to.default_content()
-        elif log_in_button_html:
-            log_in_button_html.click()
-            driver.find_element(By.XPATH, "//*[@id='InputLoginValue']").send_keys(login_email)
-            driver.find_element(By.XPATH, "//*[@id='InputPassword']").send_keys(login_pass)
-            driver.find_element(By.XPATH, "//*[@id='BtnSubmit']").click()
-            sleep(7)
-    except TypeError:
-        pass
-    return
+def fetch_owned_players():
+    """Return every player rostered in at least some ESPN leagues, most rostered first."""
+    players = []
+    offset = 0
+    while True:
+        fantasy_filter = {'players': {
+            'limit': PAGE_SIZE,
+            'offset': offset,
+            'sortPercOwned': {'sortPriority': 1, 'sortAsc': False},
+            'filterStatsForSourceIds': {'value': [0]},
+            'filterStatsForSplitTypeIds': {'value': [SPLIT_SEASON, SPLIT_7D, SPLIT_15D, SPLIT_30D]},
+            'filterStatsForExternalIds': {'value': [SEASON]},
+        }}
+        page = espn_api_get(PLAYERS_URL, {'view': 'kona_player_info'}, fantasy_filter).get('players', [])
+        owned = [item for item in page if (item['player'].get('ownership') or {}).get('percentOwned', 0) > 0]
+        players += owned
+        print(f"Fetched {len(players)} rostered players...")
+
+        # Sorted by ownership, so the first unowned player (or a short page) ends the list
+        if len(owned) < len(page) or len(page) < PAGE_SIZE:
+            return players
+        offset += PAGE_SIZE
 
 
-# Returns all Players to NocoDB
-def espn_get_player_list():
-    url_tab = '/players/add?view=trending&leagueId=' + league_id
-    print(get_time_for_logs(), '| Starting up', url_tab)  ###
-    url = url_base + url_tab
-    driver = webdriver_setup_driver()
-    driver.get(url)
-    sleep(10)
-    espn_login(driver)
-    # Change filter to display all Players
-    filter_button = driver.find_element(By.XPATH, "//*[@id='filterStatus']")
-    Select(filter_button).select_by_visible_text('All')
-    sleep(3)
-    # Starting page (of positions)
-    positition_page_start_on = 1  # 1 for Batters, 2 for Pitchers
-    positition_page_end_on = 3  # 2 for Batters, 3 for Pitchers
-    for position_page in range(positition_page_start_on, positition_page_end_on):  # First 2 position pages include all players
-        if position_page == 1:
-            pass
-        else:
-            xpath_of_position_page_box = "//*[@id='filterSlotIds']/label[" + str(position_page) + "]"
-            element_of_position_page_box = driver.find_element(By.XPATH, xpath_of_position_page_box)
-            element_of_position_page_box.click()
-            sleep(4)
-        xpath_of_pagination_box = "/html/body/div[1]/div[1]/div/div/div[5]/div[2]/div[3]/div/div/div[3]/nav/div/ul/li"
-        elements_in_pagination_box = driver.find_elements(By.XPATH, xpath_of_pagination_box)
-        number_of_elements_in_pagination_box = len(elements_in_pagination_box)
-        last_element_in_pagination_box = elements_in_pagination_box[number_of_elements_in_pagination_box - 1]
-        number_of_pages_per_position = int(last_element_in_pagination_box.text)
-        # Starting page (of players)
-        page_start_on = 1
-        # Loop click next page button until arrival at desired starting page
-        for page in range(1, page_start_on):
-            driver.find_element(By.XPATH, "/html/body/div[1]/div[1]/div/div/div[5]/div[2]/div[3]/div/div/div[3]/nav/button[2]").click()
-            print(get_time_for_logs(), '| Loading page', page+1, 'out of', page_start_on) ###
-            sleep(1)
-        # Loop through the remaining pages
-        for page in range(page_start_on-1, number_of_pages_per_position):
-            # Setup page/table for rows
-            xpath_of_table_row = "//*[@class='Table']/tbody/tr"
-            number_of_table_rows_per_page = len(driver.find_elements(By.XPATH, xpath_of_table_row))
-            # Loop through the rows of Player data
-            for row in range(0, number_of_table_rows_per_page):
-                # Setup Player row XPath strings
-                xpath_of_player_row = xpath_of_table_row + "[" + str(int(row+1)) + "]/td[1]/div/div/div[2]/div/div["
-                xpath_of_player_name = xpath_of_player_row + "1]/span[1]/a"
-                xpath_of_player_team = xpath_of_player_row + "2]/span[1]"
-                xpath_of_player_position = xpath_of_player_row + "2]/span[2]"
-                xpath_of_player_injury_status = xpath_of_player_row + "1]/span[2]"
-                xpath_of_player_rostered_team = xpath_of_table_row + "[" + str(int(row+1)) + "]/td[2]/div"
-                xpath_of_player_ownership_percentage = xpath_of_table_row + "[" + str(int(row+1)) + "]/td[12]/div"
-                xpath_of_player_ownership_change = xpath_of_table_row + "[" + str(int(row+1)) + "]/td[13]/div/span"
-                # Find Player elements
-                player_name = driver.find_element(By.XPATH, xpath_of_player_name).text
-                player_team = driver.find_element(By.XPATH, xpath_of_player_team).text
-                player_position = driver.find_element(By.XPATH, xpath_of_player_position).text
-                # Try to find and set optional status
-                player_injury_status = ''
-                try:
-                    player_injury_status = driver.find_element(By.XPATH, xpath_of_player_injury_status).text
-                except NoSuchElementException:
-                    pass
-                player_rostered_team = driver.find_element(By.XPATH, xpath_of_player_rostered_team).text
-                player_ownership_percentage = driver.find_element(By.XPATH, xpath_of_player_ownership_percentage).text
-                player_ownership_change = driver.find_element(By.XPATH, xpath_of_player_ownership_change).text
-                # Setup Player fields dict
-                list_of_player_fields = {}
-                # Setup Player Name Team Pos identifying data
-                list_of_player_fields = {'Team': player_team, 'Position': player_position}
-                # Add additional Player data values to fields dict
-                list_of_player_fields['Injury'] = player_injury_status
-                # # My team
-                # if player_rostered_team == team_abbreviation:
-                #     on_someones_roster = True
-                #     on_my_roster = True
-                # # Waitlist (free agent in x days)
-                # elif player_rostered_team.startswith('WA ('):
-                #     on_someones_roster = False
-                #     on_my_roster = False
-                # # Another team (not free agent)
-                # elif player_rostered_team != 'FA':
-                #     on_someones_roster = True
-                #     on_my_roster = False
-                # # Free agent, and anything else unbeknownst to me
-                # else:
-                #     on_someones_roster = False
-                #     on_my_roster = False
-                # list_of_player_fields['Available'] = on_someones_roster
-                # list_of_player_fields['Rostered'] = on_my_roster
-                list_of_player_fields['Roster'] = player_rostered_team
-                # NaN value convert to zer0 for newly added Player to roster pool
-                if player_ownership_percentage == '--':
-                    player_rostered = 0.0
-                else:
-                    player_rostered = float(player_ownership_percentage)
-                list_of_player_fields['E %ROST'] = player_rostered
-                list_of_player_fields['E +/- %'] = float(player_ownership_change)
-                # Send data fields to Player's NocoDB row
-                entry = {'Player': player_name, 'Team': player_team, 'Position': player_position}
-                existing = search_record(entry, "ESPN")
-                if existing:
-                    update_records([{'Id': existing['Id'], **list_of_player_fields}], "ESPN")
-                else:
-                    create_records([{**entry, **list_of_player_fields}])
-                # print(get_time_for_logs(), '| Updated player', player_name)
-            print(get_time_for_logs(), '| Finished page', page+1, 'out of', number_of_pages_per_position) ###
-            next_page_button = driver.find_element(By.XPATH, "/html/body/div[1]/div[1]/div/div/div[5]/div[2]/div[3]/div/div/div[3]/nav/button[2]")
-            next_page_button.click()
-            sleep(3)
-        print(get_time_for_logs(), '| Finished position page', position_page, 'out of', int(positition_page_end_on-1)) ###
-    webdriver_cleanup_driver(driver)
-    print(get_time_for_logs(), '| Finished', url_tab) ###
-    return
+def player_entry(item, teams):
+    """Return one player's 'players' trend values, keyed by their labels."""
+    player = item['player']
+    ownership = player.get('ownership') or {}
+    points = {
+        stat['statSplitTypeId']: round(stat.get('appliedTotal', 0), 1)
+        for stat in player.get('stats', [])
+        if stat.get('statSourceId') == 0 and stat.get('seasonId') == SEASON
+    }
+    season_rating = (item.get('ratings') or {}).get('0') or {}
+    position = DEFAULT_POSITIONS.get(player.get('defaultPositionId'), '')
+    position_rank = season_rating.get('positionalRanking')
+    roster_percent = round(ownership.get('percentOwned', 0), 2)
+    roster_change = round(ownership.get('percentChange', 0), 2)
+
+    return {
+        "Player": player['fullName'],
+        "Position": ', '.join(SLOT_POSITIONS[slot] for slot in player.get('eligibleSlots', []) if slot in SLOT_POSITIONS),
+        "Team": teams.get(player.get('proTeamId'), ''),
+        "Id_ESPN": str(player['id']),
+        "ESPN Pts 7D": points.get(SPLIT_7D),
+        "ESPN Pts 15D": points.get(SPLIT_15D),
+        "ESPN Pts 30D": points.get(SPLIT_30D),
+        "ESPN Pts Season": points.get(SPLIT_SEASON),
+        # Shown like 'DH2', the player's season rank at their main position
+        "ESPN Rank Pos": f"{position}{position_rank}" if position and position_rank else '',
+        "ESPN ADP": round(ownership.get('averageDraftPosition', 0), 1),
+        "ESPN Roster %": roster_percent,
+        "ESPN Roster % Chg 7D": roster_change,
+        "ESPN Roster % 7D Ago": round(roster_percent - roster_change, 2),
+    }
 
 
-# Returns all rostered Players to NocoDB
-def espn_get_rostered_players():
-    url_tab = '/league/rosters?leagueId=' + league_id
-    url = url_base + url_tab
-    driver = webdriver_setup_driver()
-    driver.get(url)
-    sleep(3)
-    espn_login(driver)
-    xpath_tables ="//*[@class='InnerLayout flex flex-auto flex-wrap']/div"
-    xpath_rows = "//*[@class='Table']/tbody/tr"
-    all_tables = driver.find_elements(By.XPATH, xpath_tables)
-    all_rows = driver.find_elements(By.XPATH, xpath_rows)
-    num_tables = len(all_tables)
-    num_rows = len(all_rows)
-    rows_per_table = int(num_rows / num_tables)
-    # Loop through all the tables
-    for table in range(0, num_tables):
-        # Loop through the rows of Player data
-        xpath_data = xpath_tables + "[" + str(int(table+1)) + "]"
-        xpath_row = xpath_data + "/div/div[1]/div/div[2]/div/div[2]/table/tbody/tr"
-        for row in range(0, rows_per_table):
-            xpath_player = xpath_row + "[" + str(int(row+1)) + "]/td[2]/div/div"
-            player = driver.find_element(By.XPATH, xpath_player).text
-            # Skip empty roster spots
-            if player == 'Empty':
-                break
-            # Setup Player row XPath strings
-            xpath_player_name = xpath_player + "/div[2]/div/div[1]/span[1]/a"
-            xpath_player_team = xpath_player + "/div[2]/div/div[2]/span[1]"
-            xpath_player_position = xpath_player + "/div[2]/div/div[2]/span[2]"
-            xpath_player_injury_status = xpath_player + "/div[2]/div/div[1]/span[2]"
-            xpath_player_rostered_team = xpath_data + "/div/div[1]/div/div[1]/div/a/span"
-            # Find Player elements
-            player_name = driver.find_element(By.XPATH, xpath_player_name).text
-            player_team = driver.find_element(By.XPATH, xpath_player_team).text
-            player_position = driver.find_element(By.XPATH, xpath_player_position).text
-            # Try to find and set optional status
-            player_injury_status = ''
-            try:
-                player_injury_status = driver.find_element(By.XPATH, xpath_player_injury_status).text
-            except NoSuchElementException:
-                pass
-            player_rostered_team = driver.find_element(By.XPATH, xpath_player_rostered_team).text
-            # Setup Player fields dict
-            list_of_player_fields = {'Team': player_team, 'Position': player_position}
-            list_of_player_fields['Injury'] = player_injury_status
-            # if player_rostered_team.lower() == team_name.lower():  # My team
-            #     on_someones_roster = True
-            #     on_my_roster = True
-            # else:  # Another team
-            #     on_someones_roster = True
-            #     on_my_roster = False
-            # list_of_player_fields['Available'] = on_someones_roster
-            # list_of_player_fields['Rostered'] = on_my_roster
-            list_of_player_fields['Roster'] = player_rostered_team
-            # Send data fields to Player's NocoDB row
-            entry = {'Player': player_name, 'Team': player_team, 'Position': player_position}
-            existing = search_record(entry, "ESPN")
-            if existing:
-                update_records([{'Id': existing['Id'], **list_of_player_fields}], "ESPN")
-            else:
-                create_records([{**entry, **list_of_player_fields}])
-            # print(get_time_for_logs(), '| Updated player', player_name)
-    webdriver_cleanup_driver(driver)
-    return
+def espn_players(trend_type):
+    """Process ESPN's player data and return a list of player trends."""
+    teams = fetch_team_abbreviations()
+    trends_list = [player_entry(item, teams) for item in fetch_owned_players()]
+    if not trends_list:
+        raise RuntimeError("ESPN returned no rostered players")
+
+    save_and_import(trends_list, 'espn', trend_type)
+    # Players no longer rostered anywhere drop out of the list, and would otherwise keep their last values.
+    # Team and Position stay as last seen
+    labels = next(trend['labels'] for trend in espn_config['trends'] if trend['key'] == trend_type)
+    clear_stale_values(labels, 'Id_ESPN', {entry['Id_ESPN'] for entry in trends_list}, 'ESPN')
+    return trends_list
 
 
-# Tests with `pipenv run python src/source_espn.py`
+# Tests with `docker exec buzz ./.venv/bin/python src/source_espn.py` (imports the results into the database)
 if __name__ == '__main__':
-    # print('\n', 'espn_get_added_dropped_trends', '\n', espn_get_added_dropped_trends())
-    print('\n', 'espn_get_player_list', '\n', espn_get_player_list())  #  3,534 players  x  1 secs/player  =  58.9 mins runtime
-    # print('\n', 'espn_get_rostered_players', '\n', espn_get_rostered_players())
+    print('\n', 'espn_get(players)', '\n', espn_get('players'))

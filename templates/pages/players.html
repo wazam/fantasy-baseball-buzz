@@ -1,0 +1,405 @@
+{% extends 'base.html' %}
+{% from 'macros/icons.html' import icon %}
+
+{% block extra_head %}
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/tabulator-6.6.1/tabulator.min.css') }}">
+    <script src="{{ url_for('static', filename='vendor/tabulator-6.6.1/tabulator.min.js') }}"></script>
+
+{% endblock %}
+
+{% block content %}
+
+    <div class="players-page">
+        <div class="players-toolbar">
+            <div class="group-toggles" role="group" aria-label="Show columns from"></div>
+            <details class="column-picker" id="column-picker">
+                <summary class="pill">Columns<span class="column-picker-count"></span></summary>
+                <div class="column-picker-panel">
+                    <button type="button" class="pill" id="show-all-columns">Show all</button>
+                    <div class="column-picker-list"></div>
+                </div>
+            </details>
+            <button type="button" class="pill" id="favorites-only" aria-pressed="false">{{ icon('star') }}<span>Favorites</span></button>
+            <button type="button" class="pill" id="compare-only" aria-pressed="false">{{ icon('eye') }}<span>Compare</span><span class="compare-count"></span></button>
+            <button type="button" class="pill" id="clear-compare">Clear compare</button>
+            <button type="button" class="pill" id="clear-filters">Clear filters</button>
+            <span class="players-count" id="players-count" aria-live="polite"></span>
+        </div>
+        <div id="players"></div>
+    </div>
+
+    <script>
+        // The two player lists, saved in data/player-lists.json: Favorites to keep across weeks, Compare for a
+        // short set to look at side by side
+        const LISTS = {
+            Favorite: { path: "favorite", icon: {{ icon('star') | tojson }}, label: "Favorite", button: "favorite-toggle" },
+            Compare: { path: "compare", icon: {{ icon('eye') | tojson }}, label: "Compare", button: "favorite-toggle compare-toggle" },
+        };
+        // Which column groups and single columns are hidden, and the Favorites and Compare filters, are remembered per browser
+        const PREFS_KEY = "players-prefs";
+        const DEFAULT_HIDDEN = ["IDs"];
+        // Columns the Columns menu can't hide: the two list toggles and the name identify each row
+        const ALWAYS_SHOWN = ["Favorite", "Compare", "Player"];
+
+        function loadPrefs() {
+            try {
+                return JSON.parse(localStorage.getItem(PREFS_KEY)) || {};
+            } catch (e) {
+                return {};
+            }
+        }
+
+        function savePrefs(prefs) {
+            try {
+                localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+            } catch (e) {}
+        }
+
+        // '>10', '>=10', '<5', '<=5', '=3', '3' or '10..20'; anything else filters nothing
+        function numberFilter(term, value) {
+            term = String(term).trim();
+            if (!term) return true;
+            const number = typeof value === "number" ? value : parseFloat(value);
+            if (Number.isNaN(number)) return false;
+            let match = term.match(/^(-?\d*\.?\d+)\s*\.\.\s*(-?\d*\.?\d+)$/);
+            if (match) return number >= +match[1] && number <= +match[2];
+            match = term.match(/^(>=|<=|>|<|=)?\s*(-?\d*\.?\d+)$/);
+            if (!match) return true;
+            const bound = +match[2];
+            switch (match[1]) {
+                case ">": return number > bound;
+                case ">=": return number >= bound;
+                case "<": return number < bound;
+                case "<=": return number <= bound;
+                default: return number === bound;
+            }
+        }
+
+        // Formatters return text nodes, so scraped text is never parsed as HTML
+        function formatNumber(cell) {
+            const value = cell.getValue();
+            if (typeof value === "number") return value.toLocaleString(undefined, { maximumFractionDigits: 2 });
+            return document.createTextNode(value ?? "");
+        }
+
+        // The Favorite and Compare toggles share one column, so the frozen edge holds one narrow column
+        function formatLists(cell) {
+            const row = cell.getRow().getData();
+            const wrapper = document.createElement("span");
+            wrapper.className = "list-toggles";
+            for (const [field, list] of Object.entries(LISTS)) {
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = list.button;
+                button.dataset.list = field;
+                button.setAttribute("aria-pressed", row[field] ? "true" : "false");
+                button.setAttribute("aria-label", list.label + " " + (row.Player || "player"));
+                button.innerHTML = list.icon;
+                wrapper.append(button);
+            }
+            return wrapper;
+        }
+
+        // Flips the icon at once, then puts it back if the save fails
+        async function toggleList(row, field) {
+            const on = !row.getData()[field];
+            row.update({ [field]: on ? 1 : 0 });
+            row.reformat();
+            try {
+                const response = await fetch("/players/" + row.getData().Id + "/" + LISTS[field].path, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ on }),
+                });
+                if (!response.ok) throw new Error(response.status);
+            } catch (e) {
+                row.update({ [field]: on ? 0 : 1 });
+                row.reformat();
+            }
+            document.dispatchEvent(new Event("lists-changed"));
+        }
+
+        // ESPN's columns come first, so their placeholders show each way to filter a number; the
+        // other number columns say ">10", and every number filter's tooltip lists them all
+        const NUMBER_FILTER_EXAMPLES = {
+            "ESPN Pts 7D": ">10",
+            "ESPN Pts 15D": ">=20",
+            "ESPN Pts 30D": "<5",
+            "ESPN Pts Season": "300..500",
+            "ESPN ADP": "<=50",
+            "ESPN Roster %": ">=50",
+            "ESPN Roster % Chg 7D": "<0",
+            "ESPN Roster % 7D Ago": "<=10",
+        };
+        const NUMBER_FILTER_HELP = [
+            "Filter numbers:",
+            ">10    over 10",
+            ">=10   10 or more",
+            "<5     under 5",
+            "<=5    5 or less",
+            "10..20 10 to 20",
+            "3      exactly 3",
+        ].join("\n");
+
+        function columnDefinition(column) {
+            const definition = {
+                title: column.title,
+                field: column.field,
+                headerFilter: "input",
+                headerFilterPlaceholder: "Filter",
+                sorterParams: { alignEmptyValues: "bottom" },
+                maxWidth: 220,
+            };
+            if (column.numeric) {
+                Object.assign(definition, {
+                    sorter: "number",
+                    hozAlign: "right",
+                    formatter: formatNumber,
+                    headerFilterFunc: numberFilter,
+                    headerFilterPlaceholder: "e.g. " + (NUMBER_FILTER_EXAMPLES[column.field] || ">10"),
+                    headerFilterParams: { elementAttributes: { title: NUMBER_FILTER_HELP } },
+                    maxWidth: 130,
+                });
+            } else if (column.field === "Type") {
+                Object.assign(definition, {
+                    headerFilter: "list",
+                    headerFilterParams: { values: ["Bat", "P"], clearable: true },
+                    headerFilterPlaceholder: "All",
+                });
+            } else if (column.field === "Team") {
+                Object.assign(definition, {
+                    headerFilter: "list",
+                    headerFilterParams: { valuesLookup: "all", sort: "asc", clearable: true, autocomplete: true, listOnEmpty: true },
+                    headerFilterPlaceholder: "All",
+                });
+            }
+            return definition;
+        }
+
+        // A source's column shows when neither its source button nor the Columns menu hides it
+        function columnVisible(field, source, prefs) {
+            return !(source && prefs.hidden.includes(source)) && !prefs.hiddenColumns.includes(field);
+        }
+
+        function buildColumns(groups, prefs) {
+            const columns = [];
+            for (const group of groups) {
+                if (!group.source) {
+                    for (const column of group.columns) {
+                        if (LISTS[column.field]) {
+                            if (columns.some(added => added.field === "Lists")) continue;
+                            columns.push({
+                                title: "", field: "Lists", frozen: true, headerSort: false, resizable: false, width: 52, hozAlign: "center",
+                                formatter: formatLists,
+                                cellClick: (e, cell) => {
+                                    const button = e.target.closest("button[data-list]");
+                                    if (button) toggleList(cell.getRow(), button.dataset.list);
+                                },
+                            });
+                        } else {
+                            columns.push({ ...columnDefinition(column), frozen: column.field === "Player", visible: columnVisible(column.field, null, prefs) });
+                        }
+                    }
+                    continue;
+                }
+                const title = document.createElement("span");
+                title.className = "source-name " + group.source;
+                title.textContent = group.source;
+                columns.push({
+                    title: group.source,
+                    titleFormatter: () => title.cloneNode(true),
+                    columns: group.columns.map(column => ({ ...columnDefinition(column), visible: columnVisible(column.field, group.source, prefs) })),
+                });
+            }
+            return columns;
+        }
+
+        function buildToggles(table, groups, prefs) {
+            const container = document.querySelector(".group-toggles");
+            for (const group of groups.filter(group => group.source)) {
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = "pill";
+                button.setAttribute("aria-pressed", prefs.hidden.includes(group.source) ? "false" : "true");
+                const name = document.createElement("span");
+                name.className = "source-name " + group.source;
+                name.textContent = group.source;
+                button.append(name);
+                button.addEventListener("click", () => {
+                    const show = button.getAttribute("aria-pressed") !== "true";
+                    button.setAttribute("aria-pressed", show);
+                    // One redraw for the whole group instead of one per column
+                    table.blockRedraw();
+                    // Showing a source leaves out the columns hidden in the Columns menu
+                    group.columns.forEach(column => show && !prefs.hiddenColumns.includes(column.field)
+                        ? table.showColumn(column.field) : table.hideColumn(column.field));
+                    table.restoreRedraw();
+                    prefs.hidden = show ? prefs.hidden.filter(source => source !== group.source) : [...prefs.hidden, group.source];
+                    savePrefs(prefs);
+                });
+                container.append(button);
+            }
+        }
+
+        // The Columns menu: a checkbox per column, grouped by source, to hide columns one at a time
+        function buildColumnPicker(table, groups, prefs) {
+            const picker = document.getElementById("column-picker");
+            const list = picker.querySelector(".column-picker-list");
+            const count = picker.querySelector(".column-picker-count");
+            const updateCount = () => {
+                count.textContent = prefs.hiddenColumns.length ? " (" + prefs.hiddenColumns.length + " hidden)" : "";
+            };
+            const setColumn = (field, source, show) => {
+                prefs.hiddenColumns = show ? prefs.hiddenColumns.filter(hidden => hidden !== field)
+                    : [...new Set([...prefs.hiddenColumns, field])];
+                columnVisible(field, source, prefs) ? table.showColumn(field) : table.hideColumn(field);
+            };
+
+            const boxes = [];
+            for (const group of groups) {
+                const columns = group.columns.filter(column => !ALWAYS_SHOWN.includes(column.field));
+                if (!columns.length) continue;
+                const fieldset = document.createElement("fieldset");
+                const legend = document.createElement("legend");
+                const name = document.createElement("span");
+                name.className = group.source ? "source-name " + group.source : "";
+                name.textContent = group.source || "Player";
+                legend.append(name);
+                fieldset.append(legend);
+                for (const column of columns) {
+                    const label = document.createElement("label");
+                    const box = document.createElement("input");
+                    box.type = "checkbox";
+                    box.checked = !prefs.hiddenColumns.includes(column.field);
+                    box.addEventListener("change", () => {
+                        setColumn(column.field, group.source, box.checked);
+                        savePrefs(prefs);
+                        updateCount();
+                    });
+                    boxes.push(box);
+                    label.append(box, document.createTextNode(column.title));
+                    fieldset.append(label);
+                }
+                list.append(fieldset);
+            }
+
+            document.getElementById("show-all-columns").addEventListener("click", () => {
+                const hidden = prefs.hiddenColumns;
+                table.blockRedraw();
+                for (const group of groups) {
+                    group.columns.filter(column => hidden.includes(column.field))
+                        .forEach(column => setColumn(column.field, group.source, true));
+                }
+                table.restoreRedraw();
+                boxes.forEach(box => { box.checked = true; });
+                savePrefs(prefs);
+                updateCount();
+            });
+
+            // Closes on a click outside the menu or on Escape
+            document.addEventListener("click", event => {
+                if (picker.open && !picker.contains(event.target)) picker.open = false;
+            });
+            picker.addEventListener("keydown", event => {
+                if (event.key === "Escape" && picker.open) {
+                    picker.open = false;
+                    picker.querySelector("summary").focus();
+                }
+            });
+            updateCount();
+        }
+
+        async function loadPlayers() {
+            const prefs = { hidden: DEFAULT_HIDDEN, hiddenColumns: [], favoritesOnly: false, compareOnly: false, ...loadPrefs() };
+            const count = document.getElementById("players-count");
+            let data;
+            try {
+                data = await (await fetch("/players")).json();
+            } catch (e) {
+                count.textContent = "Could not load players";
+                return;
+            }
+            // Rows arrive as lists in the order of data.fields
+            const rows = data.rows.map(values => Object.fromEntries(data.fields.map((field, i) => [field, values[i]])));
+            const total = rows.length;
+            // Forget hidden columns that are gone, such as a renamed label, so the hidden count stays true
+            prefs.hiddenColumns = prefs.hiddenColumns.filter(field => data.fields.includes(field));
+
+            const table = new Tabulator("#players", {
+                data: rows,
+                index: "Id",
+                columns: buildColumns(data.groups, prefs),
+                height: "100%",
+                layout: "fitData",
+                placeholder: "No players yet. Run a trend from the Index page to fill this table.",
+                persistence: { sort: true, headerFilter: true, columns: ["width"] },
+                persistenceID: "players",
+            });
+
+            // Each list button filters to its players; with both on, only players on both lists show
+            const listFilters = [
+                { pref: "favoritesOnly", button: document.getElementById("favorites-only"), filter: row => row.Favorite },
+                { pref: "compareOnly", button: document.getElementById("compare-only"), filter: row => row.Compare },
+            ];
+            function applyListFilters() {
+                for (const { pref, button, filter } of listFilters) {
+                    button.setAttribute("aria-pressed", prefs[pref]);
+                    if (prefs[pref]) table.addFilter(filter);
+                    else table.removeFilter(filter);
+                }
+            }
+            const compareCount = document.querySelector(".compare-count");
+            function updateCompareCount() {
+                const n = table.getData().filter(row => row.Compare).length;
+                compareCount.textContent = n ? " (" + n + ")" : "";
+            }
+            document.addEventListener("lists-changed", updateCompareCount);
+
+            table.on("tableBuilt", () => {
+                buildToggles(table, data.groups, prefs);
+                buildColumnPicker(table, data.groups, prefs);
+                applyListFilters();
+                updateCompareCount();
+                count.textContent = table.getDataCount("active").toLocaleString() + " of " + total.toLocaleString() + " players";
+            });
+            table.on("dataFiltered", (filters, rows) => {
+                count.textContent = rows.length.toLocaleString() + " of " + total.toLocaleString() + " players";
+            });
+
+            for (const { pref, button } of listFilters) {
+                button.addEventListener("click", () => {
+                    prefs[pref] = !prefs[pref];
+                    savePrefs(prefs);
+                    applyListFilters();
+                });
+            }
+            // Empties Compare for a new week, after a confirmation, since the list can't be brought back
+            document.getElementById("clear-compare").addEventListener("click", async () => {
+                const n = table.getData().filter(row => row.Compare).length;
+                if (!n || !confirm("Take all " + n + " players off Compare?")) return;
+                const response = await fetch("/players/compare/clear", { method: "POST" });
+                if (!response.ok) return;
+                table.blockRedraw();
+                table.getRows().forEach(row => {
+                    if (!row.getData().Compare) return;
+                    row.update({ Compare: 0 });
+                    row.reformat();
+                });
+                table.restoreRedraw();
+                table.refreshFilter();
+                updateCompareCount();
+            });
+            document.getElementById("clear-filters").addEventListener("click", () => {
+                table.clearHeaderFilter();
+                prefs.favoritesOnly = false;
+                prefs.compareOnly = false;
+                savePrefs(prefs);
+                applyListFilters();
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", loadPlayers);
+    </script>
+
+{% endblock %}
