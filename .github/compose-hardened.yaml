@@ -1,0 +1,13 @@
+# Compose Test's hardened run merges this over compose.yaml; its plain run uses compose.yaml alone
+services:
+  buzz:
+    init: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges=true
+    read_only: true
+    mem_limit: 512m
+    pids_limit: 128
+    tmpfs:
+      - /tmp:size=256m

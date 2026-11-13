@@ -7,8 +7,6 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
-  schedule:
-    - cron: '22 22 * * 3'
   workflow_dispatch:
   # Test what Docker Publish just published
   workflow_run:
@@ -20,7 +18,7 @@ permissions:
 
 jobs:
   test:
-    name: Validate Stack with Docker Compose (${{ matrix.source }} on ${{ matrix.runner }})
+    name: Validate Stack with Docker Compose (${{ matrix.compose }}, ${{ matrix.source }} on ${{ matrix.runner }})
     # After a publish, only test if the publish succeeded
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     strategy:
@@ -29,7 +27,12 @@ jobs:
         # Source build: amd64 only. Published images: both registries, both platforms
         runner: ${{ fromJSON(github.event_name == 'workflow_run' && '["ubuntu-latest","ubuntu-24.04-arm"]' || '["ubuntu-latest"]') }}
         source: ${{ fromJSON(github.event_name == 'workflow_run' && '["ghcr.io/wazam/fantasy-baseball-buzz","wazam123/fantasy-baseball-buzz"]' || '["build"]') }}
+        # plain is the compose.yaml users run; hardened merges .github/compose-hardened.yaml over it
+        compose: [plain, hardened]
     runs-on: ${{ matrix.runner }}
+    env:
+      # Compose reads only these files, so compose.override.yaml never merges in
+      COMPOSE_FILE: ${{ matrix.compose == 'hardened' && 'compose.yaml:.github/compose-hardened.yaml' || 'compose.yaml' }}
 
     steps:
       - name: Checkout
@@ -57,22 +60,23 @@ jobs:
             docker tag "$SOURCE:${TAG#v}" ghcr.io/wazam/fantasy-baseball-buzz:latest
           fi
 
+      # The runner is uid 1001; the container runs as 1000 and must own the folder
       - name: Create data directory
         run: mkdir -p data && sudo chown 1000:1000 data
 
       - name: Start stack and wait for healthcheck
-        run: docker compose -f compose.yaml up -d --wait --wait-timeout 180
+        run: docker compose up -d --wait --wait-timeout 180
 
       - name: Verify web UI is responding
-        run: curl --retry 10 --retry-connrefused --retry-max-time 120 --fail http://localhost:9108/index
+        run: curl --retry 10 --retry-connrefused --retry-max-time 120 --fail http://127.0.0.1:9108/index
 
       - name: Verify players database is created and served
-        run: curl --fail --silent http://localhost:9108/players | jq -e '.rows | type == "array"'
+        run: curl --fail --silent http://127.0.0.1:9108/players | jq -e '.rows | type == "array"'
 
       - name: Dump container logs on failure
         if: failure()
-        run: docker compose -f compose.yaml logs
+        run: docker compose logs
 
       - name: Teardown
         if: always()
-        run: docker compose -f compose.yaml down --volumes --remove-orphans
+        run: docker compose down --volumes --remove-orphans
