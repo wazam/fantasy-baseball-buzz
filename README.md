@@ -60,26 +60,16 @@ Rather than forecasting player talent, Buzz reveals how the fantasy community is
 1. **Create `compose.yaml`**
 
     ```yaml
-    # https://github.com/wazam/fantasy-baseball-buzz
     services:
       buzz:
         image: ghcr.io/wazam/fantasy-baseball-buzz:latest
         container_name: buzz
         restart: unless-stopped
-        init: true
-        cap_drop:
-          - ALL
-        security_opt:
-          - no-new-privileges=true
-        read_only: true
         user: "1000:1000"
-        mem_limit: 512m
-        pids_limit: 128
-        tmpfs:
-          - /tmp:size=256m
         environment:
-          - FANTRAX_LEAGUE_ID=${FANTRAX_LEAGUE_ID:-}
-          - TZ=${TZ:-UTC}
+          - FANTRAX_LEAGUE_ID=${FANTRAX_LEAGUE_ID:-}  # optional
+          - TZ=${TZ:-UTC}  # optional
+          - FORWARDED_ALLOW_IPS=${FORWARDED_ALLOW_IPS:-127.0.0.1,::1}  # optional
         volumes:
           - ./data:/usr/src/data
         ports:
@@ -88,7 +78,7 @@ Rather than forecasting player talent, Buzz reveals how the fantasy community is
 
 2. **Optionally, create `.env` next to `compose.yaml`**
 
-    Every setting is optional. To change any of the [Environment Variables](#environment-variables), copy [`.env.example`](.env.example) to `.env` and uncomment the ones you want.
+    Every setting is optional. To change any of the [Environment Variables](#environment-variables), add it to a `.env` file next to `compose.yaml`, one `NAME=value` per line, such as `TZ=America/New_York`.
 
 3. **Create the data folder and launch Buzz**
 
@@ -112,11 +102,9 @@ Rather than forecasting player talent, Buzz reveals how the fantasy community is
     cd fantasy-baseball-buzz
     ```
 
-2. **Optionally, create `.env` from the example to change any settings**
+2. **Optionally, create `.env` to change any settings**
 
-    ```sh
-    cp .env.example .env
-    ```
+    Add the settings you want to change to a `.env` file in the repo folder, one `NAME=value` per line, as in [Run via Docker Compose](#run-via-docker-compose).
 
 3. **Build the image and launch Buzz**
 
@@ -142,15 +130,18 @@ Rather than forecasting player talent, Buzz reveals how the fantasy community is
 
 ## Environment Variables
 
-You can customize Buzz behavior using these optional environment variables:
+You can customize Buzz behavior using these optional environment variables: Buzz checks them when it starts: an empty value counts as not set, and a value it can't use stops the container with an error in `docker compose logs` that names the setting.
 
-| Variable                | Description                                                                                                                                                                          | Default / Options                                                                                                                |
+| Variable                | Description                                                                                                                                                                          | Default                                                                                                                          |
 |-------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------|
-| `FANTRAX_LEAGUE_ID`     | Your Fantrax league ID, the value after `/league/` in your league URL. Needed by the Fantrax trend, and must be a league from the current season, since Fantrax only serves stats for a league's own seasons.| *(not set)* (default), accepts any `string`                                                                                      |
-| `TZ`                    | Time zone used for logs and results file names.                                                                                                                                      | `UTC` (docker default), accepts any TZ identifier from [list](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List) |
+| `FANTRAX_LEAGUE_ID`     | Your Fantrax league ID, the value after `/league/` in your league URL. Needed by the Fantrax trend, and must be a league from the current season, since Fantrax only serves stats for a league's own seasons.| *(not set)*                                                                                                                      |
+| `TZ`                    | Time zone used for logs and results file names. Accepts any [tz database name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List). An unknown name logs a warning and uses UTC.                                                                                                                                      | `UTC`                                                                                                                            |
+| `FORWARDED_ALLOW_IPS`   | Reverse proxy IPs to trust for `X-Forwarded-For` and `X-Forwarded-Proto` headers, comma-separated (CIDR ranges allowed). Behind a reverse proxy, set this to the proxy's address as the container sees it, so the access log shows real client IPs and redirects keep `https://`: the proxy container's address on a shared Docker network, or the network's gateway (from `docker network inspect`) when the proxy runs on the host. Use `*` only if nothing but the proxy can reach port 9108.| `127.0.0.1,::1`                                                                                                                  |
 
 > [!TIP]
-> Other devices on your network can reach Buzz at `http://<host-ip>:9108`.
+> Other devices on your network can reach Buzz at `http://<host-ip>:9108`, where `<host-ip>` is the address of the machine running Docker.
+>
+> If a reverse proxy runs on the same machine, publish the port on loopback only (`"127.0.0.1:9108:9108"` under `ports:`), so other devices can't go around the proxy.
 >
 > Do not put this on the Internet if you do not know what you are doing.
 
@@ -229,7 +220,7 @@ The Index page on a phone in light mode, with the source tiles in two columns an
 
 ## Contributing
 
-Report bugs or feature requests by opening an issue on the [GitHub repository](https://github.com/wazam/fantasy-baseball-buzz/issues). See [ROADMAP.md](ROADMAP.md) for planned and proposed features.
+Report bugs or feature requests by opening an issue on the [GitHub repository](https://github.com/wazam/fantasy-baseball-buzz/issues). See [CHANGELOG.md](CHANGELOG.md) for what changed in each release, [ROADMAP.md](ROADMAP.md) for planned and proposed features, and [RELEASING.md](RELEASING.md) for how a release is made.
 
 ## Disclaimers
 

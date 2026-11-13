@@ -1,14 +1,14 @@
 # Roadmap
 
-## In Development
+Tracks two kinds of ideas for future development: planned features actually committed to a future release, and proposed features that are just collected ideas, not actively planned or prioritized.
 
-Work underway or up next, in rough order.
+## Planned Features
 
 1. **Better Player Matching**: Map nicknames to the names other sources use, such as Kike Hernandez to Enrique Hernandez, once a source sends one. Match by a shared ID where sources expose one: MLB's players trend fills `Id_MLB` by name, so a source that also sends MLB's player ID could match on it instead. Matching lives in `name_keys()` and `match_score()` in `src/db.py`, and aliases would go into `name_keys()`. No one has yet checked whether ESPN's, Fantrax's, NFBC's, or CBS's player data carries MLB's ID.
 
 2. **Recheck Player Matching Before the Next Release**: Check the names that have caught matching out before, and merge or fix any that come out wrong: Luis Garcia, Luis Gonzalez, Josh Smith (two on one team), Luis Castillo, Diego Castillo, Will Smith, Wilmer Flores and Luis Ortiz (each a batter and a pitcher who share a name), Shohei Ohtani (one player who is both), Carlos Perez, Cristian Santana, Kevin Smith, Jose Martinez, Cristian Hernandez, Gabriel Arias, Adrian Hernandez, Moises Gomez, and Javy Guerra. Run the MLB Players trend first, so each major leaguer's row carries an MLB ID. `db.py duplicates` lists every name on more than one row, and the README's Your Data section has the `duplicates` and `merge` steps.
 
-3. **CBS League Trends**: CBS's most rostered and started, and activated and deactivated players, exist only inside a CBS league. Read them from a public CBS league the user creates, with its URL in an optional setting such as `CBS_LEAGUE_URL`, added everywhere `FANTRAX_LEAGUE_ID` appears (`.env.example`, `compose.yaml`, the README's compose block and settings table, and `src/sources.py`). Finding which league pages hold these lists is the first step.
+3. **CBS League Trends**: CBS's most rostered and started, and activated and deactivated players, exist only inside a CBS league. Read them from a public CBS league the user creates, with its URL in an optional setting such as `CBS_LEAGUE_URL`, added everywhere `FANTRAX_LEAGUE_ID` appears (`compose.yaml`, the README's compose block and settings table, and `src/sources.py`). Finding which league pages hold these lists is the first step.
 
 4. **Yahoo Trade Market**: [Trade Market](https://baseball.fantasysports.yahoo.com/b1/playertrades) lists the last 10 trades as groups of players, with no number per player to store yet, such as how often each player was traded. Yahoo takes its fantasy pages offline between seasons, so this can only be built in season.
 
@@ -46,11 +46,7 @@ Work underway or up next, in rough order.
     - **Interactive tools:** RotoBaller's [Who Should I Start](https://www.rotoballer.com/who-should-i-start-fantasy-baseball).
     - **Sites that turn away automated requests:** LineupExperts' [projections](https://www.lineupexperts.com/baseball/projections?flt_pos=Batter&flt_proj_time_period=Preseason), [bullpen report](https://www.lineupexperts.com/baseball/bullpen-report), [top performances](https://www.lineupexperts.com/baseball/top-performances?flt_pos=Batter), [depth chart](https://www.lineupexperts.com/baseball/depth-chart), [buy low, sell high](https://www.lineupexperts.com/baseball/buy-low-sell-high), [who's hot](https://www.lineupexperts.com/baseball/whos-hot), [role changes](https://www.lineupexperts.com/baseball/role-changes), [sleepers and busts](https://www.lineupexperts.com/baseball/sleepers-busts), and [consistency](https://www.lineupexperts.com/baseball/consistency) reports.
 
-## Planned Features
-
-Decided work that waits on something outside Buzz.
-
-1. **First In-Season Checks**: Once the 2027 season starts (Yahoo's MVPs page said "available on Mar 30" in 2026, and NFBC auctions start before that), run each of these from the Index page:
+14. **First In-Season Checks**: Once the 2027 season starts (Yahoo's MVPs page said "available on Mar 30" in 2026, and NFBC auctions start before that), run each of these from the Index page:
     - **ESPN ADP 260:** `PLACEHOLDER_VALUES` in `src/sources.py` treats exactly 260 as "undrafted". The only ESPN results so far are from the offseason, when every player had 260, so check on the first in-season ESPN run that real ADPs never land on exactly 260. NFBC's ADP columns had no placeholders on their first run (2026-11-03).
     - **First live runs:** all six Yahoo trends and NFBC auction have never returned data. The four newest Yahoo trends (`whos_hot`, `mvps`, `injuries`, and `matchup_ratings` in `src/source_yahoo.py`) were built against Wayback Machine copies of the 2026 pages, so check:
         - Who's Hot's Pitchers tab (`pos=AP`): the archive has no copy, so its table was never seen. The Batters tab (`pos=B`) was.
@@ -59,8 +55,6 @@ Decided work that waits on something outside Buzz.
         - What Who's Hot covers (the page doesn't say; about 7 days, going by 11 for 25 at bats) and what MVP % measures (the page doesn't say either). The CHANGELOG and labels say neither.
 
 ## Proposed Features
-
-Collected ideas for future development. Not actively planned or prioritized.
 
 1. **League Roster Imports**: Import the rosters of your own leagues on ESPN, Yahoo, CBS, Fantrax, and NFBC to fill the Roster column, which the players table already has but nothing fills. For a private ESPN league, read it through ESPN's data service with `ESPN_LEAGUE_ID` and the `espn_s2` and `SWID` browser cookies. v0.4.0 dropped `ESPN_LEAGUE_ID`, so this would bring it back as an optional setting, next to the existing `FANTRAX_LEAGUE_ID`.
 

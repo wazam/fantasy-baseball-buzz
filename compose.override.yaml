@@ -1,4 +1,3 @@
-# https://github.com/wazam/fantasy-baseball-buzz
 services:
   buzz:
     image: fantasy-baseball-buzz:local

@@ -1,23 +1,13 @@
-# https://github.com/wazam/fantasy-baseball-buzz
 services:
   buzz:
     image: ghcr.io/wazam/fantasy-baseball-buzz:latest
     container_name: buzz
     restart: unless-stopped
-    init: true
-    cap_drop:
-      - ALL
-    security_opt:
-      - no-new-privileges=true
-    read_only: true
     user: "1000:1000"
-    mem_limit: 512m
-    pids_limit: 128
-    tmpfs:
-      - /tmp:size=256m
     environment:
-      - FANTRAX_LEAGUE_ID=${FANTRAX_LEAGUE_ID:-}
-      - TZ=${TZ:-UTC}
+      - FANTRAX_LEAGUE_ID=${FANTRAX_LEAGUE_ID:-}  # optional
+      - TZ=${TZ:-UTC}  # optional
+      - FORWARDED_ALLOW_IPS=${FORWARDED_ALLOW_IPS:-127.0.0.1,::1}  # optional
     volumes:
       - ./data:/usr/src/data
     ports:

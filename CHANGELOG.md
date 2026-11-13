@@ -1,11 +1,20 @@
 # Changelog
 
-Release notes for every version, newest first. Each version is tagged in git and has a matching [release on GitHub](https://github.com/wazam/fantasy-baseball-buzz/releases), and its images are on [GHCR](https://github.com/wazam/fantasy-baseball-buzz/pkgs/container/fantasy-baseball-buzz) and [Docker Hub](https://hub.docker.com/r/wazam123/fantasy-baseball-buzz). Changes that haven't been released yet collect under **Unreleased**, and [RELEASING.md](RELEASING.md) covers how to ship them.
+Release notes for every version, newest first. Each version is tagged in git and has a matching [release on GitHub](https://github.com/wazam/fantasy-baseball-buzz/releases). Changes that haven't been released yet collect under **Unreleased**, and [RELEASING.md](RELEASING.md) covers how to ship them.
 
 ## Unreleased
 
+### What's New
+
+- `compose.yaml` is simpler: it no longer includes the hardening block, and each setting is marked `# optional`. An existing `compose.yaml` keeps working.
+- Reverse proxy support: set `FORWARDED_ALLOW_IPS` to your proxy's IP, and the access log shows each visitor's real IP instead of the proxy's, and redirects keep `https://`. Only requests from the addresses you list can set those headers, so nobody else can fake their IP. It defaults to `127.0.0.1,::1`, Gunicorn's own default.
+- `.env.example` is gone. The README's Environment Variables table describes every setting and its default, and `compose.yaml` marks each one `# optional` or `# required`. Put the ones you set in `.env` next to `compose.yaml`, one `NAME=value` per line.
+
 ### Bug Fixes
 
+- A mistyped `FANTRAX_LEAGUE_ID` no longer leaves Buzz looking healthy while the Fantrax trend fails with Fantrax's own error. Settings are now checked once at startup: an empty one counts as not set, spaces around a value are ignored, and a value Buzz can't use (a `FANTRAX_LEAGUE_ID` that isn't letters and digits, or a `FORWARDED_ALLOW_IPS` entry that isn't an IP address, a CIDR range or `*`) stops it with one line per problem in the logs, naming the setting.
+- An unknown `TZ` logs a warning and uses UTC, instead of using UTC without saying so.
+- Running the Fantrax trend without `FANTRAX_LEAGUE_ID` logs one line instead of a traceback.
 - With one player on Compare, **Clear compare** asks "Take 1 player off Compare?" instead of "Take all 1 players off Compare?".
 
 ## [v0.4.0](https://github.com/wazam/fantasy-baseball-buzz/releases/tag/v0.4.0) (2026-11-12)
@@ -13,7 +22,7 @@ Release notes for every version, newest first. Each version is tagged in git and
 ### Upgrading
 
 - Replace your `compose.yaml` with the one in the README. NocoDB and PostgreSQL are gone, since Buzz now keeps its players table in a SQLite file, so the new file drops the `nocodb` and `postgres` services. It also mounts `./data` at `/usr/src/data`, moves Buzz from port `5000` to `9108`, and runs the container read-only as uid `1000` with all capabilities dropped, `no-new-privileges`, `init`, and a 256 MB `/tmp` tmpfs, capped at 512 MB of memory and 128 processes.
-- Make sure uid `1000` can write to the `data` folder next to `compose.yaml`. It holds the players database, scrape results, and favorite trends. On a new install, `mkdir -p data` creates it as your user. If you're upgrading, Docker created `./data` as root for Postgres, so hand it over with `sudo chown 1000:1000 data`, or, if the folder belongs to another user (Synology shares are often `1026:100`), set `user:` in `compose.yaml` to its owner from `ls -nd data`.
+- Make sure uid `1000` can write to the `data` folder next to `compose.yaml`. It holds the players database, scrape results, and favorite trends. On a new install, `mkdir -p data` creates it as your user. If you're upgrading, Docker created `./data` as root for Postgres, so hand it over with `sudo chown 1000:1000 data`, or, if the folder belongs to another user, set `user:` in `compose.yaml` to its owner from `ls -nd data`.
 - Open Buzz at `http://<host>:9108` instead of port `5000`, and update any bookmarks.
 - Run your trends again from the Index page to fill the players table. Player data in NocoDB isn't carried over. Once you no longer need it, delete `data/postgres`.
 - Remove these settings from your `.env` and `compose.yaml`, since Buzz no longer reads them: `NOCODB_API_TOKEN`, `NOCODB_TABLE_ID`, `NOCODB_PUBLIC_ID`, `NOCODB_BASE_ID`, `NOCODB_URL`, `ESPN_LOGIN_EMAIL`, `ESPN_LOGIN_PASSWORD`, `ESPN_LEAGUE_ID`, `ESPN_TEAM_NAME`, `ESPN_TEAM_ABBREVIATION`, `LEAGUE_LOGIN_EMAIL`, `LEAGUE_LOGIN_PASSWORD`, `PRIMARY_LEAGUE_SOURCE`, `REQUESTS_PER_WINDOW`, `REQUEST_DELAY_SECONDS`, `REQUEST_DELAY_MIN`, `REQUEST_DELAY_MAX`, and `SELENIUM_HEADLESS`. Nothing needs an account or login any more, and every remaining setting is optional. Buzz now waits a fixed 5.5 seconds between requests, plus a random 0.5 to 1.5 seconds.

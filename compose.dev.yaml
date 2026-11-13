@@ -1,8 +1,6 @@
-# https://github.com/wazam/fantasy-baseball-buzz
 services:
   buzz:
-    # Flask's dev server instead of Gunicorn, for live reload and the debugger
-    command: ["./.venv/bin/python", "-m", "flask", "run"]
+    command: ["./.venv/bin/python", "src/config.py", "./.venv/bin/python", "-m", "flask", "run"]
     environment:
       - FLASK_DEBUG=1
     volumes:

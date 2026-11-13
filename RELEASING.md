@@ -1,6 +1,10 @@
 # Releasing
 
-How a new version of Buzz goes from `main` to published Docker images and a GitHub Release. Replace `X.Y.Z` with the new version throughout.
+How a new version of Buzz goes from `main` to published Docker images and a GitHub Release. Versions follow semver; replace `X.Y.Z` with the new version throughout.
+
+**What ships isn't exactly what was tested.** Docker Publish builds the images again after the tag is pushed. Python packages can't change, since `Pipfile.lock` pins them, but the base image (`python:3.14-alpine`) and the Alpine packages (`firefox-esr`, `geckodriver`) can move to newer versions between the local build, Compose Test and the publish. The GHCR and Docker Hub images are also separate builds. The published-image test in step 6 runs both registries' images on amd64 and arm64 right after publishing, which is the closest check.
+
+CI-only changes (a workflow fix) go to `main` without a version bump, tag or release.
 
 ## 1. Choose the version
 
@@ -10,23 +14,23 @@ Follow [semver](https://semver.org/). While Buzz is on `0.x`, bump the minor ver
 
 ### If the release changes the Python version
 
-Python's version appears in five files. They must agree on the minor version, `3.N`; only `.tool-versions` also pins the patch:
+Python's version appears in four files. They must agree on the minor version, `3.N`:
 
 | File | Setting | Pins |
 |------|---------|------|
-| [`.tool-versions`](.tool-versions) | `python 3.N.P` | Full patch, the version asdf installs for local linting |
 | [`Dockerfile`](Dockerfile) | `ARG DOCKER_PYTHON_V=3.N-alpine` | Minor only, so each image build picks up the latest `3.N` patch |
-| [`Pipfile`](Pipfile) | `python_version = "3.N"` | Minor only, so pipenv accepts any `3.N.x` patch, locally and in the image |
+| [`Pipfile`](Pipfile) | `python_version = "3.N"` | Minor only, so pipenv accepts any `3.N.x` patch |
 | [`Pipfile.lock`](Pipfile.lock) | `_meta.requires.python_version` and `_meta.hash` | Rewritten by pipenv; never edit by hand |
 | [`.github/workflows/lint.yml`](.github/workflows/lint.yml) | `python-version: ["3.N"]` | Minor only, matching the Pipfile |
 
-After editing the other four files, regenerate the lock file so its Python version and hash match the new Pipfile:
+After editing the other three files, regenerate the lock file so its Python version and hash match the new Pipfile. pipenv runs in a throwaway container on the new `3.N`, so nothing is installed on the host:
 
 ```bash
-pipenv lock --clear
+docker run --rm -u 1000:1000 -e HOME=/tmp -v "$PWD":/src -w /src python:3.N-slim \
+  sh -c 'pip install -q --user --no-warn-script-location pipenv && python -m pipenv lock --clear'
 ```
 
-Plain `pipenv update` can keep old versions, so use `pipenv lock --clear` for dependency updates too.
+Plain `pipenv update` can keep old versions, so use the same `pipenv lock --clear` for dependency updates too.
 
 ## 2. Write the release notes in CHANGELOG.md
 
@@ -69,8 +73,6 @@ docker compose build --pull --no-cache && docker compose up -d
 
 Inside the repo, `docker compose` also loads `compose.override.yaml`, so this runs the local build, not the published image.
 
-**What ships isn't exactly what was tested.** Docker Publish builds the images again after the tag is pushed. Python packages can't change, since `Pipfile.lock` pins them, but the base image (`python:3.14-alpine`) and the Alpine packages (`firefox-esr`, `geckodriver`) can move to newer versions between the local build, Compose Test and the publish. The GHCR and Docker Hub images are also separate builds. The published-image test in step 6 runs both registries' images on amd64 and arm64 right after publishing, which is the closest check.
-
 ## 4. Commit and tag
 
 Commit the release, including `CHANGELOG.md` so the tagged commit carries its own notes. A release commit that bundles unrelated changes gets one prefixed line per change:
@@ -102,6 +104,15 @@ If either workflow fails, fix the cause, commit it, move the tag to the new comm
 
 Push one tag at a time. Tags pushed together publish in parallel, and `latest` can end up on whichever finishes last.
 
+### Wrong tag after pushing
+
+The images are already published as `X.Y.Z`, `X.Y` and `latest`. Fix the cause, delete the release if one exists (`gh release delete vX.Y.Z --yes`), then move the tag and force-push it; the new publish overwrites those image tags:
+
+```bash
+git tag -fa vX.Y.Z -m "vX.Y.Z"
+git push --force origin vX.Y.Z
+```
+
 ## 6. Watch the images publish, then the published-image test
 
 Docker Publish builds the image for `linux/amd64` and `linux/arm64`, and pushes it to both registries with a GitHub build provenance attestation for each:
@@ -118,16 +129,16 @@ gh run watch --exit-status "$(gh run list --workflow docker.yml --commit "$(git 
 
 The `--commit` filter keeps an earlier release's run from being picked up: without it, `gh run list` can return the previous release's finished Docker Publish run, and `gh run watch` passes at once.
 
-If a job fails, fix the cause on `main`, then move the tag to the fixed commit before rerunning (`git tag -fa vX.Y.Z -m "vX.Y.Z"` and `git push -f origin vX.Y.Z`), so the images and the tag match.
+If a job fails, fix the cause on `main` and move the tag to the fixed commit, as in [Wrong tag after pushing](#wrong-tag-after-pushing), so the images and the tag match.
 
-When Docker Publish succeeds, it starts one Compose Test run with four jobs: it pulls `X.Y.Z` from GHCR and from Docker Hub, on amd64 and on arm64, and runs the same checks as on every push. All four must pass:
+When Docker Publish succeeds, it starts one Compose Test run with eight jobs: it pulls `X.Y.Z` from GHCR and from Docker Hub, on amd64 and on arm64, and runs the same checks as on every push, once with the plain `compose.yaml` and once hardened. All eight must pass:
 
 ```bash
 sleep 15  # give GitHub a moment to queue the run
 gh run watch --exit-status "$(gh run list --workflow compose-test.yml --event workflow_run --commit "$(git rev-parse HEAD)" --limit 1 --json databaseId -q '.[0].databaseId')"
 ```
 
-The commit filter works because `main` and the tag point at the same commit; push nothing else to `main` until this run finishes. If no run appears, check that `gh workflow list` shows Compose Test as active: GitHub disables scheduled workflows after 60 days without repo activity, and a disabled workflow skips this run too (`gh workflow enable compose-test.yml`).
+The commit filter works because `main` and the tag point at the same commit; push nothing else to `main` until this run finishes. If no run appears, check that `gh workflow list` shows Compose Test as active, since a disabled workflow skips this run too (`gh workflow enable compose-test.yml`).
 
 ### If the published image is bad
 
@@ -207,12 +218,41 @@ Listing needs a token with `read:packages` and deleting one with `delete:package
 
 GHCR's package page shows the README by itself. Docker Hub's page and GitHub's About description don't update on their own, so copy them from the README whenever its intro, features, quick start, settings table, or screenshots changed:
 
-- **Docker Hub overview:** on hub.docker.com, open the repository's General tab and update the overview. It copies the README in this order, with every link and image absolute:
+- **Docker Hub overview:** on hub.docker.com, open the repository's General tab and replace the overview with the output of the command below, which builds it from `README.md` so the page can't drift from it. In order, with every link absolute, it has:
   - a first line `GitHub: https://github.com/wazam/fantasy-baseball-buzz`, then the README's intro paragraph without its icon (Docker Hub shows the repository's avatar)
   - `## Quick Start`: Run via Docker Compose, with the two registries, the `compose.yaml`, and the numbered steps, without Build from Source
-  - `## Features`, then `## Issues and Feature Requests` with the issues sentence from the README's Contributing section
+  - `## Features`, then `## Issues and Feature Requests` with the README's Contributing text: the issues sentence and the CHANGELOG, ROADMAP and RELEASING links
 
   Then check the public page, [hub.docker.com/r/wazam123/fantasy-baseball-buzz](https://hub.docker.com/r/wazam123/fantasy-baseball-buzz).
+
+```bash
+# Run from the repo root.
+/usr/bin/python3 -I - <<'EOF'
+import re
+s = open('README.md').read()
+def sec(a, b):
+    i = s.index(a); return s[i:s.index(b, i)].rstrip() + '\n'
+base = 'https://github.com/wazam/fantasy-baseball-buzz'
+ghcr, hub = 'ghcr.io/wazam/fantasy-baseball-buzz:latest', 'wazam123/fantasy-baseball-buzz:latest'
+def absolute(t):
+    t = re.sub(r'\]\((#[^)]+)\)', lambda m: f']({base}{m.group(1)})', t)
+    return re.sub(r'\]\((?!https?://|#)([^)]+)\)', lambda m: f']({base}/blob/main/{m.group(1)})', t)
+intro = sec('![Buzz icon]', '## Table of Contents').replace('![Buzz icon](static/favicon.ico) ', '')
+steps = sec('1. **Create `compose.yaml`**', '### Build from Source')
+assert steps.count(ghcr) == 1
+steps = absolute(steps.replace(ghcr, hub))
+quick = '\n'.join([
+    '## Quick Start', '',
+    f'The image is published to [GitHub Container Registry]({base}/pkgs/container/fantasy-baseball-buzz) (`ghcr.io/wazam/fantasy-baseball-buzz`) and Docker Hub (`wazam123/fantasy-baseball-buzz`). The README\'s compose file uses GHCR; the one below pulls from Docker Hub.', '',
+    steps])
+feat = sec('## Features', '## Tech Stack')
+issues = absolute(sec('## Contributing', '## Disclaimers').replace('## Contributing', '## Issues and Feature Requests'))
+print('\n'.join([f'GitHub: {base}', '', intro, quick, feat, issues]).rstrip())
+EOF
+```
+
+An `AssertionError` or `ValueError` means the README changed shape where the command expects it; update the command to match before pasting anything.
+
 - **One-line description:** one sentence of at most 100 characters (Docker Hub's limit) saying what the README's first sentence says, used as both Docker Hub's short description and GitHub's About description:
 
     ```bash
