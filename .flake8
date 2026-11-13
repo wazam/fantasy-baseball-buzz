@@ -1,7 +1,0 @@
-[flake8]
-max-complexity = 10
-exclude = .git,__pycache__,data
-extend-ignore = E501
-count = true
-show-source = true
-statistics = true
