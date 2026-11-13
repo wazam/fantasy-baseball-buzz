@@ -12,6 +12,8 @@ import source_fantrax
 import source_nfbc
 import source_mlb
 import db
+import reverse_proxy
+import config
 from sources import SOURCES, NUMERIC_LABELS
 from db import RESULTS_FOLDER
 
@@ -35,9 +37,13 @@ SUPPORTED_TRENDS = {
     'mlb': source_mlb.SUPPORTED_TRENDS,
 }
 
+# A setting the app can't use stops it here, before anything runs
+config.check_settings()
 db.check_data_folder()
 
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
+# Behind a reverse proxy, take the client IP and scheme from forwarded headers, but only from trusted addresses
+app.wsgi_app = reverse_proxy.TrustedProxyFix(app.wsgi_app, config.trusted_networks())
 
 
 @app.route('/')

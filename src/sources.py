@@ -1,8 +1,10 @@
 from datetime import date
-from os import environ
 
-# Fantrax league ID from the league's URL; Fantrax only serves player stats within a league
-FANTRAX_LEAGUE_ID = environ.get('FANTRAX_LEAGUE_ID', '')
+import config
+
+# Fantrax league ID from the league's URL; Fantrax only serves player stats within a league. Empty when it's
+# not set. config.check_settings() checks its shape at startup, before anything uses it
+FANTRAX_LEAGUE_ID = config.setting('FANTRAX_LEAGUE_ID') or ''
 
 # Latest MLB season with stats, rolling over each March when spring training starts
 SEASON = date.today().year if date.today().month >= 3 else date.today().year - 1

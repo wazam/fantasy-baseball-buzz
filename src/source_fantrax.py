@@ -1,5 +1,6 @@
 from util_beautifulsoup import ratelimit_post_url, parse_number
 from db import save_and_import, clear_stale_values
+from config import SettingError
 from sources import SOURCES, FANTRAX_LEAGUE_ID, SEASON
 
 fantrax_config = next(source for source in SOURCES if source['source'].lower() == 'fantrax')
@@ -36,7 +37,7 @@ def fantrax_get(trend_type):
     if trend_type not in trend_keys:
         raise ValueError(f"Invalid trend_type '{trend_type}'. Choose from: {trend_keys}")
     if not FANTRAX_LEAGUE_ID:
-        raise ValueError("FANTRAX_LEAGUE_ID is not set; Fantrax only serves player stats for a league")
+        raise SettingError("FANTRAX_LEAGUE_ID is not set; Fantrax only serves player stats for a league")
 
     return fantrax_players(trend_type)
 

@@ -4,6 +4,7 @@ import queue
 import threading
 import traceback
 from datetime import datetime, timezone
+from config import SettingError, logger
 from db import RESULTS_FOLDER
 
 # One worker runs queued scrapes one at a time, so a double click or a second tab never starts a
@@ -80,6 +81,10 @@ def _work():
         _update(job_id, state='running', started_at=_now())
         try:
             result = func(*args)
+        except SettingError as e:
+            # A trend that needs a setting that isn't set: the message names it, so no traceback
+            logger.error(f"{job_id} can't run: {e}")
+            _update(job_id, state='failed', finished_at=_now(), error=str(e))
         except Exception as e:
             traceback.print_exc()
             _update(job_id, state='failed', finished_at=_now(), error=str(e) or type(e).__name__)
